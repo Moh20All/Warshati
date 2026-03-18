@@ -1,0 +1,127 @@
+{
+    "name": "rakam",
+    "productName": "Rakam",
+    "version": "1.0.3",
+    "description": "Phone repair & store management",
+    "author": "Allali Mohamed <allalimohamedbahaeddine@gmail.com>",
+    "main": "./out/main/index.js",
+    "build": {
+        "appId": "com.rakam.desktop",
+        "productName": "Rakam",
+        "copyright": "Copyright © 2026 Rakam",
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "AllaliMohamed",
+                "repo": "PhoneRepair"
+            }
+        ],
+        "directories": {
+            "output": "release"
+        },
+        "asar": false,
+        "files": [
+            "out/**/*",
+            "assets/**/*",
+            "node_modules/**/*"
+        ],
+        "extraResources": [
+            {
+                "from": "assets/db",
+                "to": "assets/db",
+                "filter": [
+                    "**/*"
+                ]
+            },
+            {
+                "from": "node_modules/.prisma",
+                "to": "node_modules/.prisma",
+                "filter": [
+                    "**/*"
+                ]
+            },
+            {
+                "from": "node_modules/@prisma",
+                "to": "node_modules/@prisma",
+                "filter": [
+                    "**/*"
+                ]
+            },
+            {
+                "from": "prisma",
+                "to": "prisma",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "assets/r.ico",
+            "sign": null
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowElevation": true,
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "assets/r.ico",
+            "uninstallerIcon": "assets/r.ico",
+            "installerHeaderIcon": "assets/r.ico",
+            "license": "assets/license.txt",
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "Rakam",
+            "menuCategory": "Rakam",
+            "deleteAppDataOnUninstall": false,
+            "displayLanguageSelector": false,
+            "language": "1033"
+        }
+    },
+    "scripts": {
+        "dev": "electron-vite dev",
+        "build": "electron-vite build",
+        "build:win": "npm run build && node scripts/build-installer.js",
+        "check-assets": "node scripts/create-placeholder-assets.js",
+        "stage-db": "node scripts/stage-db.js",
+        "clean:locks": "taskkill /f /im app-builder.exe 2>nul || exit 0",
+        "electron:build": "npm run clean:locks && npm run stage-db && npm run prisma:generate && npm run build && npm run check-assets && electron-builder",
+        "start": "electron-vite preview",
+        "postinstall": "electron-builder install-app-deps",
+        "prisma:generate": "prisma generate",
+        "prisma:push": "prisma db push",
+        "prisma:studio": "prisma studio"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.4.1",
+        "@supabase/supabase-js": "^2.99.2",
+        "@tanstack/react-query": "^5.64.0",
+        "axios": "^1.7.9",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "electron-log": "^5.4.3",
+        "electron-squirrel-startup": "^1.0.1",
+        "electron-updater": "^6.8.3",
+        "express": "^4.21.2",
+        "jsonwebtoken": "^9.0.2",
+        "lucide-react": "^0.474.0",
+        "node-machine-id": "^1.1.12",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "react-router-dom": "^7.1.3"
+    },
+    "devDependencies": {
+        "@electron-toolkit/preload": "^3.0.1",
+        "@electron-toolkit/utils": "^4.0.0",
+        "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-react": "^4.3.4",
+        "electron": "^34.1.1",
+        "electron-builder": "^25.1.8",
+        "electron-packager": "^17.1.2",
+        "electron-vite": "^3.0.0",
+        "electron-winstaller": "^5.4.0",
+        "prisma": "^6.4.1",
+        "tailwindcss": "^4.0.0",
+        "vite": "^6.0.0"
+    }
+}

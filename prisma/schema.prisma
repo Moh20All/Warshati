@@ -1,0 +1,519 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./rakam.db"
+}
+
+// ─────────────────────────────────────────
+// LICENSING (LOCAL SYSTEM CACHE)
+// ─────────────────────────────────────────
+model LocalLicense {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  machineId   String
+  activatedAt DateTime @default(now())
+}
+
+// ─────────────────────────────────────────
+// STORE & AUTH
+// ─────────────────────────────────────────
+
+model Store {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?
+  address      String?
+  currency     String   @default("DZD")
+  warrantyDays Int      @default(30)
+  logoPath     String?
+  createdAt    DateTime @default(now())
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  checkIns     CheckIn[]
+  tickets      RepairTicket[]
+  sales        Sale[]
+  expenses     Expense[]
+}
+
+enum Role {
+  OWNER
+  STAFF
+}
+
+// ─────────────────────────────────────────
+// CUSTOMERS
+// ─────────────────────────────────────────
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  checkIns      CheckIn[]
+  repairTickets RepairTicket[]
+  sales         Sale[]
+  tradeIns      TradeIn[]
+  debtLedger    DebtEntry[]
+
+  @@index([phone])
+}
+
+// ─────────────────────────────────────────
+// CUSTOMER DEBT LEDGER
+// ─────────────────────────────────────────
+
+enum DebtType {
+  REPAIR_CREDIT
+  SALE_CREDIT
+  PARTIAL_PAYMENT
+}
+
+enum DebtStatus {
+  OPEN
+  PARTIAL
+  SETTLED
+}
+
+model DebtEntry {
+  id           String     @id @default(cuid())
+  customerId   String
+  customer     Customer   @relation(fields: [customerId], references: [id])
+
+  type         DebtType
+  totalAmount  Decimal
+  paidAmount   Decimal    @default(0)
+  remaining    Decimal
+  status       DebtStatus @default(OPEN)
+
+  saleId         String?  @unique
+  sale           Sale?    @relation(fields: [saleId], references: [id])
+  repairTicketId String?  @unique
+  repairTicket   RepairTicket? @relation(fields: [repairTicketId], references: [id])
+
+  payments     DebtPayment[]
+  notes        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([status])
+  @@index([customerId])
+}
+
+model DebtPayment {
+  id          String    @id @default(cuid())
+  debtEntryId String
+  debtEntry   DebtEntry @relation(fields: [debtEntryId], references: [id])
+  amount      Decimal
+  paidAt      DateTime  @default(now())
+  notes       String?
+}
+
+// ─────────────────────────────────────────
+// SUPPLIERS
+// ─────────────────────────────────────────
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  purchaseOrders PurchaseOrder[]
+  supplierDebts  SupplierDebt[]
+}
+
+model PurchaseOrder {
+  id           String        @id @default(cuid())
+  orderNumber  String        @unique
+  supplierId   String
+  supplier     Supplier      @relation(fields: [supplierId], references: [id])
+
+  totalAmount  Decimal
+  paidAmount   Decimal       @default(0)
+  paymentStatus PaymentStatus @default(UNPAID)
+
+  items        PurchaseOrderItem[]
+  supplierDebt SupplierDebt?
+
+  notes        String?
+  orderedAt    DateTime      @default(now())
+  receivedAt   DateTime?
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  quantity        Int
+  unitCost        Decimal
+  subtotal        Decimal
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+model SupplierDebt {
+  id              String        @id @default(cuid())
+  supplierId      String
+  supplier        Supplier      @relation(fields: [supplierId], references: [id])
+
+  purchaseOrderId String        @unique
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  totalAmount     Decimal
+  paidAmount      Decimal       @default(0)
+  remaining       Decimal
+  status          DebtStatus    @default(OPEN)
+
+  payments        SupplierDebtPayment[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model SupplierDebtPayment {
+  id             String       @id @default(cuid())
+  supplierDebtId String
+  supplierDebt   SupplierDebt @relation(fields: [supplierDebtId], references: [id])
+  amount         Decimal
+  paidAt         DateTime     @default(now())
+  notes          String?
+}
+
+// ─────────────────────────────────────────
+// INVENTORY
+// ─────────────────────────────────────────
+
+enum InventoryType {
+  PHONE_NEW
+  PHONE_USED
+  PART
+  ACCESSORY
+}
+
+model InventoryItem {
+  id          String        @id @default(cuid())
+  type        InventoryType
+  name        String
+  sku         String?       @unique
+  barcode     String?       @unique
+  imei        String?       @unique
+  brand       String?
+  model       String?
+  color       String?
+  storage     String?
+  quantity    Int           @default(0)
+  buyPrice    Decimal
+  sellPrice   Decimal
+  lowStockAt  Int           @default(3)
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  saleItems         SaleItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+  tradeInSource     TradeIn?  @relation("TradeInToInventory")
+
+  @@index([type])
+  @@index([barcode])
+  @@index([imei])
+}
+
+// ─────────────────────────────────────────
+// REPAIR FLOW — STAGE 1: CHECK-IN
+// ─────────────────────────────────────────
+
+model CheckIn {
+  id            String    @id @default(cuid())
+  checkInNumber String    @unique
+  customerId    String
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  createdById   String
+  createdBy     User      @relation(fields: [createdById], references: [id])
+
+  deviceBrand   String
+  deviceModel   String
+  imei          String?
+  color         String?
+  issueDesc     String
+  condition     String?
+
+  printedAt     DateTime?
+  convertedAt   DateTime?
+  repairTicket  RepairTicket?
+
+  createdAt     DateTime  @default(now())
+
+  @@index([checkInNumber])
+}
+
+// ─────────────────────────────────────────
+// REPAIR FLOW — STAGE 2: FULL TICKET
+// ─────────────────────────────────────────
+
+enum TicketStatus {
+  DIAGNOSING
+  WAITING_PARTS
+  IN_REPAIR
+  DONE
+  DELIVERED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  URGENT
+}
+
+model RepairTicket {
+  id             String       @id @default(cuid())
+  ticketNumber   String       @unique
+  checkInId      String?      @unique
+  checkIn        CheckIn?     @relation(fields: [checkInId], references: [id])
+  customerId     String
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  createdById    String
+  createdBy      User         @relation(fields: [createdById], references: [id])
+
+  deviceBrand    String
+  deviceModel    String
+  imei           String?
+  devicePassword String?
+  color          String?
+  condition      String?
+
+  issueDesc      String
+  diagnosis      String?
+  partsUsedNotes String?
+
+  status         TicketStatus @default(DIAGNOSING)
+  priority       Priority     @default(NORMAL)
+
+  estimatedCost  Decimal?
+  finalCost      Decimal?
+  partsCost      Decimal?     @default(0)
+  deposit        Decimal?     @default(0)
+
+  warrantyDays   Int          @default(30)
+
+  receivedAt     DateTime     @default(now())
+  estimatedDoneAt DateTime?
+  deliveredAt    DateTime?
+  updatedAt      DateTime     @updatedAt
+
+  warrantyClaims WarrantyClaim[] @relation("TicketWarrantyClaims")
+  warrantyClaimNewTicket WarrantyClaim? @relation("ClaimNewTicket")
+  debtEntry      DebtEntry?
+  sale           Sale?
+
+  @@index([status])
+  @@index([ticketNumber])
+  @@index([imei])
+}
+
+// ─────────────────────────────────────────
+// WARRANTY CLAIMS
+// ─────────────────────────────────────────
+
+model WarrantyClaim {
+  id               String        @id @default(cuid())
+  originalTicketId String
+  originalTicket   RepairTicket  @relation("TicketWarrantyClaims", fields: [originalTicketId], references: [id])
+
+  issueDesc        String
+  isWithinWarranty Boolean
+  responsibleNote  String?
+
+  newTicketId      String?       @unique
+  newTicket        RepairTicket? @relation("ClaimNewTicket", fields: [newTicketId], references: [id])
+
+  resolution       String?
+  createdAt        DateTime      @default(now())
+}
+
+// ─────────────────────────────────────────
+// TRADE-INS
+// ─────────────────────────────────────────
+
+enum TradeInCondition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  BROKEN
+}
+
+enum TradeInStatus {
+  APPRAISED
+  ACCEPTED
+  REJECTED
+}
+
+model TradeIn {
+  id              String            @id @default(cuid())
+  customerId      String
+  customer        Customer          @relation(fields: [customerId], references: [id])
+
+  brand           String
+  model           String
+  imei            String?
+  storage         String?
+  color           String?
+  condition       TradeInCondition?
+  conditionNotes  String?
+
+  appraisedValue  Decimal
+  status          TradeInStatus     @default(APPRAISED)
+
+  inventoryItemId String?           @unique
+  inventoryItem   InventoryItem?    @relation("TradeInToInventory", fields: [inventoryItemId], references: [id])
+
+  saleId          String?
+  sale            Sale?             @relation(fields: [saleId], references: [id])
+
+  createdAt       DateTime          @default(now())
+}
+
+// ─────────────────────────────────────────
+// SALES & INVOICES
+// ─────────────────────────────────────────
+
+enum SaleStatus {
+  COMPLETED
+  CREDIT
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  CREDIT
+  SPLIT
+}
+
+model Sale {
+  id            String        @id @default(cuid())
+  saleNumber    String        @unique
+  customerId    String?
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id])
+
+  status        SaleStatus    @default(COMPLETED)
+  paymentMethod PaymentMethod @default(CASH)
+
+  subtotal      Decimal
+  discountAmount Decimal      @default(0)
+  tradeInCredit Decimal       @default(0)
+  total         Decimal
+  amountPaid    Decimal
+  change        Decimal       @default(0)
+  creditAmount  Decimal       @default(0)
+
+  repairTicketId String?      @unique
+  repairTicket  RepairTicket? @relation(fields: [repairTicketId], references: [id])
+
+  items         SaleItem[]
+  tradeIns      TradeIn[]
+  debtEntry     DebtEntry?
+
+  notes         String?
+  createdAt     DateTime      @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model SaleItem {
+  id              String         @id @default(cuid())
+  saleId          String
+  sale            Sale           @relation(fields: [saleId], references: [id])
+  inventoryItemId String?
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  description     String         @default("")
+
+  quantity        Int
+  unitCost        Decimal        @default(0)
+  unitPrice       Decimal
+  subtotal        Decimal
+}
+
+// ─────────────────────────────────────────
+// EXPENSES
+// ─────────────────────────────────────────
+
+enum ExpenseCategory {
+  SUPPLIER_RESTOCK
+  RENT
+  UTILITIES
+  TOOLS_EQUIPMENT
+  PETTY_CASH
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  category    ExpenseCategory
+  description String
+  amount      Decimal
+  paidTo      String?
+  supplierId  String?
+  createdById String
+  createdBy   User            @relation(fields: [createdById], references: [id])
+  expenseDate DateTime        @default(now())
+  createdAt   DateTime        @default(now())
+
+  @@index([expenseDate])
+  @@index([category])
+}
+
+// ─────────────────────────────────────────
+// DAILY CLOSE SNAPSHOT
+// ─────────────────────────────────────────
+
+model DailyClose {
+  id                 String   @id @default(cuid())
+  date               DateTime @unique
+
+  totalRevenue       Decimal
+  totalCreditSales   Decimal
+  totalDebtCollected Decimal
+  totalExpenses      Decimal
+  netCash            Decimal
+
+  openTickets        Int
+  doneNotDelivered   Int
+  newWarrantyClaims  Int
+
+  lowStockCount      Int
+  notes              String?
+  closedAt           DateTime @default(now())
+}
