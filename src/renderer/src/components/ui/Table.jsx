@@ -20,9 +20,10 @@ export default function Table({
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/50">
-                        {columns.map((col) => (
+                        {columns.map((col, c) => (
                             <th
-                                key={col.key}
+                                // Several columns may read the same field (e.g. _count), so keys include the position
+                                key={col.id || `${col.key}-${c}`}
                                 className={`
                   px-4 py-3 text-left font-medium text-muted-foreground
                   ${col.sortable ? 'cursor-pointer select-none hover:text-foreground' : ''}
@@ -53,8 +54,8 @@ export default function Table({
               `}
                             onClick={() => onRowClick?.(row)}
                         >
-                            {columns.map((col) => (
-                                <td key={col.key} className={`px-4 py-3 ${col.className || ''}`}>
+                            {columns.map((col, c) => (
+                                <td key={col.id || `${col.key}-${c}`} className={`px-4 py-3 ${col.className || ''}`}>
                                     {col.render ? col.render(row[col.key], row) : row[col.key]}
                                 </td>
                             ))}

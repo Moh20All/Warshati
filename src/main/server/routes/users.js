@@ -2,8 +2,19 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
 
 const router = Router()
+
+// True if this change would leave the store with no active owner
+async function wouldRemoveLastOwner(targetId, { role, isActive }) {
+    const target = await prisma.user.findUnique({ where: { id: targetId } })
+    if (!target || target.role !== 'OWNER' || !target.isActive) return false
+    const losesOwner = (role !== undefined && role !== 'OWNER') || isActive === false
+    if (!losesOwner) return false
+    const otherOwners = await prisma.user.count({ where: { role: 'OWNER', isActive: true, id: { not: targetId } } })
+    return otherOwners === 0
+}
 
 // All user routes require OWNER role
 router.use(requireAuth)
@@ -25,7 +36,7 @@ router.get('/', async (req, res) => {
         })
         res.json({ users })
     } catch (err) {
-        console.error('List users error:', err)
+        logger.error('List users error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })
@@ -37,6 +48,9 @@ router.post('/', async (req, res) => {
 
         if (!name || !email || !password) {
             return res.status(400).json({ error: 'Name, email, and password are required' })
+        }
+        if (role !== undefined && !['OWNER', 'STAFF'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role' })
         }
 
         const existing = await prisma.user.findUnique({ where: { email } })
@@ -64,7 +78,7 @@ router.post('/', async (req, res) => {
 
         res.status(201).json({ user })
     } catch (err) {
-        console.error('Create user error:', err)
+        logger.error('Create user error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })
@@ -74,6 +88,17 @@ router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params
         const { name, email, password, role, isActive } = req.body
+
+        if (role !== undefined && !['OWNER', 'STAFF'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role' })
+        }
+        // An owner cannot demote or deactivate their own account (prevents self lock-out)
+        if (id === req.user.id && ((role !== undefined && role !== 'OWNER') || isActive === false)) {
+            return res.status(400).json({ error: 'You cannot change your own role or deactivate your own account' })
+        }
+        if (await wouldRemoveLastOwner(id, { role, isActive })) {
+            return res.status(400).json({ error: 'The store must keep at least one active owner' })
+        }
 
         const data = {}
         if (name !== undefined) data.name = name
@@ -99,7 +124,9 @@ router.put('/:id', async (req, res) => {
 
         res.json({ user })
     } catch (err) {
-        console.error('Update user error:', err)
+        if (err.code === 'P2002') return res.status(400).json({ error: 'Email already in use' })
+        if (err.code === 'P2025') return res.status(404).json({ error: 'User not found' })
+        logger.error('Update user error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })
@@ -112,6 +139,9 @@ router.delete('/:id', async (req, res) => {
         // Can't deactivate yourself
         if (id === req.user.id) {
             return res.status(400).json({ error: 'Cannot deactivate your own account' })
+        }
+        if (await wouldRemoveLastOwner(id, { isActive: false })) {
+            return res.status(400).json({ error: 'The store must keep at least one active owner' })
         }
 
         const user = await prisma.user.update({
@@ -128,7 +158,7 @@ router.delete('/:id', async (req, res) => {
 
         res.json({ user })
     } catch (err) {
-        console.error('Deactivate user error:', err)
+        logger.error('Deactivate user error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })

@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
+import { generateTicketNumber } from './tickets.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -17,7 +19,7 @@ router.get('/', async (req, res) => {
     })
     res.json({ claims })
   } catch (err) {
-    console.error('List warranty claims error:', err)
+    logger.error('List warranty claims error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -55,7 +57,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ claim })
   } catch (err) {
-    console.error('Create warranty claim error:', err)
+    logger.error('Create warranty claim error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -72,40 +74,35 @@ router.post('/:id/new-ticket', async (req, res) => {
 
     const orig = claim.originalTicket
 
-    // Generate ticket number
-    const year = new Date().getFullYear()
-    const prefix = `TKT-${year}-`
-    const last = await prisma.repairTicket.findFirst({
-      where: { ticketNumber: { startsWith: prefix } },
-      orderBy: { ticketNumber: 'desc' }
-    })
-    const num = last ? parseInt(last.ticketNumber.split('-').pop()) + 1 : 1
-    const ticketNumber = `${prefix}${String(num).padStart(4, '0')}`
+    // New ticket and claim link are saved together or not at all
+    const newTicket = await prisma.$transaction(async (tx) => {
+      const created = await tx.repairTicket.create({
+        data: {
+          ticketNumber: await generateTicketNumber(tx),
+          customerId: orig.customerId,
+          createdById: req.user.id,
+          deviceBrand: orig.deviceBrand,
+          deviceModel: orig.deviceModel,
+          imei: orig.imei,
+          color: orig.color,
+          issueDesc: claim.issueDesc,
+          priority: 'URGENT',
+          estimatedCost: claim.isWithinWarranty ? 0 : null,
+          finalCost: claim.isWithinWarranty ? 0 : null
+        }
+      })
 
-    const newTicket = await prisma.repairTicket.create({
-      data: {
-        ticketNumber,
-        customerId: orig.customerId,
-        createdById: req.user.id,
-        deviceBrand: orig.deviceBrand,
-        deviceModel: orig.deviceModel,
-        imei: orig.imei,
-        color: orig.color,
-        issueDesc: claim.issueDesc,
-        priority: 'URGENT',
-        estimatedCost: claim.isWithinWarranty ? 0 : null,
-        finalCost: claim.isWithinWarranty ? 0 : null
-      }
-    })
+      await tx.warrantyClaim.update({
+        where: { id: claim.id },
+        data: { newTicketId: created.id }
+      })
 
-    await prisma.warrantyClaim.update({
-      where: { id: claim.id },
-      data: { newTicketId: newTicket.id }
+      return created
     })
 
     res.status(201).json({ ticket: newTicket })
   } catch (err) {
-    console.error('Create warranty ticket error:', err)
+    logger.error('Create warranty ticket error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

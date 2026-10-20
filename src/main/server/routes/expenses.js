@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
 
     res.json({ expenses, monthTotal })
   } catch (err) {
-    console.error('List expenses error:', err)
+    logger.error('List expenses error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -53,13 +54,39 @@ router.post('/', async (req, res) => {
     })
     res.status(201).json({ expense })
   } catch (err) {
-    console.error('Create expense error:', err)
+    logger.error('Create expense error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// PUT /api/expenses/:id — correct an expense (owner only)
+router.put('/:id', requireRole('OWNER'), async (req, res) => {
+  try {
+    const { category, description, amount, paidTo, expenseDate } = req.body
+    const data = {}
+    if (category !== undefined) data.category = category
+    if (description !== undefined) {
+      if (!String(description).trim()) return res.status(400).json({ error: 'Description is required' })
+      data.description = description
+    }
+    if (amount !== undefined) {
+      if (!(parseFloat(amount) > 0)) return res.status(400).json({ error: 'Amount must be positive' })
+      data.amount = parseFloat(amount)
+    }
+    if (paidTo !== undefined) data.paidTo = paidTo || null
+    if (expenseDate !== undefined) data.expenseDate = new Date(expenseDate)
+
+    const expense = await prisma.expense.update({ where: { id: req.params.id }, data })
+    res.json({ expense })
+  } catch (err) {
+    if (err.code === 'P2025') return res.status(404).json({ error: 'Expense not found' })
+    logger.error('Update expense error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
 
 // DELETE /api/expenses/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('OWNER'), async (req, res) => {
   try {
     await prisma.expense.delete({ where: { id: req.params.id } })
     res.json({ success: true })

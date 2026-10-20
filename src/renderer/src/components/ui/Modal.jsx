@@ -1,6 +1,18 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import Button from './Button'
+
+const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl'
+}
+
+// Open modals, newest last: Escape closes only the top one, and the page scroll comes back
+// only when the last one closes (a modal can open another, e.g. device details from a form).
+const openStack = []
 
 export default function Modal({
     open,
@@ -12,31 +24,30 @@ export default function Modal({
     className = ''
 }) {
     const overlayRef = useRef(null)
+    const token = useRef({})
+    const closeRef = useRef(onClose)
+    closeRef.current = onClose
 
     useEffect(() => {
+        if (!open) return
+        const me = token.current
+        openStack.push(me)
+        document.body.style.overflow = 'hidden'
         const handleEscape = (e) => {
-            if (e.key === 'Escape') onClose()
+            if (e.key === 'Escape' && openStack[openStack.length - 1] === me) closeRef.current()
         }
-        if (open) {
-            document.addEventListener('keydown', handleEscape)
-            document.body.style.overflow = 'hidden'
-        }
+        document.addEventListener('keydown', handleEscape)
         return () => {
             document.removeEventListener('keydown', handleEscape)
-            document.body.style.overflow = ''
+            openStack.splice(openStack.indexOf(me), 1)
+            if (openStack.length === 0) document.body.style.overflow = ''
         }
-    }, [open, onClose])
+    }, [open])
 
     if (!open) return null
 
-    const sizeClasses = {
-        sm: 'max-w-sm',
-        md: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl'
-    }
-
-    return (
+    // Rendered on <body> so a modal opened from inside another one is never clipped by it
+    return createPortal(
         <div
             ref={overlayRef}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in"
@@ -73,7 +84,8 @@ export default function Modal({
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
 

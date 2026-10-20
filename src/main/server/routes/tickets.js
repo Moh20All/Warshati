@@ -1,32 +1,17 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
+import { generateSaleNumber } from './sales.js'
+import { nextTicketNumber } from '../lib/numbering.js'
+import { rememberDevice } from '../lib/catalog.js'
 
 const router = Router()
 router.use(requireAuth)
 
-// Generate TKT number: TKT-YYYY-NNNN
-async function generateTicketNumber() {
-  const year = new Date().getFullYear()
-  const prefix = `TKT-${year}-`
-  const last = await prisma.repairTicket.findFirst({
-    where: { ticketNumber: { startsWith: prefix } },
-    orderBy: { ticketNumber: 'desc' }
-  })
-  const num = last ? parseInt(last.ticketNumber.split('-').pop()) + 1 : 1
-  return `${prefix}${String(num).padStart(4, '0')}`
-}
-
-// Generate sale number for auto-invoicing
-async function generateSaleNumber() {
-  const year = new Date().getFullYear()
-  const prefix = `INV-${year}-`
-  const last = await prisma.sale.findFirst({
-    where: { saleNumber: { startsWith: prefix } },
-    orderBy: { saleNumber: 'desc' }
-  })
-  const num = last ? parseInt(last.saleNumber.split('-').pop()) + 1 : 1
-  return `${prefix}${String(num).padStart(4, '0')}`
+// Generate TKT number: TKT-YYYY-NNNN (pass the transaction client when inside one)
+export async function generateTicketNumber(db = prisma) {
+  return nextTicketNumber(db)
 }
 
 const validTransitions = {
@@ -59,7 +44,7 @@ router.get('/', async (req, res) => {
     })
     res.json({ tickets })
   } catch (err) {
-    console.error('List tickets error:', err)
+    logger.error('List tickets error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -88,7 +73,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/tickets — create directly (no check-in needed)
 router.post('/', async (req, res) => {
   try {
-    const { checkInId, customerId, customerName, customerPhone, deviceBrand, deviceModel, imei, devicePassword, color, condition, issueDesc, diagnosis, partsUsedNotes, estimatedCost, deposit, priority, estimatedDoneAt, warrantyDays } = req.body
+    const { checkInId, customerId, customerName, customerPhone, deviceBrand, deviceModel, imei, devicePassword, color, condition, issueDesc, diagnosis, partsUsedNotes, finalCost, partsCost, deposit, priority, estimatedDoneAt, warrantyDays } = req.body
 
     if (!deviceBrand || !deviceModel || !issueDesc) {
       return res.status(400).json({ error: 'Device brand, model, and issue description are required' })
@@ -97,50 +82,60 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Customer name is required' })
     }
 
-    // Find or create customer
-    let finalCustomerId = customerId
-    if (!finalCustomerId) {
-      // Try to find existing customer by phone first
-      let customer = null
-      if (customerPhone) {
-        customer = await prisma.customer.findFirst({ where: { phone: customerPhone } })
+    // Customer, ticket and check-in conversion are saved together or not at all
+    const ticket = await prisma.$transaction(async (tx) => {
+      // Find or create customer
+      let finalCustomerId = customerId
+      if (!finalCustomerId) {
+        // Try to find existing customer by phone first
+        let customer = null
+        if (customerPhone) {
+          customer = await tx.customer.findFirst({ where: { phone: customerPhone } })
+        }
+        if (!customer) {
+          // Create new customer with just name (+ optional phone)
+          customer = await tx.customer.create({
+            data: { name: customerName, phone: customerPhone || null }
+          })
+        }
+        finalCustomerId = customer.id
       }
-      if (!customer) {
-        // Create new customer with just name (+ optional phone)
-        customer = await prisma.customer.create({
-          data: { name: customerName, phone: customerPhone || null }
+
+      const created = await tx.repairTicket.create({
+        data: {
+          ticketNumber: await generateTicketNumber(tx), customerId: finalCustomerId, createdById: req.user.id,
+          checkInId: checkInId || null,
+          deviceBrand, deviceModel, imei: imei || null,
+          devicePassword: devicePassword || null, color: color || null, condition: condition || null,
+          issueDesc, diagnosis: diagnosis || null, partsUsedNotes: partsUsedNotes || null,
+          finalCost: finalCost || null, partsCost: partsCost || 0, deposit: deposit || 0,
+          priority: priority || 'NORMAL',
+          estimatedDoneAt: estimatedDoneAt ? new Date(estimatedDoneAt) : null,
+          warrantyDays: warrantyDays || 30
+        },
+        include: { customer: true }
+      })
+
+      // Deposit taken at drop-off counts as cash on this day
+      if (parseFloat(deposit) > 0) {
+        await tx.repairDeposit.create({ data: { repairTicketId: created.id, amount: parseFloat(deposit) } })
+      }
+
+      // Mark check-in as converted (if from check-in)
+      if (checkInId) {
+        await tx.checkIn.update({
+          where: { id: checkInId },
+          data: { convertedAt: new Date() }
         })
       }
-      finalCustomerId = customer.id
-    }
 
-    const ticketNumber = await generateTicketNumber()
-    const ticket = await prisma.repairTicket.create({
-      data: {
-        ticketNumber, customerId: finalCustomerId, createdById: req.user.id,
-        checkInId: checkInId || null,
-        deviceBrand, deviceModel, imei: imei || null,
-        devicePassword: devicePassword || null, color: color || null, condition: condition || null,
-        issueDesc, diagnosis: diagnosis || null, partsUsedNotes: partsUsedNotes || null,
-        estimatedCost: estimatedCost || null, deposit: deposit || 0,
-        priority: priority || 'NORMAL',
-        estimatedDoneAt: estimatedDoneAt ? new Date(estimatedDoneAt) : null,
-        warrantyDays: warrantyDays || 30
-      },
-      include: { customer: true }
+      return created
     })
 
-    // Mark check-in as converted (if from check-in)
-    if (checkInId) {
-      await prisma.checkIn.update({
-        where: { id: checkInId },
-        data: { convertedAt: new Date() }
-      })
-    }
-
+    await rememberDevice(prisma, { category: req.body.deviceCategory, brand: deviceBrand, model: deviceModel })
     res.status(201).json({ ticket })
   } catch (err) {
-    console.error('Create ticket error:', err)
+    logger.error('Create ticket error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -155,18 +150,33 @@ router.put('/:id', async (req, res) => {
     if (estimatedCost !== undefined) data.estimatedCost = estimatedCost
     if (finalCost !== undefined) data.finalCost = finalCost
     if (partsCost !== undefined) data.partsCost = partsCost
-    if (deposit !== undefined) data.deposit = deposit
     if (priority !== undefined) data.priority = priority
     if (estimatedDoneAt !== undefined) data.estimatedDoneAt = estimatedDoneAt ? new Date(estimatedDoneAt) : null
 
-    const ticket = await prisma.repairTicket.update({
-      where: { id: req.params.id },
-      data,
-      include: { customer: true }
+    const current = await prisma.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true } })
+    if (!current) return res.status(404).json({ error: 'Ticket not found' })
+
+    // A deposit change is real cash in (or refunded, if lowered) today
+    const depositDelta = deposit !== undefined ? (parseFloat(deposit) || 0) - parseFloat(current.deposit || 0) : 0
+    if (depositDelta !== 0) {
+      if (current.sale) return res.status(400).json({ error: 'The deposit cannot change after the ticket is invoiced' })
+      if ((parseFloat(deposit) || 0) < 0) return res.status(400).json({ error: 'Deposit cannot be negative' })
+      data.deposit = parseFloat(deposit) || 0
+    }
+
+    const ticket = await prisma.$transaction(async (tx) => {
+      if (depositDelta !== 0) {
+        await tx.repairDeposit.create({ data: { repairTicketId: current.id, amount: depositDelta } })
+      }
+      return tx.repairTicket.update({
+        where: { id: req.params.id },
+        data,
+        include: { customer: true }
+      })
     })
     res.json({ ticket })
   } catch (err) {
-    console.error('Update ticket error:', err)
+    logger.error('Update ticket error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -195,32 +205,40 @@ router.post('/:id/transition', async (req, res) => {
       if (partsCost !== undefined) data.partsCost = partsCost
     }
 
-    // DELIVERED logic: Auto-create sale if missing
-    if (status === 'DELIVERED') {
-      data.deliveredAt = new Date()
-      
-      if (!ticket.sale) {
-        if (!paymentMethod) {
-          return res.status(400).json({ error: 'Payment method (CASH/CREDIT) is required to deliver and create an invoice' })
-        }
+    const needsInvoice = status === 'DELIVERED' && !ticket.sale
+    if (needsInvoice && !paymentMethod) {
+      return res.status(400).json({ error: 'Payment method (CASH/CREDIT) is required to deliver and create an invoice' })
+    }
+    if (status === 'DELIVERED') data.deliveredAt = new Date()
 
-        const saleNumber = await generateSaleNumber()
+    // Invoice, debt and status change are saved together or not at all
+    const updated = await prisma.$transaction(async (tx) => {
+      // DELIVERED logic: Auto-create sale if missing
+      if (needsInvoice) {
         const costToCustomer = parseFloat(finalCost || ticket.finalCost || 0)
         const costOfParts = parseFloat(partsCost !== undefined ? partsCost : (ticket.partsCost || 0))
+        // The deposit was already counted as cash when received; it only reduces what is due now
+        const depositApplied = Math.min(parseFloat(ticket.deposit || 0), costToCustomer)
+        const amountDue = costToCustomer - depositApplied
+        const amountPaid = paymentMethod === 'CREDIT' ? depositApplied : costToCustomer
+        const owed = costToCustomer - amountPaid
 
         // Create the sale linking it to this ticket
-        const newSale = await prisma.sale.create({
+        const newSale = await tx.sale.create({
           data: {
-            saleNumber,
+            saleNumber: await generateSaleNumber(tx),
             customerId: ticket.customerId,
             repairTicketId: ticket.id,
             createdById: req.user.id,
             subtotal: costToCustomer,
             total: costToCustomer,
-            amountPaid: paymentMethod === 'CREDIT' ? 0 : costToCustomer,
+            amountPaid,
+            depositApplied,
+            creditAmount: owed,
             change: 0,
             paymentMethod,
-            status: paymentMethod === 'CREDIT' ? 'CREDIT' : 'COMPLETED',
+            status: owed > 0 ? 'CREDIT' : 'COMPLETED',
+            notes: depositApplied > 0 ? `Deposit ${depositApplied} deducted, due at delivery ${amountDue}` : null,
             items: {
               create: [{
                 description: `Repair: ${ticket.deviceBrand} ${ticket.deviceModel}`,
@@ -233,31 +251,105 @@ router.post('/:id/transition', async (req, res) => {
           }
         })
 
-        // Auto-create debt entry if credit
-        if (paymentMethod === 'CREDIT' && ticket.customerId) {
-          await prisma.debtEntry.create({
+        // Auto-create debt entry for whatever is still owed after the deposit
+        if (owed > 0 && ticket.customerId) {
+          await tx.debtEntry.create({
             data: {
               customerId: ticket.customerId,
               saleId: newSale.id,
-              type: 'SALE_CREDIT',
-              totalAmount: costToCustomer,
+              repairTicketId: ticket.id,
+              type: 'REPAIR_CREDIT',
+              totalAmount: owed,
               paidAmount: 0,
-              remaining: costToCustomer,
+              remaining: owed,
               status: 'OPEN'
             }
           })
         }
       }
-    }
 
-    const updated = await prisma.repairTicket.update({
-      where: { id: req.params.id },
-      data,
-      include: { customer: true, sale: true }
+      return tx.repairTicket.update({
+        where: { id: req.params.id },
+        data,
+        include: { customer: true, sale: true }
+      })
     })
     res.json({ ticket: updated })
   } catch (err) {
-    console.error('Transition error:', err)
+    logger.error('Transition error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// ── Parts taken from stock ─────────────────────────────────────────────
+// Thrown inside a transaction to roll it back and answer with a 400
+class PartError extends Error {}
+
+async function partsResponse(db, ticketId) {
+  const [parts, ticket] = await Promise.all([
+    db.repairPart.findMany({ where: { repairTicketId: ticketId }, include: { inventoryItem: true }, orderBy: { createdAt: 'asc' } }),
+    db.repairTicket.findUnique({ where: { id: ticketId }, select: { partsCost: true } })
+  ])
+  return { parts, partsCost: ticket?.partsCost ?? 0 }
+}
+
+// GET /api/tickets/:id/parts
+router.get('/:id/parts', async (req, res) => {
+  try {
+    res.json(await partsResponse(prisma, req.params.id))
+  } catch (err) {
+    logger.error('List ticket parts error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/tickets/:id/parts — { inventoryItemId, quantity }: take parts from stock
+router.post('/:id/parts', async (req, res) => {
+  try {
+    const quantity = parseInt(req.body.quantity) || 1
+    if (!req.body.inventoryItemId || quantity <= 0) return res.status(400).json({ error: 'Choose a part and a positive quantity' })
+
+    await prisma.$transaction(async (tx) => {
+      const ticket = await tx.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true } })
+      if (!ticket) throw new PartError('Ticket not found')
+      if (ticket.sale || ['DELIVERED', 'CANCELLED'].includes(ticket.status)) throw new PartError('Parts cannot be added to a closed or invoiced ticket')
+
+      const item = await tx.inventoryItem.findUnique({ where: { id: req.body.inventoryItemId } })
+      if (!item || !item.isActive) throw new PartError('Part not found')
+      if (item.quantity < quantity) throw new PartError(`Not enough stock for ${item.name} (available: ${item.quantity})`)
+
+      const unitCost = parseFloat(item.buyPrice)
+      await tx.inventoryItem.update({ where: { id: item.id }, data: { quantity: { decrement: quantity } } })
+      await tx.repairPart.create({ data: { repairTicketId: ticket.id, inventoryItemId: item.id, quantity, unitCost } })
+      await tx.repairTicket.update({ where: { id: ticket.id }, data: { partsCost: parseFloat(ticket.partsCost || 0) + unitCost * quantity } })
+    })
+
+    res.status(201).json(await partsResponse(prisma, req.params.id))
+  } catch (err) {
+    if (err instanceof PartError) return res.status(400).json({ error: err.message })
+    logger.error('Add ticket part error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// DELETE /api/tickets/:id/parts/:partId — put the part back in stock
+router.delete('/:id/parts/:partId', async (req, res) => {
+  try {
+    await prisma.$transaction(async (tx) => {
+      const part = await tx.repairPart.findUnique({ where: { id: req.params.partId }, include: { repairTicket: { include: { sale: true } } } })
+      if (!part || part.repairTicketId !== req.params.id) throw new PartError('Part not found on this ticket')
+      if (part.repairTicket.sale) throw new PartError('Parts cannot be removed after the ticket is invoiced')
+
+      await tx.inventoryItem.update({ where: { id: part.inventoryItemId }, data: { quantity: { increment: part.quantity } } })
+      await tx.repairPart.delete({ where: { id: part.id } })
+      const newCost = parseFloat(part.repairTicket.partsCost || 0) - parseFloat(part.unitCost) * part.quantity
+      await tx.repairTicket.update({ where: { id: part.repairTicketId }, data: { partsCost: Math.max(0, newCost) } })
+    })
+
+    res.json(await partsResponse(prisma, req.params.id))
+  } catch (err) {
+    if (err instanceof PartError) return res.status(400).json({ error: err.message })
+    logger.error('Remove ticket part error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

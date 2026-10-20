@@ -1,9 +1,11 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requireRole('OWNER'))
 
 // GET /api/suppliers
 router.get('/', async (req, res) => {
@@ -25,7 +27,7 @@ router.get('/', async (req, res) => {
     })
     res.json({ suppliers })
   } catch (err) {
-    console.error('List suppliers error:', err)
+    logger.error('List suppliers error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -36,13 +38,14 @@ router.get('/:id', async (req, res) => {
     const supplier = await prisma.supplier.findUnique({
       where: { id: req.params.id },
       include: {
-        purchaseOrders: { orderBy: { createdAt: 'desc' }, include: { lines: { include: { inventoryItem: true } } } },
-        debts: { orderBy: { createdAt: 'desc' }, include: { payments: true } }
+        purchaseOrders: { orderBy: { orderedAt: 'desc' }, include: { items: { include: { inventoryItem: true } } } },
+        supplierDebts: { orderBy: { createdAt: 'desc' }, include: { payments: true, purchaseOrder: true } }
       }
     })
     if (!supplier) return res.status(404).json({ error: 'Supplier not found' })
     res.json({ supplier })
   } catch (err) {
+    logger.error('Get supplier error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

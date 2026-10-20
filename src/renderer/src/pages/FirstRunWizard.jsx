@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Wrench, Store, UserPlus, CheckCircle } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import api from '../lib/api'
 
-const steps = ['Welcome', 'Store Info', 'Owner Account', 'Done']
-
 export default function FirstRunWizard() {
+    const { t } = useTranslation()
+    const steps = [t('setup.steps.welcome'), t('setup.steps.store_info'), t('setup.steps.owner_account'), t('setup.steps.done')]
+    
     const [step, setStep] = useState(0)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -31,11 +33,11 @@ export default function FirstRunWizard() {
 
     const handleSetup = async () => {
         if (form.password !== form.confirmPassword) {
-            setError('Passwords do not match')
+            setError(t('setup.err_pwd_match'))
             return
         }
         if (form.password.length < 6) {
-            setError('Password must be at least 6 characters')
+            setError(t('setup.err_pwd_length'))
             return
         }
 
@@ -54,7 +56,7 @@ export default function FirstRunWizard() {
             })
             setStep(3) // Done
         } catch (err) {
-            setError(err.response?.data?.error || 'Setup failed')
+            setError(err.response?.data?.error || t('setup.err_setup'))
         } finally {
             setLoading(false)
         }
@@ -66,7 +68,7 @@ export default function FirstRunWizard() {
                 {/* Step indicators */}
                 <div className="flex items-center justify-center gap-2 mb-8">
                     {steps.map((s, i) => (
-                        <div key={s} className="flex items-center gap-2">
+                        <div key={i} className="flex items-center gap-2">
                             <div className={`
                 flex items-center justify-center h-7 w-7 rounded-full text-xs font-medium
                 ${i <= step
@@ -90,12 +92,12 @@ export default function FirstRunWizard() {
                             <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-primary-foreground mx-auto mb-4">
                                 <Wrench className="h-6 w-6" />
                             </div>
-                            <h1 className="text-xl font-bold text-foreground mb-2">Welcome to Rakam</h1>
+                            <h1 className="text-xl font-bold text-foreground mb-2">{t('setup.welcome_title')}</h1>
                             <p className="text-sm text-muted-foreground mb-6">
-                                Let's set up your phone repair shop in just a few steps.
+                                {t('setup.welcome_subtitle')}
                             </p>
                             <Button onClick={() => setStep(1)} className="w-full">
-                                Get Started
+                                {t('setup.get_started')}
                             </Button>
                         </div>
                     )}
@@ -105,36 +107,42 @@ export default function FirstRunWizard() {
                         <div>
                             <div className="flex items-center gap-2 mb-4">
                                 <Store className="h-5 w-5 text-muted-foreground" />
-                                <h2 className="text-lg font-semibold">Store Information</h2>
+                                <h2 className="text-lg font-semibold">{t('setup.store_title')}</h2>
                             </div>
                             <div className="space-y-4">
                                 <Input
-                                    label="Store Name"
+                                    label={t('setup.store_name')}
                                     placeholder="My Repair Shop"
                                     value={form.storeName}
                                     onChange={(e) => update('storeName', e.target.value)}
                                     required
                                 />
                                 <Input
-                                    label="Phone Number"
+                                    label={t('setup.phone')}
                                     placeholder="+213 555 1234"
                                     value={form.storePhone}
                                     onChange={(e) => update('storePhone', e.target.value)}
                                 />
                                 <Input
-                                    label="Address"
-                                    placeholder="123 Main Street, Algiers"
+                                    label={t('setup.address')}
+                                    placeholder="Algiers"
                                     value={form.storeAddress}
                                     onChange={(e) => update('storeAddress', e.target.value)}
                                 />
                                 <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-sm font-medium text-foreground">{t('setup.currency')}</label>
+                                        <select value={form.currency} onChange={(e) => update('currency', e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                                            <option value="DZD">DZD (Algerian Dinar)</option>
+                                            <option value="USD">USD (US Dollar)</option>
+                                            <option value="EUR">EUR (Euro)</option>
+                                            <option value="SAR">SAR (Saudi Riyal)</option>
+                                            <option value="MAD">MAD (Moroccan Dirham)</option>
+                                            <option value="TND">TND (Tunisian Dinar)</option>
+                                        </select>
+                                    </div>
                                     <Input
-                                        label="Currency"
-                                        value={form.currency}
-                                        onChange={(e) => update('currency', e.target.value)}
-                                    />
-                                    <Input
-                                        label="Default Warranty (days)"
+                                        label={t('setup.warranty')}
                                         type="number"
                                         value={form.warrantyDays}
                                         onChange={(e) => update('warrantyDays', parseInt(e.target.value) || 30)}
@@ -143,14 +151,14 @@ export default function FirstRunWizard() {
                             </div>
                             <div className="flex gap-2 mt-6">
                                 <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
-                                    Back
+                                    {t('setup.back')}
                                 </Button>
                                 <Button
                                     onClick={() => setStep(2)}
                                     className="flex-1"
                                     disabled={!form.storeName}
                                 >
-                                    Next
+                                    {t('setup.next')}
                                 </Button>
                             </div>
                         </div>
@@ -161,7 +169,7 @@ export default function FirstRunWizard() {
                         <div>
                             <div className="flex items-center gap-2 mb-4">
                                 <UserPlus className="h-5 w-5 text-muted-foreground" />
-                                <h2 className="text-lg font-semibold">Create Owner Account</h2>
+                                <h2 className="text-lg font-semibold">{t('setup.owner_title')}</h2>
                             </div>
 
                             {error && (
@@ -172,14 +180,14 @@ export default function FirstRunWizard() {
 
                             <div className="space-y-4">
                                 <Input
-                                    label="Your Name"
+                                    label={t('setup.your_name')}
                                     placeholder="John Doe"
                                     value={form.userName}
                                     onChange={(e) => update('userName', e.target.value)}
                                     required
                                 />
                                 <Input
-                                    label="Email"
+                                    label={t('setup.email')}
                                     type="email"
                                     placeholder="admin@rakam.app"
                                     value={form.email}
@@ -187,17 +195,17 @@ export default function FirstRunWizard() {
                                     required
                                 />
                                 <Input
-                                    label="Password"
+                                    label={t('setup.password')}
                                     type="password"
-                                    placeholder="Min 6 characters"
+                                    placeholder="••••••••"
                                     value={form.password}
                                     onChange={(e) => update('password', e.target.value)}
                                     required
                                 />
                                 <Input
-                                    label="Confirm Password"
+                                    label={t('setup.confirm_password')}
                                     type="password"
-                                    placeholder="Re-enter password"
+                                    placeholder="••••••••"
                                     value={form.confirmPassword}
                                     onChange={(e) => update('confirmPassword', e.target.value)}
                                     required
@@ -205,7 +213,7 @@ export default function FirstRunWizard() {
                             </div>
                             <div className="flex gap-2 mt-6">
                                 <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                                    Back
+                                    {t('setup.back')}
                                 </Button>
                                 <Button
                                     onClick={handleSetup}
@@ -213,7 +221,7 @@ export default function FirstRunWizard() {
                                     loading={loading}
                                     disabled={!form.userName || !form.email || !form.password}
                                 >
-                                    Create Account
+                                    {t('setup.create_account')}
                                 </Button>
                             </div>
                         </div>
@@ -225,12 +233,12 @@ export default function FirstRunWizard() {
                             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-success/15 text-success mx-auto mb-4">
                                 <CheckCircle className="h-6 w-6" />
                             </div>
-                            <h2 className="text-xl font-bold text-foreground mb-2">All Set!</h2>
+                            <h2 className="text-xl font-bold text-foreground mb-2">{t('setup.done_title')}</h2>
                             <p className="text-sm text-muted-foreground mb-6">
-                                Your store has been set up. You can now sign in with your account.
+                                {t('setup.done_subtitle')}
                             </p>
                             <Button onClick={() => navigate('/login')} className="w-full">
-                                Go to Login
+                                {t('setup.go_login')}
                             </Button>
                         </div>
                     )}

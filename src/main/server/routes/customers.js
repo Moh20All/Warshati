@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -33,7 +34,7 @@ router.get('/', async (req, res) => {
     })
     res.json({ customers })
   } catch (err) {
-    console.error('List customers error:', err)
+    logger.error('List customers error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -53,7 +54,7 @@ router.get('/:id', async (req, res) => {
     if (!customer) return res.status(404).json({ error: 'Customer not found' })
     res.json({ customer })
   } catch (err) {
-    console.error('Get customer error:', err)
+    logger.error('Get customer error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -66,7 +67,7 @@ router.get('/lookup/:phone', async (req, res) => {
     })
     res.json({ customer: customer || null })
   } catch (err) {
-    console.error('Lookup error:', err)
+    logger.error('Lookup error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -90,7 +91,7 @@ router.post('/', async (req, res) => {
     })
     res.status(201).json({ customer })
   } catch (err) {
-    console.error('Create customer error:', err)
+    logger.error('Create customer error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -111,18 +112,18 @@ router.put('/:id', async (req, res) => {
     })
     res.json({ customer })
   } catch (err) {
-    console.error('Update customer error:', err)
+    logger.error('Update customer error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
 
 // DELETE /api/customers/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('OWNER'), async (req, res) => {
   try {
     await prisma.customer.delete({ where: { id: req.params.id } })
     res.json({ success: true })
   } catch (err) {
-    console.error('Delete customer error:', err)
+    logger.error('Delete customer error:', err)
     res.status(500).json({ error: 'Cannot delete customer with linked records' })
   }
 })

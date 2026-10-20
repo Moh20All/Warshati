@@ -1,20 +1,16 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
+import { nextCheckInNumber } from '../lib/numbering.js'
+import { rememberDevice } from '../lib/catalog.js'
 
 const router = Router()
 router.use(requireAuth)
 
-// Generate CI number: CI-YYYY-NNNN
-async function generateCINumber() {
-  const year = new Date().getFullYear()
-  const prefix = `CI-${year}-`
-  const last = await prisma.checkIn.findFirst({
-    where: { checkInNumber: { startsWith: prefix } },
-    orderBy: { checkInNumber: 'desc' }
-  })
-  const num = last ? parseInt(last.checkInNumber.split('-').pop()) + 1 : 1
-  return `${prefix}${String(num).padStart(4, '0')}`
+// Generate CI number: CI-YYYY-NNNN (pass the transaction client when inside one)
+async function generateCINumber(db = prisma) {
+  return nextCheckInNumber(db)
 }
 
 // GET /api/checkins
@@ -41,7 +37,7 @@ router.get('/', async (req, res) => {
     })
     res.json({ checkins })
   } catch (err) {
-    console.error('List checkins error:', err)
+    logger.error('List checkins error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -72,27 +68,30 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Customer name is required' })
     }
 
-    // Resolve or create customer
-    let resolvedCustomerId = customerId
-    if (!resolvedCustomerId) {
-      const customer = await prisma.customer.create({
-        data: { name: customerName, phone: customerPhone || null }
-      })
-      resolvedCustomerId = customer.id
-    }
+    // Customer and check-in are saved together or not at all
+    const checkin = await prisma.$transaction(async (tx) => {
+      // Resolve or create customer
+      let resolvedCustomerId = customerId
+      if (!resolvedCustomerId) {
+        const customer = await tx.customer.create({
+          data: { name: customerName, phone: customerPhone || null }
+        })
+        resolvedCustomerId = customer.id
+      }
 
-    const checkInNumber = await generateCINumber()
-    const checkin = await prisma.checkIn.create({
-      data: {
-        checkInNumber, customerId: resolvedCustomerId, createdById: req.user.id,
-        deviceBrand, deviceModel, imei: imei || null, color: color || null,
-        issueDesc, condition: condition || null
-      },
-      include: { customer: true }
+      return tx.checkIn.create({
+        data: {
+          checkInNumber: await generateCINumber(tx), customerId: resolvedCustomerId, createdById: req.user.id,
+          deviceBrand, deviceModel, imei: imei || null, color: color || null,
+          issueDesc, condition: condition || null
+        },
+        include: { customer: true }
+      })
     })
+    await rememberDevice(prisma, { category: req.body.deviceCategory, brand: deviceBrand, model: deviceModel })
     res.status(201).json({ checkin })
   } catch (err) {
-    console.error('Create checkin error:', err)
+    logger.error('Create checkin error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

@@ -1,9 +1,11 @@
 import axios from 'axios'
 
 const api = axios.create({
-    baseURL: 'http://localhost:3456/api',
+    baseURL: 'http://127.0.0.1:3456/api',
     headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        // Per-launch key handed over by the preload; the local API refuses requests without it
+        'X-Rakam-Key': window.api?.apiKey || ''
     }
 })
 
@@ -23,9 +25,9 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             localStorage.removeItem('rakam_token')
             localStorage.removeItem('rakam_user')
-            // Only redirect if not already on login/setup
-            if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/setup')) {
-                window.location.href = '/login'
+            // Only redirect if not already on login/setup (app uses HashRouter, so routes live in the hash)
+            if (!window.location.hash.includes('/login') && !window.location.hash.includes('/setup')) {
+                window.location.hash = '#/login'
             }
         }
         return Promise.reject(error)

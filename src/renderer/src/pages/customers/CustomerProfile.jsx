@@ -1,31 +1,34 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Phone, Mail, StickyNote, Wrench, ShoppingCart, CreditCard, ArrowLeftRight } from 'lucide-react'
 import api from '../../lib/api'
+import { useCurrency } from '../../lib/currency'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Table from '../../components/ui/Table'
 
-const tabs = [
-  { key: 'repairs', label: 'Repairs', icon: Wrench },
-  { key: 'sales', label: 'Sales', icon: ShoppingCart },
-  { key: 'debt', label: 'Debt', icon: CreditCard },
-  { key: 'tradeins', label: 'Trade-Ins', icon: ArrowLeftRight }
-]
-
 export default function CustomerProfile() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('repairs')
+
+  const tabs = [
+    { key: 'repairs', label: t('customers.tabs.repairs'), icon: Wrench },
+    { key: 'sales', label: t('customers.tabs.sales'), icon: ShoppingCart },
+    { key: 'debt', label: t('customers.tabs.debt'), icon: CreditCard },
+    { key: 'tradeins', label: t('customers.tabs.tradeins'), icon: ArrowLeftRight }
+  ]
 
   const { data: customer, isLoading } = useQuery({
     queryKey: ['customer', id],
     queryFn: () => api.get(`/customers/${id}`).then(r => r.data.customer)
   })
 
-  if (isLoading) return <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
-  if (!customer) return <div className="text-center py-12 text-sm text-destructive">Customer not found</div>
+  if (isLoading) return <div className="text-center py-12 text-sm text-muted-foreground">{t('customers.loading')}</div>
+  if (!customer) return <div className="text-center py-12 text-sm text-destructive">{t('customers.not_found')}</div>
 
   return (
     <div className="animate-fade-in">
@@ -69,56 +72,60 @@ export default function CustomerProfile() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'repairs' && <RepairsTab tickets={customer.repairTickets || []} />}
-      {activeTab === 'sales' && <SalesTab sales={customer.sales || []} />}
-      {activeTab === 'debt' && <DebtTab debts={customer.debtLedger || []} />}
-      {activeTab === 'tradeins' && <TradeInsTab tradeIns={customer.tradeIns || []} />}
+      {activeTab === 'repairs' && <RepairsTab tickets={customer.repairTickets || []} t={t} />}
+      {activeTab === 'sales' && <SalesTab sales={customer.sales || []} t={t} />}
+      {activeTab === 'debt' && <DebtTab debts={customer.debtLedger || []} t={t} />}
+      {activeTab === 'tradeins' && <TradeInsTab tradeIns={customer.tradeIns || []} t={t} />}
     </div>
   )
 }
 
-function RepairsTab({ tickets }) {
+function RepairsTab({ tickets, t }) {
+  const cur = useCurrency()
   const columns = [
-    { key: 'ticketNumber', label: 'Ticket #' },
-    { key: 'deviceBrand', label: 'Device', render: (v, r) => `${v} ${r.deviceModel}` },
-    { key: 'status', label: 'Status', render: (v) => <Badge color={v}>{v.replace('_', ' ')}</Badge> },
-    { key: 'priority', label: 'Priority', render: (v) => <Badge color={v}>{v}</Badge> },
-    { key: 'finalCost', label: 'Cost', render: (v) => v ? `${Number(v).toLocaleString()} DZD` : '—' },
-    { key: 'receivedAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() }
+    { key: 'ticketNumber', label: t('customers.columns.ticket_num') },
+    { key: 'deviceBrand', label: t('customers.columns.device'), render: (v, r) => `${v} ${r.deviceModel}` },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v}>{v.replace('_', ' ')}</Badge> },
+    { key: 'priority', label: t('customers.columns.priority'), render: (v) => <Badge color={v}>{v}</Badge> },
+    { key: 'finalCost', label: t('customers.columns.cost'), render: (v) => v ? `${Number(v).toLocaleString()} ${cur}` : '—' },
+    { key: 'receivedAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
-  return <Table columns={columns} data={tickets} emptyTitle="No repairs" emptyDescription="No repair tickets for this customer yet." />
+  return <Table columns={columns} data={tickets} emptyTitle={t('customers.empty.repairs_title')} emptyDescription={t('customers.empty.repairs_desc')} />
 }
 
-function SalesTab({ sales }) {
+function SalesTab({ sales, t }) {
+  const cur = useCurrency()
   const columns = [
-    { key: 'saleNumber', label: 'Invoice #' },
-    { key: 'status', label: 'Status', render: (v) => <Badge color={v === 'COMPLETED' ? 'success' : v === 'CREDIT' ? 'warning' : 'danger'}>{v}</Badge> },
-    { key: 'total', label: 'Total', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'paymentMethod', label: 'Payment', render: (v) => <Badge>{v}</Badge> },
-    { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() }
+    { key: 'saleNumber', label: t('customers.columns.invoice_num') },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v === 'COMPLETED' ? 'success' : v === 'CREDIT' ? 'warning' : 'danger'}>{v}</Badge> },
+    { key: 'total', label: t('customers.columns.total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'paymentMethod', label: t('customers.columns.payment'), render: (v) => <Badge>{v}</Badge> },
+    { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
-  return <Table columns={columns} data={sales} emptyTitle="No sales" emptyDescription="No sales for this customer yet." />
+  return <Table columns={columns} data={sales} emptyTitle={t('customers.empty.sales_title')} emptyDescription={t('customers.empty.sales_desc')} />
 }
 
-function DebtTab({ debts }) {
+function DebtTab({ debts, t }) {
+  const cur = useCurrency()
   const columns = [
-    { key: 'type', label: 'Type', render: (v) => <Badge>{v.replace('_', ' ')}</Badge> },
-    { key: 'totalAmount', label: 'Total', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'paidAmount', label: 'Paid', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'remaining', label: 'Remaining', render: (v) => <span className="font-medium text-destructive">{Number(v).toLocaleString()} DZD</span> },
-    { key: 'status', label: 'Status', render: (v) => <Badge color={v}>{v}</Badge> },
-    { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() }
+    { key: 'type', label: t('customers.columns.type'), render: (v) => <Badge>{v.replace('_', ' ')}</Badge> },
+    { key: 'totalAmount', label: t('customers.columns.total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'paidAmount', label: t('customers.columns.paid'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'remaining', label: t('customers.columns.remaining'), render: (v) => <span className="font-medium text-destructive">{Number(v).toLocaleString()} {cur}</span> },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v}>{v}</Badge> },
+    { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
-  return <Table columns={columns} data={debts} emptyTitle="No debt" emptyDescription="This customer has no outstanding debt." />
+  return <Table columns={columns} data={debts} emptyTitle={t('customers.empty.debt_title')} emptyDescription={t('customers.empty.debt_desc')} />
 }
 
-function TradeInsTab({ tradeIns }) {
+function TradeInsTab({ tradeIns, t }) {
+  const cur = useCurrency()
   const columns = [
-    { key: 'brand', label: 'Device', render: (v, r) => `${v} ${r.model}` },
-    { key: 'condition', label: 'Condition', render: (v) => v ? <Badge>{v}</Badge> : '—' },
-    { key: 'appraisedValue', label: 'Value', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'status', label: 'Status', render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{v}</Badge> },
-    { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() }
+    { key: 'brand', label: t('customers.columns.device'), render: (v, r) => `${v} ${r.model}` },
+    { key: 'condition', label: t('customers.columns.condition'), render: (v) => v ? <Badge>{v}</Badge> : '—' },
+    { key: 'appraisedValue', label: t('customers.columns.value'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{v}</Badge> },
+    { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
-  return <Table columns={columns} data={tradeIns} emptyTitle="No trade-ins" emptyDescription="No trade-ins from this customer yet." />
+  return <Table columns={columns} data={tradeIns} emptyTitle={t('customers.empty.tradeins_title')} emptyDescription={t('customers.empty.tradeins_desc')} />
 }

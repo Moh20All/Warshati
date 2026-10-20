@@ -1,7 +1,24 @@
-import { app, shell, BrowserWindow, ipcMain, net } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, net, protocol } from 'electron'
+import { pathToFileURL } from 'url'
+import { resolve as resolvePath, sep } from 'path'
+import { catalogImagesDir } from './server/lib/catalog.js'
+
+// rakam-media://catalog/<file> serves downloaded device images (and nothing outside that folder)
+protocol.registerSchemesAsPrivileged([
+    { scheme: 'rakam-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }
+])
 import { machineIdSync } from 'node-machine-id'
 import { autoUpdater } from 'electron-updater'
+import log from 'electron-log'
 import prisma from './server/lib/prisma.js'
+import { printHtml } from './server/lib/print.js'
+import { backupDatabase, restoreDatabase, scheduleAutoBackups, getBackupInfo, openBackupFolder } from './server/lib/backup.js'
+
+// Configure logging
+autoUpdater.logger = log
+log.info('App starting...')
+log.transports.file.level = 'info'
+
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
@@ -9,10 +26,12 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { startServer } from './server/index.js'
 
-// Supabase config for server-side license validation
-const SUPABASE_URL = 'https://amlcmorpizpzgzjgltuf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbGNtb3JwaXpwemd6amdsdHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTAzMjUsImV4cCI6MjA4OTM2NjMyNX0.wAk_r39NhaAgL8yANumflkig-psoEIKpfFmZnciCXJ0';
-const ONLINE_CHECK_TIMEOUT_MS = 3000;
+import { checkLicense, activateLicense } from './license.js'
+import { exportXlsx } from './export.js'
+import { SESSION_KEY } from './server/lib/session-key.js'
+
+// The renderer reads the per-launch API key synchronously while its preload runs
+ipcMain.on('get-api-key', (event) => { event.returnValue = SESSION_KEY })
 
 let mainWindow
 
@@ -33,11 +52,11 @@ function createWindow() {
 
     mainWindow.on('ready-to-show', () => {
         mainWindow.show()
-        mainWindow.webContents.openDevTools()
     })
 
     mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url)
+        // Only web links leave the app (never file:// or other protocols)
+        if (/^https?:\/\//i.test(details.url)) shell.openExternal(details.url)
         return { action: 'deny' }
     })
 
@@ -49,67 +68,6 @@ function createWindow() {
     }
 }
 
-// ─────────────────────────────────────────────────
-// Online Supabase License Validation (main process)
-// ─────────────────────────────────────────────────
-async function checkInternetAvailable() {
-    // Ping Supabase with a 3s hard timeout; returns true/false
-    return new Promise((resolve) => {
-        const controller = new AbortController();
-        const timer = setTimeout(() => { controller.abort(); resolve(false); }, ONLINE_CHECK_TIMEOUT_MS);
-        fetch(SUPABASE_URL, { method: 'HEAD', signal: controller.signal })
-            .then(() => { clearTimeout(timer); resolve(true); })
-            .catch(() => { clearTimeout(timer); resolve(false); });
-    });
-}
-
-async function validateLicenseOnline(licenseKey, currentMachineId) {
-    // Returns: { valid: true } OR { valid: false, message: '...' }
-    try {
-        const url = `${SUPABASE_URL}/rest/v1/licenses?key=eq.${encodeURIComponent(licenseKey)}&select=*`;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Accept': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            // Supabase returned an HTTP error — treat as network issue, NOT deactivation
-            return { valid: true };
-        }
-
-        const records = await response.json();
-        if (!records || records.length === 0) {
-            // Key was deleted from Supabase entirely — deactivate
-            return { valid: false, message: 'Your license key was not found on our servers. Please contact support.' };
-        }
-
-        const remoteLicense = records[0];
-
-        // Check 1: Is the key revoked?
-        if (remoteLicense.is_active === false) {
-            return { valid: false, message: 'Your license has been deactivated. Please contact support.' };
-        }
-
-        // Check 2: Does the machine_id match?
-        // null machine_id means the binding was intentionally cleared by the owner
-        // via "Reset Machine Binding" — the app must NOT treat null as a free pass.
-        if (!remoteLicense.machine_id || remoteLicense.machine_id !== currentMachineId) {
-            return { valid: false, message: 'This license is registered to a different device. Please contact support.' };
-        }
-
-        // Both checks passed
-        return { valid: true };
-    } catch (e) {
-        // Any unexpected error = treat as offline = graceful pass
-        console.log('[License] Online validation error (treating as offline):', e.message);
-        return { valid: true };
-    }
-}
-
 app.whenReady().then(async () => {
     electronApp.setAppUserModelId('com.rakam.desktop')
     app.setName('Rakam')
@@ -118,67 +76,102 @@ app.whenReady().then(async () => {
         optimizer.watchWindowShortcuts(window)
     })
 
+    protocol.handle('rakam-media', (request) => {
+        const url = new URL(request.url)
+        const base = resolvePath(catalogImagesDir())
+        const file = resolvePath(base, decodeURIComponent(url.pathname).replace(/^\/+/, ''))
+        if (url.hostname !== 'catalog' || !file.startsWith(base + sep)) return new Response('Forbidden', { status: 403 })
+        return net.fetch(pathToFileURL(file).toString())
+    })
+
     // BACKGROUND AUTO-UPDATER
     autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.checkForUpdates().catch(() => {});
+    autoUpdater.autoInstallOnAppQuit = false; // We will handle this explicitly via UI now
     
-    autoUpdater.on('update-downloaded', () => {
+    // Wire up events to send back to the renderer
+    autoUpdater.on('update-available', (info) => {
+        log.info('Update available:', info.version);
         if (BrowserWindow.getAllWindows().length > 0) {
-            BrowserWindow.getAllWindows()[0].webContents.send('update-downloaded');
+            BrowserWindow.getAllWindows()[0].webContents.send('update-available', info);
         }
     });
 
+    autoUpdater.on('download-progress', (progressObj) => {
+        // progressObj contains: bytesPerSecond, percent, total, transferred
+        if (BrowserWindow.getAllWindows().length > 0) {
+            BrowserWindow.getAllWindows()[0].webContents.send('download-progress', progressObj);
+        }
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+        log.info('Update downloaded, ready to install');
+        if (BrowserWindow.getAllWindows().length > 0) {
+            BrowserWindow.getAllWindows()[0].webContents.send('update-downloaded', info);
+        }
+    });
+
+    autoUpdater.on('error', (err) => {
+        log.error('Auto-updater error:', err);
+        if (BrowserWindow.getAllWindows().length > 0) {
+            BrowserWindow.getAllWindows()[0].webContents.send('update-error', err.message);
+        }
+    });
+
+    // Start checking for updates after handlers are attached
+    autoUpdater.checkForUpdates().catch(() => {});
+
     ipcMain.handle('restart-to-update', () => {
-        autoUpdater.quitAndInstall();
+        autoUpdater.quitAndInstall(false, true); // (isSilent, isForceRunAfter)
     });
 
     // NATIVE HARDWARE BINDING & LICENSING IPC
     ipcMain.handle('get-machine-id', () => machineIdSync());
 
-    ipcMain.handle('get-local-license', async () => {
-        try {
-            const localLicense = await prisma.localLicense.findFirst();
-            if (!localLicense) {
-                // No local license — return null, renderer will show activation screen
-                return { valid: false, license: null, deactivationMessage: null };
-            }
-
-            // Local license exists — attempt online validation
-            const isOnline = await checkInternetAvailable();
-            if (!isOnline) {
-                // Outcome 4: Offline — skip check, proceed normally
-                console.log('[License] Offline — skipping online validation');
-                return { valid: true, license: localLicense, deactivationMessage: null };
-            }
-
-            // Online — validate against Supabase
-            const currentMachineId = machineIdSync();
-            const result = await validateLicenseOnline(localLicense.key, currentMachineId);
-
-            if (result.valid) {
-                // Outcome 1: Valid — proceed normally
-                return { valid: true, license: localLicense, deactivationMessage: null };
-            }
-
-            // Outcome 2 or 3: Deactivated — delete LocalLicense, return message
-            // ONLY the LocalLicense row is deleted. App data is NEVER touched.
-            console.log('[License] Deactivation triggered:', result.message);
-            await prisma.localLicense.deleteMany({});
-            return { valid: false, license: null, deactivationMessage: result.message };
-        } catch (e) {
-            console.error('[License] IPC handler error:', e);
-            // On any unexpected error, fail open (don't block the user)
-            return { valid: true, license: null, deactivationMessage: null };
-        }
+    // Validation (with offline grace period) and activation both happen here, not in the renderer
+    ipcMain.handle('get-local-license', () => checkLicense());
+    ipcMain.handle('activate-license', (_e, licenseKey) => activateLicense(licenseKey));
+    
+    // NATIVE THERMAL PRINTING
+    ipcMain.handle('get-printers', async () => {
+        const list = await mainWindow.webContents.getPrintersAsync();
+        console.log(`[DEBUG-PRINTERS] Discovered ${list.length} printers:`, list.map(p => p.name).join(', '));
+        return list;
     });
 
-    ipcMain.handle('setup-license', async (event, licenseKey, machineId) => {
-        try {
-            await prisma.localLicense.create({ data: { key: licenseKey, machineId: machineId } });
-            return true;
-        } catch (e) { return false; }
+    // Print the focused window with the system print dialog
+    ipcMain.handle('print-page', async () => {
+        const win = BrowserWindow.getFocusedWindow();
+        if (!win) return;
+        win.webContents.print(
+            { silent: false, printBackground: true },
+            (success, errorType) => {
+                if (!success) console.error('Print failed:', errorType);
+            }
+        );
     });
+
+    // Print HTML content: silent to thermal printer, or with dialog as fallback
+    ipcMain.handle('print-receipt', async (event, { html, printerName, width = '80mm' }) => {
+        return printHtml({ html, printerName, width })
+    });
+
+    // DATABASE BACKUP & RESTORE
+    ipcMain.handle('backup-db', (_e, token) => backupDatabase(mainWindow, token))
+    ipcMain.handle('restore-db', (_e, token) => restoreDatabase(mainWindow, token))
+    ipcMain.handle('get-backup-info', (_e, token) => getBackupInfo(token))
+    ipcMain.handle('open-backup-folder', (_e, token) => openBackupFolder(token))
+
+    // WHATSAPP: opens WhatsApp (app or web) with a ready message; the URL is built here, not in the renderer
+    ipcMain.handle('open-whatsapp', async (_e, { phone, text } = {}) => {
+        // The renderer sends international digits only; anything else is refused, not "repaired"
+        const digits = String(phone || '')
+        if (!/^\d{8,15}$/.test(digits)) return { success: false, error: 'Invalid phone number' }
+        await shell.openExternal(`https://wa.me/${digits}?text=${encodeURIComponent(String(text || '').slice(0, 2000))}`)
+        return { success: true }
+    })
+
+    // EXCEL EXPORT (the renderer sends only rows the user can already see)
+    ipcMain.handle('export-xlsx', (_e, payload) => exportXlsx(mainWindow, payload))
 
     // Start Express API server first
     try {
@@ -191,6 +184,7 @@ app.whenReady().then(async () => {
     }
 
     createWindow()
+    scheduleAutoBackups()
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -201,4 +195,27 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()
     }
+})
+
+// ─────────────────────────────────────────────────
+// Main Process Crash Handlers
+// ─────────────────────────────────────────────────
+process.on('uncaughtException', (error) => {
+    log.error('[CRASH] Uncaught exception:', error)
+    try {
+        const { writeFileSync, appendFileSync } = require('fs')
+        const { join } = require('path')
+        const logPath = join(app.getPath('logs'), 'rakam-crash.log')
+        appendFileSync(logPath, `[${new Date().toISOString()}] UNCAUGHT: ${error.stack || error.message}\n`)
+    } catch (e) { /* ignore write errors */ }
+})
+
+process.on('unhandledRejection', (reason) => {
+    log.error('[CRASH] Unhandled rejection:', reason)
+    try {
+        const { appendFileSync } = require('fs')
+        const { join } = require('path')
+        const logPath = join(app.getPath('logs'), 'rakam-crash.log')
+        appendFileSync(logPath, `[${new Date().toISOString()}] REJECTION: ${reason?.stack || reason}\n`)
+    } catch (e) { /* ignore write errors */ }
 })

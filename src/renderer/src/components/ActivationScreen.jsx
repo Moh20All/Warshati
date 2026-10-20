@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabase'
 import { ShieldAlert, KeyRound, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function ActivationScreen({ onActivated, deactivationMessage }) {
+  const { t } = useTranslation()
   const [key, setKey] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,44 +17,18 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
     setError('')
 
     try {
-      // 1. Fetch license from Supabase
-      const { data: license, error: fetchErr } = await supabase
-        .from('licenses')
-        .select('*')
-        .eq('key', key.trim().toUpperCase())
-        .single()
-
-      if (fetchErr || !license) {
-        throw new Error('Invalid license key. Please check for typos.')
+      // Verification, machine binding and local caching all happen in the main process
+      const result = await window.api.activateLicense(key)
+      if (!result.ok) {
+        const messages = {
+          invalid: t('activation.err_invalid'),
+          revoked: t('activation.err_revoked'),
+          in_use: t('activation.err_in_use'),
+          offline: t('activation.err_offline'),
+          cache: t('activation.err_cache')
+        }
+        throw new Error(messages[result.code] || t('activation.err_unexpected'))
       }
-
-      if (!license.is_active) {
-        throw new Error('This license has been revoked by the administrator.')
-      }
-
-      // 2. Cross-verify the stable Machine ID
-      const machineId = await window.api.getMachineId()
-
-      if (license.machine_id && license.machine_id !== machineId) {
-        throw new Error('Key already in use on another computing device.')
-      }
-
-      // 3. Update Supabase if unactivated (binding the hardware)
-      if (!license.machine_id) {
-        const { error: updateErr } = await supabase
-          .from('licenses')
-          .update({
-            machine_id: machineId,
-            activated_at: new Date().toISOString()
-          })
-          .eq('id', license.id)
-          
-        if (updateErr) throw new Error('Failed to bind license to this device.')
-      }
-
-      // 4. Save to local native SQLite via IPC so it works offline forever
-      const cached = await window.api.setupLicense(license.key, machineId)
-      if (!cached) throw new Error('Failed to write activation cache to local disk.')
 
       setSuccess(true)
       setTimeout(() => {
@@ -61,7 +36,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
       }, 1500)
 
     } catch (err) {
-      setError(err.message || 'An unexpected activation error occurred.')
+      setError(err.message || t('activation.err_unexpected'))
     } finally {
       setLoading(false)
     }
@@ -82,8 +57,8 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
           <div className="w-16 h-16 bg-[#23345a] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#c9a84c]/20">
             <KeyRound className="w-8 h-8 text-[#c9a84c]" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Software Activation</h1>
-          <p className="text-[#c9a84c]/80 text-sm">Enter your 16-character license key</p>
+          <h1 className="text-2xl font-bold text-white mb-2">{t('activation.title')}</h1>
+          <p className="text-[#c9a84c]/80 text-sm">{t('activation.subtitle')}</p>
         </div>
 
         <div className="p-8">
@@ -92,7 +67,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
             <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm flex gap-3">
               <ShieldAlert className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5" />
               <div>
-                <p className="font-semibold mb-1">License Deactivated</p>
+                <p className="font-semibold mb-1">{t('activation.deactivated')}</p>
                 <p>{deactivationMessage}</p>
               </div>
             </div>
@@ -101,8 +76,8 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
           {success ? (
             <div className="text-center py-6">
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Activation Successful</h2>
-              <p className="text-gray-500">Launching application environment...</p>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">{t('activation.success_title')}</h2>
+              <p className="text-gray-500">{t('activation.success_desc')}</p>
             </div>
           ) : (
             <form onSubmit={handleActivate} className="space-y-6">
@@ -115,13 +90,13 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  License Key
+                  {t('activation.lbl_key')}
                 </label>
                 <input
                   type="text"
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
-                  placeholder="RAKAM-XXXX-XXXX-XXXX-XXXX"
+                  placeholder={t('activation.ph_key')}
                   className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-center font-mono tracking-widest text-[#1a2744] uppercase focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c] outline-none transition-all placeholder:tracking-normal placeholder:font-sans placeholder:text-gray-300"
                   required
                 />
@@ -132,7 +107,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
                 disabled={loading}
                 className="w-full bg-[#1a2744] text-[#c9a84c] font-bold py-3 px-4 rounded-lg shadow hover:bg-[#23345a] transition-all disabled:opacity-70 flex justify-center items-center gap-2"
               >
-                {loading ? 'Validating Telemetry...' : 'Activate Device'}
+                {loading ? t('activation.btn_validating') : t('activation.btn_activate')}
               </button>
             </form>
           )}
@@ -140,7 +115,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
       </div>
       
       <p className="mt-8 text-gray-400 text-sm">
-        Need a license? Contact Rakam administrative support.
+        {t('activation.footer')}
       </p>
     </div>
   )

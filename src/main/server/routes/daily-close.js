@@ -1,62 +1,28 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
+import { dayRange, loadMovements, summarize } from '../lib/finance.js'
 
 const router = Router()
 router.use(requireAuth)
 
+async function todayFigures() {
+  const { start, end } = dayRange()
+  const totals = summarize(await loadMovements(prisma, start, end))
+  return { start, end, totals }
+}
+
 // POST /api/daily-close — generate today's snapshot
 router.post('/', async (req, res) => {
   try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+    const { start: today, end: tomorrow, totals } = await todayFigures()
 
     // Check if already closed
     const existing = await prisma.dailyClose.findFirst({
       where: { date: { gte: today, lt: tomorrow } }
     })
     if (existing) return res.status(400).json({ error: 'Today is already closed', close: existing })
-
-    // Exclude ticket-linked sales (those are counted as ticket profit)
-    const todaySales = await prisma.sale.findMany({
-      where: { createdAt: { gte: today, lt: tomorrow }, repairTicketId: null },
-      include: { items: true }
-    })
-    const totalRevenue = todaySales.reduce((s, sale) => s + parseFloat(sale.total), 0)
-    const totalCreditSales = todaySales.filter(s => s.status === 'CREDIT').reduce((s, sale) => s + parseFloat(sale.total), 0)
-    
-    // Calculate COGS (Cost of Goods Sold)
-    let totalCogs = 0
-    todaySales.forEach(sale => {
-      sale.items.forEach(item => { totalCogs += parseFloat(item.unitCost || 0) * item.quantity })
-    })
-
-    const todayPayments = await prisma.debtPayment.findMany({
-      where: { paidAt: { gte: today, lt: tomorrow } }
-    })
-    const totalDebtCollected = todayPayments.reduce((s, p) => s + parseFloat(p.amount), 0)
-
-    const todayExpenses = await prisma.expense.findMany({
-      where: { expenseDate: { gte: today, lt: tomorrow } }
-    })
-    const totalExpenses = todayExpenses.reduce((s, e) => s + parseFloat(e.amount), 0)
-
-    // Add Ticket Profit (Finished or Delivered today)
-    const todayTickets = await prisma.repairTicket.findMany({
-      where: { 
-        status: { in: ['DONE', 'DELIVERED'] }, 
-        updatedAt: { gte: today, lt: tomorrow } 
-      }
-    })
-    const ticketRevenue = todayTickets.reduce((s, t) => s + parseFloat(t.finalCost || 0), 0)
-    const ticketCogs = todayTickets.reduce((s, t) => s + parseFloat(t.partsCost || 0), 0)
-    const netTicketProfit = ticketRevenue - ticketCogs
-
-    // Net Profit = Cash collected from sales - COGS + Ticket Profit + Debt Collected - Expenses
-    const cashSales = totalRevenue - totalCreditSales
-    const netCash = cashSales - totalCogs + netTicketProfit + totalDebtCollected - totalExpenses
 
     const openTickets = await prisma.repairTicket.count({
       where: { status: { in: ['DIAGNOSING', 'WAITING_PARTS', 'IN_REPAIR'] } }
@@ -78,8 +44,11 @@ router.post('/', async (req, res) => {
     const close = await prisma.dailyClose.create({
       data: {
         date: today,
-        totalRevenue, totalCreditSales, totalDebtCollected,
-        totalExpenses, netCash,
+        totalRevenue: totals.totalRevenue,
+        totalCreditSales: totals.totalCreditSales,
+        totalDebtCollected: totals.totalDebtCollected,
+        totalExpenses: totals.totalExpenses,
+        netCash: totals.netCash,
         openTickets, doneNotDelivered, newWarrantyClaims: todayClaims,
         lowStockCount, notes: req.body.notes || null
       }
@@ -87,7 +56,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ close })
   } catch (err) {
-    console.error('Daily close error:', err)
+    logger.error('Daily close error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -103,57 +72,17 @@ router.get('/', async (_req, res) => {
 })
 
 // GET /api/daily-close/preview — show today's stats without closing
-router.get('/preview', async (_req, res) => {
+router.get('/preview', async (req, res) => {
   try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-
-    // Exclude ticket-linked sales (those are counted as ticket profit)
-    const todaySales = await prisma.sale.findMany({ 
-      where: { createdAt: { gte: today, lt: tomorrow }, repairTicketId: null },
-      include: { items: true }
-    })
-    const totalRevenue = todaySales.reduce((s, sale) => s + parseFloat(sale.total), 0)
-    const totalCreditSales = todaySales.filter(s => s.status === 'CREDIT').reduce((s, sale) => s + parseFloat(sale.total), 0)
-    const cashSales = totalRevenue - totalCreditSales
-    const salesCount = todaySales.length
-
-    let totalCogs = 0
-    todaySales.forEach(sale => {
-      sale.items.forEach(item => { totalCogs += parseFloat(item.unitCost || 0) * item.quantity })
-    })
-
-    // Add Ticket Profit (Finished or Delivered today)
-    const todayTickets = await prisma.repairTicket.findMany({
-      where: { 
-        status: { in: ['DONE', 'DELIVERED'] },
-        updatedAt: { gte: today, lt: tomorrow } 
-      }
-    })
-    const ticketRevenue = todayTickets.reduce((s, t) => s + parseFloat(t.finalCost || 0), 0)
-    const ticketCogs = todayTickets.reduce((s, t) => s + parseFloat(t.partsCost || 0), 0)
-    const netTicketProfit = ticketRevenue - ticketCogs
-
-    const todayPayments = await prisma.debtPayment.findMany({ where: { paidAt: { gte: today, lt: tomorrow } } })
-    const totalDebtCollected = todayPayments.reduce((s, p) => s + parseFloat(p.amount), 0)
-
-    const todayExpenses = await prisma.expense.findMany({ where: { expenseDate: { gte: today, lt: tomorrow } } })
-    const totalExpenses = todayExpenses.reduce((s, e) => s + parseFloat(e.amount), 0)
-
-    // Net Profit = (Cash Sales - COGS) + Ticket Profit + Debt Collected - Expenses
-    const netCash = cashSales - totalCogs + netTicketProfit + totalDebtCollected - totalExpenses
-
+    const { start: today, end: tomorrow, totals } = await todayFigures()
     const existing = await prisma.dailyClose.findFirst({ where: { date: { gte: today, lt: tomorrow } } })
-
-    res.json({
-      totalRevenue, totalCreditSales, cashSales, salesCount,
-      ticketRevenue, ticketCogs, netTicketProfit,
-      totalDebtCollected, totalExpenses, netCash,
-      alreadyClosed: !!existing
-    })
+    // Staff see the drawer figures they need to close the day, not the shop's margins
+    if (req.user.role !== 'OWNER') {
+      for (const k of ['cogs', 'grossProfit', 'runningCosts', 'netProfit', 'ticketCogs', 'netTicketProfit']) delete totals[k]
+    }
+    res.json({ ...totals, alreadyClosed: !!existing })
   } catch (err) {
+    logger.error('Daily close preview error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

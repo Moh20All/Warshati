@@ -1,0 +1,19 @@
+console_id,brand,model_name,generation,release_year,type,cpu,gpu,ram,storage,max_resolution,price_usd
+1,Sony,PlayStation 5,9th,2020,Home Console,AMD Zen 2 8-core,AMD RDNA 2 custom,16GB GDDR6,825GB SSD,4K 120fps,499
+2,Sony,PlayStation 5 Digital Edition,9th,2020,Home Console,AMD Zen 2 8-core,AMD RDNA 2 custom,16GB GDDR6,825GB SSD,4K 120fps,449
+3,Sony,PlayStation 5 Pro,9th,2024,Home Console,AMD Zen 2 8-core,AMD RDNA 2 enhanced,16GB GDDR6,2TB SSD,4K 120fps,699
+4,Sony,PlayStation 4,8th,2013,Home Console,AMD Jaguar 8-core,AMD Radeon GCN,8GB GDDR5,500GB HDD,1080p,399
+5,Sony,PlayStation 4 Pro,8th,2016,Home Console,AMD Jaguar 8-core,AMD Radeon GCN enhanced,8GB GDDR5,1TB HDD,4K checkerboard,399
+6,Sony,PlayStation 3,7th,2006,Home Console,IBM Cell,NVIDIA RSX,256MB+256MB,20-60GB HDD,1080p,499
+7,Microsoft,Xbox Series X,9th,2020,Home Console,AMD Zen 2 8-core,AMD RDNA 2 custom,16GB GDDR6,1TB SSD,4K 120fps,499
+8,Microsoft,Xbox Series S,9th,2020,Home Console,AMD Zen 2 8-core,AMD RDNA 2 custom,10GB GDDR6,512GB SSD,1440p 120fps,299
+9,Microsoft,Xbox One,8th,2013,Home Console,AMD Jaguar 8-core,AMD Radeon GCN,8GB DDR3,500GB HDD,1080p,499
+10,Microsoft,Xbox One X,8th,2017,Home Console,AMD Jaguar 8-core,AMD Radeon GCN enhanced,12GB GDDR5,1TB HDD,4K,499
+11,Nintendo,Switch,8th,2017,Hybrid,NVIDIA Tegra X1,NVIDIA Maxwell,4GB,32GB + microSD,1080p docked,299
+12,Nintendo,Switch Lite,8th,2019,Handheld,NVIDIA Tegra X1,NVIDIA Maxwell,4GB,32GB + microSD,720p,199
+13,Nintendo,Switch OLED,8th,2021,Hybrid,NVIDIA Tegra X1,NVIDIA Maxwell,4GB,64GB + microSD,1080p docked,349
+14,Nintendo,Switch 2,9th,2025,Hybrid,NVIDIA custom,NVIDIA Ampere,12GB,256GB + microSD,4K docked,449
+15,Valve,Steam Deck,PC Handheld,2022,Handheld,AMD Zen 2 4-core,AMD RDNA 2,16GB LPDDR5,64GB-1TB SSD,800p,399
+16,ASUS,ROG Ally,PC Handheld,2023,Handheld,AMD Z1 Extreme,AMD RDNA 3,16GB LPDDR5,512GB SSD,1080p 120Hz,699
+17,Nintendo,Wii U,8th,2012,Home Console,IBM PowerPC,AMD Radeon,2GB,8-32GB,1080p,299
+18,Nintendo,Wii,7th,2006,Home Console,IBM Broadway,ATI Hollywood,88MB,512MB,480p,249

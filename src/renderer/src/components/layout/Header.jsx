@@ -2,6 +2,7 @@ import { Bell, LogOut, User } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../lib/auth'
 import Breadcrumbs from './Breadcrumbs'
+import UpdaterIndicator from './UpdaterIndicator'
 
 export default function Header() {
     const { user, logout } = useAuth()
@@ -23,6 +24,9 @@ export default function Header() {
             <Breadcrumbs />
 
             <div className="flex items-center gap-2">
+                {/* Auto Updater Indicator */}
+                <UpdaterIndicator />
+
                 {/* Notification bell */}
                 <button className="relative p-2 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer">
                     <Bell className="h-4 w-4" />

@@ -1,7 +1,11 @@
 node_modules/
 out/
 dist/
+release/
+# Vite's temporary copies of the config (electron.vite.config.<timestamp>.mjs)
+electron.vite.config.*.mjs
 prisma/*.db
 prisma/*.db-journal
 assets/db/*.db
 .env
+.next/

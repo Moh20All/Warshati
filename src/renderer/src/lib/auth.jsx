@@ -51,7 +51,8 @@ export function AuthProvider({ children }) {
         loading,
         login,
         logout,
-        isAuthenticated: !!token && !!user
+        isAuthenticated: !!token && !!user,
+        isOwner: user?.role === 'OWNER'
     }
 
     return (

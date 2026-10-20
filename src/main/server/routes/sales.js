@@ -1,20 +1,18 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
+import { nextSaleNumber } from '../lib/numbering.js'
 
 const router = Router()
 router.use(requireAuth)
 
-// Generate sale number: INV-YYYY-NNNN
-async function generateSaleNumber() {
-  const year = new Date().getFullYear()
-  const prefix = `INV-${year}-`
-  const last = await prisma.sale.findFirst({
-    where: { saleNumber: { startsWith: prefix } },
-    orderBy: { saleNumber: 'desc' }
-  })
-  const num = last ? parseInt(last.saleNumber.split('-').pop()) + 1 : 1
-  return `${prefix}${String(num).padStart(4, '0')}`
+// Thrown inside a transaction to roll it back and answer with a 400
+class SaleError extends Error {}
+
+// Generate sale number: INV-YYYY-NNNN (pass the transaction client when inside one)
+export async function generateSaleNumber(db = prisma) {
+  return nextSaleNumber(db)
 }
 
 // GET /api/sales
@@ -31,12 +29,12 @@ router.get('/', async (req, res) => {
     }
     const sales = await prisma.sale.findMany({
       where,
-      include: { customer: true, createdBy: { select: { name: true } }, items: { include: { inventoryItem: true } } },
+      include: { customer: true, createdBy: { select: { name: true } }, items: { include: { inventoryItem: true } }, debtEntry: true, refund: true },
       orderBy: { createdAt: 'desc' }
     })
     res.json({ sales })
   } catch (err) {
-    console.error('List sales error:', err)
+    logger.error('List sales error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -61,8 +59,10 @@ router.post('/', async (req, res) => {
     const { customerId, repairTicketId, items, discount, tradeInCredit, paymentMethod, amountPaid, notes } = req.body
 
     if (!items || items.length === 0) return res.status(400).json({ error: 'At least one item is required' })
-
-    const saleNumber = await generateSaleNumber()
+    for (const item of items) {
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) return res.status(400).json({ error: 'Item quantity must be a positive whole number' })
+      if (!(parseFloat(item.unitPrice) >= 0)) return res.status(400).json({ error: 'Item price cannot be negative' })
+    }
 
     // Calculate totals
     let subtotal = 0
@@ -70,7 +70,9 @@ router.post('/', async (req, res) => {
       subtotal += item.unitPrice * item.quantity
     }
     const total = subtotal - (discount || 0) - (tradeInCredit || 0)
-    const paid = amountPaid !== undefined ? parseFloat(amountPaid) : total
+    if (total < 0) return res.status(400).json({ error: 'Discount and trade-in credit cannot exceed the subtotal' })
+    // CREDIT means "pay later": nothing is collected now, whatever the POS sends
+    const paid = paymentMethod === 'CREDIT' ? 0 : (amountPaid !== undefined ? parseFloat(amountPaid) : total)
     const change = Math.max(0, paid - total)
 
     // Determine status
@@ -78,59 +80,137 @@ router.post('/', async (req, res) => {
     if (paymentMethod === 'CREDIT') status = 'CREDIT'
     else if (paymentMethod === 'SPLIT' && paid < total) status = 'CREDIT'
 
-    const sale = await prisma.sale.create({
-      data: {
-        saleNumber,
-        customerId: customerId || null,
-        repairTicketId: repairTicketId || null,
-        createdById: req.user.id,
-        subtotal, discountAmount: discount || 0, tradeInCredit: tradeInCredit || 0,
-        total, amountPaid: Math.min(paid, total), change,
-        paymentMethod: paymentMethod || 'CASH', status,
-        notes: notes || null,
-        items: {
-          create: items.map(item => ({
-            inventoryItemId: item.inventoryItemId || null,
-            description: item.description || item.name,
-            quantity: item.quantity,
-            unitCost: item.unitCost || 0,
-            unitPrice: item.unitPrice,
-            subtotal: item.unitPrice * item.quantity
-          }))
-        }
-      },
-      include: { customer: true, items: { include: { inventoryItem: true } } }
-    })
+    if (status === 'CREDIT' && !customerId) {
+      return res.status(400).json({ error: 'A customer is required for credit sales' })
+    }
+    // A cash sale paid short would silently lose the rest: it must be a Split sale (rest becomes a debt)
+    if (status === 'COMPLETED' && paid < total - 0.001) {
+      return res.status(400).json({ error: 'The amount paid is less than the total. Use Split to record the rest as a debt.' })
+    }
+    if (!(paid >= 0)) return res.status(400).json({ error: 'The amount paid cannot be negative' })
 
-    // Decrement inventory quantities
-    for (const item of items) {
-      if (item.inventoryItemId) {
-        await prisma.inventoryItem.update({
+    // Sale, stock decrement and debt are saved together or not at all
+    const sale = await prisma.$transaction(async (tx) => {
+      // Stock check: refuse to sell more than is on hand
+      for (const item of items) {
+        if (!item.inventoryItemId) continue
+        const stock = await tx.inventoryItem.findUnique({ where: { id: item.inventoryItemId } })
+        if (!stock || !stock.isActive) throw new SaleError(`Item not found: ${item.description || item.name}`)
+        if (stock.quantity < item.quantity) {
+          throw new SaleError(`Not enough stock for ${stock.name} (available: ${stock.quantity})`)
+        }
+        await tx.inventoryItem.update({
           where: { id: item.inventoryItemId },
           data: { quantity: { decrement: item.quantity } }
         })
       }
-    }
 
-    // Auto-create debt if credit/split
-    if (status === 'CREDIT' || (paymentMethod === 'SPLIT' && paid < total)) {
-      const debtAmount = total - Math.min(paid, total)
-      await prisma.debtEntry.create({
+      const created = await tx.sale.create({
         data: {
-          customerId: customerId,
-          saleId: sale.id,
-          type: 'SALE_CREDIT',
-          totalAmount: debtAmount,
-          paidAmount: 0,
-          remaining: debtAmount,
-          status: 'OPEN'
-        }
+          saleNumber: await generateSaleNumber(tx),
+          customerId: customerId || null,
+          repairTicketId: repairTicketId || null,
+          createdById: req.user.id,
+          subtotal, discountAmount: discount || 0, tradeInCredit: tradeInCredit || 0,
+          total, amountPaid: Math.min(paid, total), change,
+          paymentMethod: paymentMethod || 'CASH', status,
+          notes: notes || null,
+          items: {
+            create: items.map(item => ({
+              inventoryItemId: item.inventoryItemId || null,
+              description: item.description || item.name,
+              quantity: item.quantity,
+              unitCost: item.unitCost || 0,
+              unitPrice: item.unitPrice,
+              subtotal: item.unitPrice * item.quantity,
+              warrantyDays: item.warrantyDays || 0
+            }))
+          }
+        },
+        include: { customer: true, items: { include: { inventoryItem: true } } }
       })
-    }
+
+      // Auto-create debt if credit/split
+      if (status === 'CREDIT') {
+        const debtAmount = total - Math.min(paid, total)
+        await tx.debtEntry.create({
+          data: {
+            customerId,
+            saleId: created.id,
+            type: 'SALE_CREDIT',
+            totalAmount: debtAmount,
+            paidAmount: 0,
+            remaining: debtAmount,
+            status: 'OPEN'
+          }
+        })
+      }
+
+      return created
+    })
 
     res.status(201).json({ sale })
   } catch (err) {
-    console.error('Create sale error:', err)
+    if (err instanceof SaleError) return res.status(400).json({ error: err.message })
+    logger.error('Create sale error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/sales/:id/refund — full refund (owner only): items back in stock, money handed back
+router.post('/:id/refund', requireRole('OWNER'), async (req, res) => {
+  try {
+    const sale = await prisma.sale.findUnique({
+      where: { id: req.params.id },
+      include: { items: true, debtEntry: true, refund: true }
+    })
+    if (!sale) return res.status(404).json({ error: 'Sale not found' })
+    if (sale.status === 'REFUNDED' || sale.refund) return res.status(400).json({ error: 'This sale is already refunded' })
+    if (sale.repairTicketId) return res.status(400).json({ error: 'Repair invoices cannot be refunded here. Use a warranty claim instead.' })
+
+    // Everything the customer actually paid: at the till plus any later debt payments
+    const debtPaid = sale.debtEntry ? parseFloat(sale.debtEntry.paidAmount) : 0
+    const amount = parseFloat(sale.amountPaid) + debtPaid
+    const cost = sale.items.reduce((s, i) => s + parseFloat(i.unitCost || 0) * i.quantity, 0)
+
+    const updated = await prisma.$transaction(async (tx) => {
+      for (const item of sale.items) {
+        if (!item.inventoryItemId) continue
+        await tx.inventoryItem.update({
+          where: { id: item.inventoryItemId },
+          data: { quantity: { increment: item.quantity } }
+        })
+      }
+
+      // Nothing more is owed on a refunded sale
+      if (sale.debtEntry && sale.debtEntry.status !== 'SETTLED') {
+        await tx.debtEntry.update({
+          where: { id: sale.debtEntry.id },
+          data: { remaining: 0, status: 'SETTLED', notes: `Closed by refund of ${sale.saleNumber}` }
+        })
+      }
+
+      await tx.refund.create({
+        data: {
+          saleId: sale.id,
+          amount,
+          revenue: parseFloat(sale.total),
+          cost,
+          reason: req.body.reason || null,
+          createdById: req.user.id
+        }
+      })
+
+      return tx.sale.update({
+        where: { id: sale.id },
+        data: { status: 'REFUNDED' },
+        include: { customer: true, items: { include: { inventoryItem: true } }, debtEntry: true, refund: true }
+      })
+    })
+
+    res.json({ sale: updated, refundedAmount: amount })
+  } catch (err) {
+    logger.error('Refund sale error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

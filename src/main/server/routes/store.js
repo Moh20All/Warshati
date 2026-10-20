@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
+import logger from '../lib/logger.js'
 
 const router = Router()
 
@@ -10,8 +11,8 @@ router.get('/status', async (_req, res) => {
         const storeCount = await prisma.store.count()
         res.json({ needsSetup: storeCount === 0 })
     } catch (err) {
-        console.error('[Raw Prisma Error in /api/store/status]:', err)
-        res.status(500).json({ error: 'Internal server error', details: err.message })
+        logger.error('[Raw Prisma Error in /api/store/status]:', err)
+        res.status(500).json({ error: 'Internal server error' })
     }
 })
 
@@ -24,7 +25,7 @@ router.get('/', requireAuth, async (_req, res) => {
         }
         res.json({ store })
     } catch (err) {
-        console.error('Get store error:', err)
+        logger.error('Get store error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })
@@ -53,7 +54,7 @@ router.put('/', requireAuth, requireRole('OWNER'), async (req, res) => {
 
         res.json({ store: updated })
     } catch (err) {
-        console.error('Update store error:', err)
+        logger.error('Update store error:', err)
         res.status(500).json({ error: 'Internal server error' })
     }
 })

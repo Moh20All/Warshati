@@ -17,6 +17,31 @@ model LocalLicense {
   key         String   @unique
   machineId   String
   activatedAt DateTime @default(now())
+  lastValidatedAt DateTime? // last successful online check; drives the offline grace period
+}
+
+// ─────────────────────────────────────────
+// DEVICE CATALOG (bundled list + devices the shop typed by hand)
+// ─────────────────────────────────────────
+model DeviceCatalog {
+  id        String   @id @default(cuid())
+  category  String   // PHONE | LAPTOP | CONSOLE
+  brand     String
+  model     String
+  specs     String   @default("{}") // JSON
+  imageUrl  String?  // where the image can be downloaded from
+  imageFile String?  // downloaded image, relative to the catalog images folder
+  isCustom  Boolean  @default(false) // typed by hand in this shop; never replaced by catalog updates
+  createdAt DateTime @default(now())
+
+  @@unique([category, brand, model])
+  @@index([category, brand])
+}
+
+// Small key/value settings (e.g. installed catalog version)
+model AppMeta {
+  key   String @id
+  value String
 }
 
 // ─────────────────────────────────────────
@@ -47,6 +72,7 @@ model User {
   tickets      RepairTicket[]
   sales        Sale[]
   expenses     Expense[]
+  refunds      Refund[]
 }
 
 enum Role {
@@ -83,6 +109,7 @@ enum DebtType {
   REPAIR_CREDIT
   SALE_CREDIT
   PARTIAL_PAYMENT
+  OPENING_BALANCE // owed before the shop started using Rakam (entered by hand)
 }
 
 enum DebtStatus {
@@ -120,9 +147,10 @@ model DebtPayment {
   id          String    @id @default(cuid())
   debtEntryId String
   debtEntry   DebtEntry @relation(fields: [debtEntryId], references: [id])
-  amount      Decimal
+  amount      Decimal   // negative for a cancelling entry
   paidAt      DateTime  @default(now())
   notes       String?
+  reversalOf  String?   // id of the payment this entry cancels
 }
 
 // ─────────────────────────────────────────
@@ -201,9 +229,10 @@ model SupplierDebtPayment {
   id             String       @id @default(cuid())
   supplierDebtId String
   supplierDebt   SupplierDebt @relation(fields: [supplierDebtId], references: [id])
-  amount         Decimal
+  amount         Decimal      // negative for a cancelling entry
   paidAt         DateTime     @default(now())
   notes          String?
+  reversalOf     String?      // id of the payment this entry cancels
 }
 
 // ─────────────────────────────────────────
@@ -232,12 +261,14 @@ model InventoryItem {
   buyPrice    Decimal
   sellPrice   Decimal
   lowStockAt  Int           @default(3)
+  warrantyDays Int          @default(0)
   isActive    Boolean       @default(true)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
   saleItems         SaleItem[]
   purchaseOrderItems PurchaseOrderItem[]
+  repairParts       RepairPart[]
   tradeInSource     TradeIn?  @relation("TradeInToInventory")
 
   @@index([type])
@@ -328,6 +359,8 @@ model RepairTicket {
   deliveredAt    DateTime?
   updatedAt      DateTime     @updatedAt
 
+  deposits       RepairDeposit[]
+  parts          RepairPart[]
   warrantyClaims WarrantyClaim[] @relation("TicketWarrantyClaims")
   warrantyClaimNewTicket WarrantyClaim? @relation("ClaimNewTicket")
   debtEntry      DebtEntry?
@@ -336,6 +369,31 @@ model RepairTicket {
   @@index([status])
   @@index([ticketNumber])
   @@index([imei])
+}
+
+// Cash received (or refunded, negative) as a repair deposit, dated for the daily close
+model RepairDeposit {
+  id             String       @id @default(cuid())
+  repairTicketId String
+  repairTicket   RepairTicket @relation(fields: [repairTicketId], references: [id])
+  amount         Decimal
+  paidAt         DateTime     @default(now())
+
+  @@index([paidAt])
+}
+
+// Part taken from stock for a repair; its cost is added to the ticket's partsCost
+model RepairPart {
+  id              String        @id @default(cuid())
+  repairTicketId  String
+  repairTicket    RepairTicket  @relation(fields: [repairTicketId], references: [id])
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  quantity        Int
+  unitCost        Decimal
+  createdAt       DateTime      @default(now())
+
+  @@index([repairTicketId])
 }
 
 // ─────────────────────────────────────────
@@ -390,6 +448,7 @@ model TradeIn {
   conditionNotes  String?
 
   appraisedValue  Decimal
+  payoutMethod    String            @default("CASH") // CASH = paid out of the drawer, STORE_CREDIT = deducted from a sale
   status          TradeInStatus     @default(APPRAISED)
 
   inventoryItemId String?           @unique
@@ -437,6 +496,7 @@ model Sale {
   amountPaid    Decimal
   change        Decimal       @default(0)
   creditAmount  Decimal       @default(0)
+  depositApplied Decimal      @default(0) // part of amountPaid that was a repair deposit collected earlier
 
   repairTicketId String?      @unique
   repairTicket  RepairTicket? @relation(fields: [repairTicketId], references: [id])
@@ -444,6 +504,7 @@ model Sale {
   items         SaleItem[]
   tradeIns      TradeIn[]
   debtEntry     DebtEntry?
+  refund        Refund?
 
   notes         String?
   createdAt     DateTime      @default(now())
@@ -464,6 +525,23 @@ model SaleItem {
   unitCost        Decimal        @default(0)
   unitPrice       Decimal
   subtotal        Decimal
+  warrantyDays    Int           @default(0)
+}
+
+// Full refund of a sale, counted on the day it happens (the original sale stays on its own day)
+model Refund {
+  id          String   @id @default(cuid())
+  saleId      String   @unique
+  sale        Sale     @relation(fields: [saleId], references: [id])
+  amount      Decimal  // money handed back to the customer
+  revenue     Decimal  // sale total reversed
+  cost        Decimal  // cost of the items put back in stock
+  reason      String?
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // ─────────────────────────────────────────

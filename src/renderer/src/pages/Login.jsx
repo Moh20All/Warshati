@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../lib/auth'
 import { Wrench, Mail, Lock } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
 export default function Login() {
+    const { t } = useTranslation()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -38,13 +40,13 @@ export default function Login() {
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">RAKAM</h1>
                     <p className="text-sm font-semibold text-accent mt-0">رقم</p>
-                    <p className="text-sm text-muted-foreground mt-1">Know your numbers. Own your day.</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t('auth.slogan')}</p>
                 </div>
 
                 {/* Login Card */}
                 <div className="border border-border rounded-lg bg-card p-6">
-                    <h2 className="text-lg font-semibold text-foreground mb-1">Welcome back</h2>
-                    <p className="text-sm text-muted-foreground mb-6">Sign in to your account</p>
+                    <h2 className="text-lg font-semibold text-foreground mb-1">{t('auth.login_title')}</h2>
+                    <p className="text-sm text-muted-foreground mb-6">{t('auth.login_subtitle')}</p>
 
                     {error && (
                         <div className="mb-4 px-3 py-2 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
@@ -54,7 +56,7 @@ export default function Login() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <Input
-                            label="Email"
+                            label={t('auth.email')}
                             type="email"
                             placeholder="admin@rakam.app"
                             value={email}
@@ -63,7 +65,7 @@ export default function Login() {
                             required
                         />
                         <Input
-                            label="Password"
+                            label={t('auth.password')}
                             type="password"
                             placeholder="••••••••"
                             value={password}
@@ -72,7 +74,7 @@ export default function Login() {
                             required
                         />
                         <Button type="submit" className="w-full" loading={loading}>
-                            Sign In
+                            {t('auth.sign_in')}
                         </Button>
                     </form>
                 </div>

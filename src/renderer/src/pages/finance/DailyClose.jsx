@@ -1,16 +1,23 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle, Printer } from 'lucide-react'
 import api from '../../lib/api'
+import { useCurrency } from '../../lib/currency'
+import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
+import ExportButton from '../../components/ExportButton'
 
 export default function DailyClosePage() {
+  const cur = useCurrency()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const print = usePrint()
   const [showConfirm, setShowConfirm] = useState(false)
 
   const { data: preview } = useQuery({
@@ -29,39 +36,89 @@ export default function DailyClosePage() {
       queryClient.invalidateQueries({ queryKey: ['daily-closes'] })
       queryClient.invalidateQueries({ queryKey: ['daily-close-preview'] })
       setShowConfirm(false)
-      toast.success('Day closed successfully!')
+      toast.success(t('finance.daily_close.success'))
     },
-    onError: (err) => toast.error(err.response?.data?.error || 'Close failed')
+    onError: (err) => toast.error(err.response?.data?.error || t('finance.daily_close.err_failed'))
   })
 
+  // Get store info for branding
+  const { data: store } = useQuery({
+    queryKey: ['store'],
+    queryFn: () => api.get('/store').then(r => r.data.store)
+  })
+
+  const printDailyReport = () => {
+    if (!preview) return
+    const dir = i18n.dir()
+    const storeName = store?.name || 'Rakam — رقم'
+    
+    const html = `
+      <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">
+        <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+          <h1 style="margin:0; font-size:24px;">${storeName}</h1>
+          <h2 style="margin:5px 0 0 0; font-size:18px; color: #666;">DAILY X-REPORT / تقرير Daily Close</h2>
+          <p style="margin:5px 0 0 0; font-size:14px;">Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+          ${stats.map(s => `
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
+              <div style="font-size: 12px; color: #666; margin-bottom: 5px; text-transform: uppercase;">${s.label}</div>
+              <div style="font-size: 20px; font-weight: bold;">${s.value}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="margin-top: 50px;">
+          <div style="display:flex; justify-content:space-between; border-top: 1px solid #ddd; padding-top: 10px;">
+            <div style="text-align:center; width: 45%;">
+              <p style="margin-bottom: 40px;">Manager Signature</p>
+              <div style="border-bottom: 1px solid #000; width: 100%;"></div>
+            </div>
+            <div style="text-align:center; width: 45%;">
+              <p style="margin-bottom: 40px;">Cashier Signature</p>
+              <div style="border-bottom: 1px solid #000; width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+    print.print(html, 'report')
+  }
+
   const stats = [
-    { label: 'Total Revenue', value: `${(preview?.totalRevenue || 0).toLocaleString()} DZD`, icon: TrendingUp, color: 'text-success' },
-    { label: 'Cash Sales', value: `${(preview?.cashSales || 0).toLocaleString()} DZD`, icon: DollarSign, color: 'text-info' },
-    { label: 'Credit Sales', value: `${(preview?.totalCreditSales || 0).toLocaleString()} DZD`, icon: CreditCard, color: 'text-warning' },
-    { label: 'Debt Collected', value: `${(preview?.totalDebtCollected || 0).toLocaleString()} DZD`, icon: Receipt, color: 'text-primary' },
-    { label: 'Expenses', value: `${(preview?.totalExpenses || 0).toLocaleString()} DZD`, icon: AlertTriangle, color: 'text-destructive' },
-    { label: 'Net Cash', value: `${(preview?.netCash || 0).toLocaleString()} DZD`, icon: DollarSign, color: preview?.netCash >= 0 ? 'text-success' : 'text-destructive' }
+    { label: t('finance.daily_close.stat_revenue'), value: `${(preview?.totalRevenue || 0).toLocaleString()} ${cur}`, icon: TrendingUp, color: 'text-success' },
+    { label: t('finance.daily_close.stat_cash_sales'), value: `${(preview?.cashSales || 0).toLocaleString()} ${cur}`, icon: DollarSign, color: 'text-info' },
+    { label: t('finance.daily_close.stat_credit_sales'), value: `${(preview?.totalCreditSales || 0).toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning' },
+    { label: t('finance.daily_close.stat_debt_collected'), value: `${(preview?.totalDebtCollected || 0).toLocaleString()} ${cur}`, icon: Receipt, color: 'text-primary' },
+    { label: t('finance.daily_close.stat_expenses'), value: `${(preview?.totalExpenses || 0).toLocaleString()} ${cur}`, icon: AlertTriangle, color: 'text-destructive' },
+    { label: t('finance.daily_close.stat_net_cash'), value: `${(preview?.netCash || 0).toLocaleString()} ${cur}`, icon: DollarSign, color: preview?.netCash >= 0 ? 'text-success' : 'text-destructive' }
   ]
 
   const historyColumns = [
-    { key: 'date', label: 'Date', render: (v) => new Date(v).toLocaleDateString() },
-    { key: 'totalRevenue', label: 'Revenue', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'totalExpenses', label: 'Expenses', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'totalDebtCollected', label: 'Debt Collected', render: (v) => `${Number(v).toLocaleString()} DZD` },
-    { key: 'netCash', label: 'Net Cash', render: (v) => <span className={`font-medium ${Number(v) >= 0 ? 'text-success' : 'text-destructive'}`}>{Number(v).toLocaleString()} DZD</span> },
-    { key: 'openTickets', label: 'Open Tickets', render: (v) => v },
-    { key: 'lowStockCount', label: 'Low Stock', render: (v) => v > 0 ? <Badge color="warning">{v}</Badge> : '0' }
+    { key: 'date', label: t('finance.daily_close.col_date'), render: (v) => new Date(v).toLocaleDateString() },
+    { key: 'totalRevenue', label: t('finance.daily_close.col_revenue'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'totalExpenses', label: t('finance.daily_close.col_expenses'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'totalDebtCollected', label: t('finance.daily_close.col_debt'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
+    { key: 'netCash', label: t('finance.daily_close.col_net'), render: (v) => <span className={`font-medium ${Number(v) >= 0 ? 'text-success' : 'text-destructive'}`}>{Number(v).toLocaleString()} {cur}</span> },
+    { key: 'openTickets', label: t('finance.daily_close.col_tickets'), render: (v) => v },
+    { key: 'lowStockCount', label: t('finance.daily_close.col_low_stock'), render: (v) => v > 0 ? <Badge color="warning">{v}</Badge> : '0' }
   ]
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">Daily Close</h1><p className="text-sm text-muted-foreground mt-1">End-of-day summary</p></div>
-        {!preview?.alreadyClosed ? (
-          <Button onClick={() => setShowConfirm(true)}><CalendarCheck className="h-4 w-4" /> Close Today</Button>
-        ) : (
-          <Badge color="success">Today is already closed</Badge>
-        )}
+        <div><h1 className="text-2xl font-bold text-foreground">{t('finance.daily_close.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.daily_close.subtitle')}</p></div>
+        <div className="flex gap-2">
+          {preview && (
+            <Button variant="outline" onClick={printDailyReport}><Printer className="h-4 w-4" /> {t('common.print', 'Print Report')}</Button>
+          )}
+          {!preview?.alreadyClosed ? (
+            <Button onClick={() => setShowConfirm(true)}><CalendarCheck className="h-4 w-4" /> {t('finance.daily_close.btn_close')}</Button>
+          ) : (
+            <Badge color="success" className="py-2.5 px-4">{t('finance.daily_close.already_closed')}</Badge>
+          )}
+        </div>
       </div>
 
       {/* Today's Preview */}
@@ -78,12 +135,24 @@ export default function DailyClosePage() {
       </div>
 
       {/* History */}
-      <h3 className="text-lg font-semibold text-foreground mb-3">Close History</h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-foreground">{t('finance.daily_close.history_title')}</h3>
+        <ExportButton fileName="rakam-daily-closes" sheetName={t('finance.daily_close.title')} rows={history || []} columns={[
+          { header: t('finance.daily_close.col_date'), key: 'date', type: 'date' },
+          { header: `${t('finance.daily_close.col_revenue')} (${cur})`, key: 'totalRevenue', type: 'money', width: 16 },
+          { header: `${t('finance.daily_close.stat_credit_sales')} (${cur})`, key: 'totalCreditSales', type: 'money', width: 16 },
+          { header: `${t('finance.daily_close.col_debt')} (${cur})`, key: 'totalDebtCollected', type: 'money', width: 16 },
+          { header: `${t('finance.daily_close.col_expenses')} (${cur})`, key: 'totalExpenses', type: 'money', width: 16 },
+          { header: `${t('finance.daily_close.col_net')} (${cur})`, key: 'netCash', type: 'money', width: 16 },
+          { header: t('finance.daily_close.col_tickets'), key: 'openTickets', type: 'number' },
+          { header: t('finance.daily_close.col_low_stock'), key: 'lowStockCount', type: 'number' }
+        ]} />
+      </div>
       {isLoading ? <div className="text-center py-8 text-sm text-muted-foreground">Loading...</div>
-        : <Table columns={historyColumns} data={history || []} emptyTitle="No closes yet" emptyDescription="Close your first day." />}
+        : <Table columns={historyColumns} data={history || []} emptyTitle={t('finance.daily_close.empty_title')} emptyDescription={t('finance.daily_close.empty_desc')} />}
 
       <ConfirmModal open={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={() => closeMutation.mutate()}
-        title="Close Today?" message="This will create an immutable snapshot of today's financial summary. Make sure all transactions are entered." confirmText="Close Day" loading={closeMutation.isPending} />
+        title={t('finance.daily_close.modal_title')} message={t('finance.daily_close.modal_msg')} confirmText={t('finance.daily_close.btn_confirm')} loading={closeMutation.isPending} />
     </div>
   )
 }

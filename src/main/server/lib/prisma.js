@@ -4,7 +4,7 @@ import path from 'path'
 import fs from 'fs'
 
 const isDev = !app.isPackaged
-const dbPath = isDev
+export const dbPath = isDev
   ? path.join(process.cwd(), 'prisma', 'rakam.db')
   : path.join(app.getPath('userData'), 'rakam.db')
 
@@ -42,6 +42,174 @@ export async function initPrisma() {
         logToDisk(`DB file exists. Validating schema...`);
         const tables = await prisma.$queryRaw`SELECT count(*) as count FROM sqlite_schema WHERE type='table' AND name='Store'`;
         
+async function applyMigrations(prismaDb) {
+  try {
+    logToDisk('Checking schema for missing columns...');
+    
+    // Check Store
+    const storeInfo = await prismaDb.$queryRaw`PRAGMA table_info(Store)`;
+    if (!storeInfo.some(col => col.name === 'warrantyDays')) {
+      logToDisk('Migrating Store table: adding warrantyDays');
+      await prismaDb.$executeRaw`ALTER TABLE Store ADD COLUMN warrantyDays INTEGER NOT NULL DEFAULT 30`;
+    }
+
+    // Check InventoryItem
+    const invInfo = await prismaDb.$queryRaw`PRAGMA table_info(InventoryItem)`;
+    if (!invInfo.some(col => col.name === 'warrantyDays')) {
+      logToDisk('Migrating InventoryItem table: adding warrantyDays');
+      await prismaDb.$executeRaw`ALTER TABLE InventoryItem ADD COLUMN warrantyDays INTEGER NOT NULL DEFAULT 0`;
+    }
+
+    // Check RepairTicket
+    const ticketInfo = await prismaDb.$queryRaw`PRAGMA table_info(RepairTicket)`;
+    if (!ticketInfo.some(col => col.name === 'warrantyDays')) {
+      logToDisk('Migrating RepairTicket table: adding warrantyDays');
+      await prismaDb.$executeRaw`ALTER TABLE RepairTicket ADD COLUMN warrantyDays INTEGER NOT NULL DEFAULT 30`;
+    }
+
+    // Check SaleItem
+    const saleItemInfo = await prismaDb.$queryRaw`PRAGMA table_info(SaleItem)`;
+    if (!saleItemInfo.some(col => col.name === 'warrantyDays')) {
+      logToDisk('Migrating SaleItem table: adding warrantyDays');
+      await prismaDb.$executeRaw`ALTER TABLE SaleItem ADD COLUMN warrantyDays INTEGER NOT NULL DEFAULT 0`;
+    }
+
+    // v1.5: deposit applied to repair invoices
+    const saleInfo = await prismaDb.$queryRaw`PRAGMA table_info(Sale)`;
+    if (!saleInfo.some(col => col.name === 'depositApplied')) {
+      logToDisk('Migrating Sale table: adding depositApplied');
+      await prismaDb.$executeRaw`ALTER TABLE Sale ADD COLUMN depositApplied DECIMAL NOT NULL DEFAULT 0`;
+    }
+
+    // v1.5: trade-in payout method
+    const tradeInInfo = await prismaDb.$queryRaw`PRAGMA table_info(TradeIn)`;
+    if (!tradeInInfo.some(col => col.name === 'payoutMethod')) {
+      logToDisk('Migrating TradeIn table: adding payoutMethod');
+      await prismaDb.$executeRaw`ALTER TABLE TradeIn ADD COLUMN payoutMethod TEXT NOT NULL DEFAULT 'CASH'`;
+    }
+
+    // v1.5: dated repair deposits (backfilled from existing tickets on their received date)
+    const depositTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='RepairDeposit'`;
+    if (depositTable.length === 0) {
+      logToDisk('Migrating: creating RepairDeposit table');
+      await prismaDb.$executeRawUnsafe(`CREATE TABLE "RepairDeposit" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "repairTicketId" TEXT NOT NULL,
+    "amount" DECIMAL NOT NULL,
+    "paidAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "RepairDeposit_repairTicketId_fkey" FOREIGN KEY ("repairTicketId") REFERENCES "RepairTicket" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+)`);
+      await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairDeposit_paidAt_idx" ON "RepairDeposit"("paidAt")`);
+      await prismaDb.$executeRawUnsafe(`INSERT INTO "RepairDeposit" ("id", "repairTicketId", "amount", "paidAt")
+        SELECT 'mig' || lower(hex(randomblob(10))), "id", "deposit", "receivedAt" FROM "RepairTicket" WHERE "deposit" > 0`);
+    }
+
+    // v1.5: refunds
+    const refundTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='Refund'`;
+    if (refundTable.length === 0) {
+      logToDisk('Migrating: creating Refund table');
+      await prismaDb.$executeRawUnsafe(`CREATE TABLE "Refund" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "saleId" TEXT NOT NULL,
+    "amount" DECIMAL NOT NULL,
+    "revenue" DECIMAL NOT NULL,
+    "cost" DECIMAL NOT NULL,
+    "reason" TEXT,
+    "createdById" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Refund_saleId_fkey" FOREIGN KEY ("saleId") REFERENCES "Sale" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Refund_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+)`);
+      await prismaDb.$executeRawUnsafe(`CREATE UNIQUE INDEX "Refund_saleId_key" ON "Refund"("saleId")`);
+      await prismaDb.$executeRawUnsafe(`CREATE INDEX "Refund_createdAt_idx" ON "Refund"("createdAt")`);
+    }
+
+    // v1.5: license offline grace period (very old databases have no LocalLicense table at all).
+    // Own try/catch so a problem here can never skip the steps after it.
+    try {
+      const licenseInfo = await prismaDb.$queryRaw`PRAGMA table_info(LocalLicense)`;
+      if (licenseInfo.length === 0) {
+        logToDisk('Migrating: creating LocalLicense table');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "LocalLicense" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "key" TEXT NOT NULL,
+    "machineId" TEXT NOT NULL,
+    "activatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lastValidatedAt" DATETIME
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE UNIQUE INDEX "LocalLicense_key_key" ON "LocalLicense"("key")`);
+      } else if (!licenseInfo.some(col => col.name === 'lastValidatedAt')) {
+        logToDisk('Migrating LocalLicense table: adding lastValidatedAt');
+        await prismaDb.$executeRaw`ALTER TABLE LocalLicense ADD COLUMN lastValidatedAt DATETIME`;
+      }
+    } catch (err) {
+      logToDisk(`LocalLicense migration failed: ${err.message}`);
+    }
+
+    // v1.6: cancelling entries for debt payments (own try/catch: never blocks later steps)
+    try {
+      for (const table of ['DebtPayment', 'SupplierDebtPayment']) {
+        const info = await prismaDb.$queryRawUnsafe(`PRAGMA table_info("${table}")`);
+        if (info.length && !info.some(col => col.name === 'reversalOf')) {
+          logToDisk(`Migrating ${table} table: adding reversalOf`);
+          await prismaDb.$executeRawUnsafe(`ALTER TABLE "${table}" ADD COLUMN "reversalOf" TEXT`);
+        }
+      }
+    } catch (err) {
+      logToDisk(`Payment reversal migration failed: ${err.message}`);
+    }
+
+    // v1.6: device catalog + key/value settings (own try/catch: never blocks later steps)
+    try {
+      const catalogTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='DeviceCatalog'`;
+      if (catalogTable.length === 0) {
+        logToDisk('Migrating: creating DeviceCatalog table');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "DeviceCatalog" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "category" TEXT NOT NULL,
+    "brand" TEXT NOT NULL,
+    "model" TEXT NOT NULL,
+    "specs" TEXT NOT NULL DEFAULT '{}',
+    "imageUrl" TEXT,
+    "imageFile" TEXT,
+    "isCustom" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE INDEX "DeviceCatalog_category_brand_idx" ON "DeviceCatalog"("category", "brand")`);
+        await prismaDb.$executeRawUnsafe(`CREATE UNIQUE INDEX "DeviceCatalog_category_brand_model_key" ON "DeviceCatalog"("category", "brand", "model")`);
+      }
+      const metaTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='AppMeta'`;
+      if (metaTable.length === 0) {
+        logToDisk('Migrating: creating AppMeta table');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "AppMeta" ("key" TEXT NOT NULL PRIMARY KEY, "value" TEXT NOT NULL)`);
+      }
+    } catch (err) {
+      logToDisk(`Catalog migration failed: ${err.message}`);
+    }
+
+    // v1.5: parts taken from stock for repairs
+    const partTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='RepairPart'`;
+    if (partTable.length === 0) {
+      logToDisk('Migrating: creating RepairPart table');
+      await prismaDb.$executeRawUnsafe(`CREATE TABLE "RepairPart" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "repairTicketId" TEXT NOT NULL,
+    "inventoryItemId" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "unitCost" DECIMAL NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "RepairPart_repairTicketId_fkey" FOREIGN KEY ("repairTicketId") REFERENCES "RepairTicket" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "RepairPart_inventoryItemId_fkey" FOREIGN KEY ("inventoryItemId") REFERENCES "InventoryItem" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+)`);
+      await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairPart_repairTicketId_idx" ON "RepairPart"("repairTicketId")`);
+    }
+
+    logToDisk('Schema migrations completed.');
+  } catch (err) {
+    logToDisk(`Migration failed: ${err.message}`);
+  }
+}
+
         // Prisma $queryRaw returns BigInts sometimes, or standard numbers. 
         // We just check if the array has a result and if it's > 0
         if (!tables || tables.length === 0 || Number(tables[0].count) === 0) {
@@ -49,6 +217,7 @@ export async function initPrisma() {
           needsCopy = true;
         } else {
           logToDisk(`Database validation successful: Tables exist.`);
+          await applyMigrations(prisma);
         }
       } catch (err) {
         logToDisk(`Validation query crashed: ${err.message}. Assuming corrupted database. Will overwrite with template.`);

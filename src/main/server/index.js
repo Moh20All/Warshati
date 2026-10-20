@@ -16,12 +16,24 @@ import expenseRoutes from './routes/expenses.js'
 import warrantyRoutes from './routes/warranty.js'
 import tradeInRoutes from './routes/trade-ins.js'
 import dailyCloseRoutes from './routes/daily-close.js'
+import reportRoutes from './routes/reports.js'
+import catalogRoutes from './routes/catalog.js'
+import { syncCatalog } from './lib/catalog.js'
+import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
 const app = express()
 const PORT = 3456
+const HOST = '127.0.0.1' // local only — never expose the API to the shop network
 
 app.use(cors())
 app.use(express.json())
+
+// Only the Rakam window knows this launch's key; any other caller (e.g. a web page) is refused
+app.use('/api', (req, res, next) => {
+    if (req.path === '/health') return next()
+    if (req.get(SESSION_HEADER) !== SESSION_KEY) return res.status(403).json({ error: 'Forbidden' })
+    next()
+})
 
 // Routes
 app.use('/api/auth', authRoutes)
@@ -40,6 +52,8 @@ app.use('/api/expenses', expenseRoutes)
 app.use('/api/warranty', warrantyRoutes)
 app.use('/api/trade-ins', tradeInRoutes)
 app.use('/api/daily-close', dailyCloseRoutes)
+app.use('/api/reports', reportRoutes)
+app.use('/api/catalog', catalogRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -59,33 +73,41 @@ app.use((err, req, res, next) => {
     try {
         const logPath = path.join(electronApp.getPath('userData'), 'rakam-error.log');
         fs.appendFileSync(logPath, errorLog);
-        console.error(errorLog);
+        logger.error(errorLog);
     } catch (e) {
-        console.error("Failed to write to log file:", e);
+        logger.error("Failed to write to log file:", e);
     }
 
-    res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    res.status(500).json({ error: 'Internal Server Error' });
 })
 
-import { initPrisma } from './lib/prisma.js'
+import prisma, { initPrisma } from './lib/prisma.js'
+import logger from './lib/logger.js'
 
 export async function startServer() {
     try {
         await initPrisma()
     } catch (dbErr) {
-        console.error('Failed to initialize or validate Prisma database on startup', dbErr)
+        logger.error('Failed to initialize or validate Prisma database on startup', dbErr)
         throw dbErr
     }
 
+    // Load the bundled device catalog when its version changed (a failure never blocks startup)
+    try {
+        await syncCatalog(prisma)
+    } catch (err) {
+        logger.error('Device catalog sync failed', err)
+    }
+
     return new Promise((resolve, reject) => {
-        const server = app.listen(PORT, () => {
-            console.log(`Rakam API running on http://localhost:${PORT}`)
+        const server = app.listen(PORT, HOST, () => {
+            logger.info(`Rakam API running on http://${HOST}:${PORT}`)
             resolve(server)
         })
 
         server.on('error', (err) => {
             if (err.code === 'EADDRINUSE') {
-                console.error(`Port ${PORT} is already in use. Is another instance running?`)
+                logger.error(`Port ${PORT} is already in use. Is another instance running?`)
                 reject(new Error(`Port ${PORT} is already in use. Please close any other running instances or development servers of Rakam.`))
             } else {
                 reject(err)

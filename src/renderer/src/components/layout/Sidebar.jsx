@@ -1,60 +1,72 @@
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Wrench, ShoppingCart, DollarSign, Settings,
   ClipboardList, Ticket, Shield, ArrowLeftRight,
   Receipt, CreditCard, BookOpen, FileWarning,
   CalendarCheck, Store, Users, Database,
   ChevronLeft, ChevronRight, LayoutDashboard,
-  Contact, Package
+  Contact, Package, BarChart3, Info,
+  MessageSquarePlus, Smartphone
 } from 'lucide-react'
 import { useState } from 'react'
+import FeedbackModal from '../FeedbackModal'
+import { useAuth } from '../../lib/auth'
 
-const navigation = [
-  {
-    group: 'Main',
-    items: [
-      { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-      { name: 'Customers', path: '/customers', icon: Contact },
-      { name: 'Inventory', path: '/inventory', icon: Package }
-    ]
-  },
-  {
-    group: 'Repairs',
-    items: [
-      { name: 'Check-In', path: '/repairs/checkin', icon: ClipboardList },
-      { name: 'Tickets', path: '/repairs/tickets', icon: Ticket },
-      { name: 'Warranty', path: '/repairs/warranty', icon: Shield },
-      { name: 'Trade-Ins', path: '/repairs/trade-ins', icon: ArrowLeftRight }
-    ]
-  },
-  {
-    group: 'Sales',
-    items: [
-      { name: 'POS', path: '/sales/pos', icon: ShoppingCart },
-      { name: 'Invoices', path: '/sales/invoices', icon: Receipt }
-    ]
-  },
-  {
-    group: 'Finance',
-    items: [
-      { name: 'Expenses', path: '/finance/expenses', icon: CreditCard },
-      { name: 'Suppliers', path: '/finance/suppliers', icon: BookOpen },
-      { name: 'Debt Ledger', path: '/finance/debts', icon: FileWarning },
-      { name: 'Daily Close', path: '/finance/daily-close', icon: CalendarCheck }
-    ]
-  },
-  {
-    group: 'Settings',
-    items: [
-      { name: 'Store', path: '/settings/store', icon: Store },
-      { name: 'Users', path: '/settings/users', icon: Users },
-      { name: 'Backup', path: '/settings/backup', icon: Database }
-    ]
-  }
-]
 
 export default function Sidebar() {
+  const { t } = useTranslation()
+  const { isOwner } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
+
+  const navigation = [
+    {
+      group: t('navigation.groups.main'),
+      items: [
+        { name: t('navigation.dashboard'), path: '/dashboard', icon: LayoutDashboard },
+        { name: t('navigation.customers'), path: '/customers', icon: Contact },
+        { name: t('navigation.inventory'), path: '/inventory', icon: Package },
+        { name: t('navigation.devices'), path: '/devices', icon: Smartphone }
+      ]
+    },
+    {
+      group: t('navigation.groups.repairs'),
+      items: [
+        { name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList },
+        { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket },
+        { name: t('navigation.warranty'), path: '/repairs/warranty', icon: Shield },
+        { name: t('navigation.trade_ins'), path: '/repairs/trade-ins', icon: ArrowLeftRight }
+      ]
+    },
+    {
+      group: t('navigation.groups.sales'),
+      items: [
+        { name: t('navigation.pos'), path: '/sales/pos', icon: ShoppingCart },
+        { name: t('navigation.invoices'), path: '/sales/invoices', icon: Receipt }
+      ]
+    },
+    {
+      group: t('navigation.groups.finance'),
+      items: [
+        { name: t('navigation.expenses'), path: '/finance/expenses', icon: CreditCard },
+        { name: t('navigation.suppliers'), path: '/finance/suppliers', icon: BookOpen, ownerOnly: true },
+        { name: t('navigation.debt_ledger'), path: '/finance/debts', icon: FileWarning },
+        { name: t('navigation.daily_close'), path: '/finance/daily-close', icon: CalendarCheck },
+        { name: t('navigation.monthly_summary'), path: '/finance/monthly-summary', icon: BarChart3, ownerOnly: true }
+      ]
+    },
+    {
+      group: t('navigation.groups.settings'),
+      items: [
+        { name: t('navigation.store'), path: '/settings/store', icon: Store, ownerOnly: true },
+        { name: t('navigation.users'), path: '/settings/users', icon: Users, ownerOnly: true },
+        { name: t('navigation.backup'), path: '/settings/backup', icon: Database, ownerOnly: true },
+        { name: t('navigation.catalog'), path: '/settings/catalog', icon: Smartphone, ownerOnly: true },
+        { name: t('navigation.about', 'About App'), path: '/settings/about', icon: Info }
+      ]
+    }
+  ].map(section => ({ ...section, items: section.items.filter(i => isOwner || !i.ownerOnly) }))
 
   return (
     <aside className={`flex flex-col h-screen bg-card border-r border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
@@ -77,7 +89,9 @@ export default function Sidebar() {
               <span className="font-bold text-white text-base tracking-wide">RAKAM</span>
               <span className="text-[#c9972b] text-xs font-semibold mb-[2px]">رقم</span>
             </div>
-            <span className="text-muted-foreground text-[10px] uppercase font-medium tracking-wider leading-none">Shop Manager</span>
+            <span className="text-muted-foreground text-[10px] uppercase font-medium tracking-wider leading-none">
+              Shop Manager
+            </span>
           </div>
         )}
       </div>
@@ -113,11 +127,16 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-border p-2 shrink-0">
+      <div className="border-t border-border p-2 shrink-0 space-y-1">
+        <button onClick={() => setShowFeedback(true)} className={`flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`} title={collapsed ? 'Send Feedback' : undefined}>
+          <MessageSquarePlus className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>Send Feedback</span>}
+        </button>
         <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center w-full py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer">
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>
+      <FeedbackModal open={showFeedback} onClose={() => setShowFeedback(false)} />
     </aside>
   )
 }

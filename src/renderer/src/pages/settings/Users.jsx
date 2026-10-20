@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, UserX, UserCheck } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
@@ -10,6 +11,7 @@ import Badge from '../../components/ui/Badge'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
 
 export default function Users() {
+    const { t } = useTranslation()
     const queryClient = useQueryClient()
     const toast = useToast()
     const [showAddModal, setShowAddModal] = useState(false)
@@ -26,10 +28,10 @@ export default function Users() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
             setShowAddModal(false)
-            toast.success('User created successfully')
+            toast.success(t('users.success_created'))
         },
         onError: (err) => {
-            toast.error(err.response?.data?.error || 'Failed to create user')
+            toast.error(err.response?.data?.error || t('users.err_create'))
         }
     })
 
@@ -38,10 +40,10 @@ export default function Users() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
             setEditUser(null)
-            toast.success('User updated successfully')
+            toast.success(t('users.success_updated'))
         },
         onError: (err) => {
-            toast.error(err.response?.data?.error || 'Failed to update user')
+            toast.error(err.response?.data?.error || t('users.err_update'))
         }
     })
 
@@ -50,10 +52,10 @@ export default function Users() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
             setDeleteUser(null)
-            toast.success('User deactivated')
+            toast.success(t('users.success_deactivated'))
         },
         onError: (err) => {
-            toast.error(err.response?.data?.error || 'Failed to deactivate user')
+            toast.error(err.response?.data?.error || t('users.err_deactivate'))
         }
     })
 
@@ -61,31 +63,31 @@ export default function Users() {
         mutationFn: (id) => api.put(`/users/${id}`, { isActive: true }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] })
-            toast.success('User reactivated')
+            toast.success(t('users.success_reactivated'))
         },
         onError: (err) => {
-            toast.error(err.response?.data?.error || 'Failed to reactivate user')
+            toast.error(err.response?.data?.error || t('users.err_reactivate'))
         }
     })
 
     const columns = [
-        { key: 'name', label: 'Name', sortable: true },
-        { key: 'email', label: 'Email', sortable: true },
+        { key: 'name', label: t('users.col_name'), sortable: true },
+        { key: 'email', label: t('users.col_email'), sortable: true },
         {
             key: 'role',
-            label: 'Role',
+            label: t('users.col_role'),
             render: (val) => (
                 <Badge color={val === 'OWNER' ? 'primary' : 'default'}>
-                    {val}
+                    {val === 'OWNER' ? t('users.role_owner') : t('users.role_staff')}
                 </Badge>
             )
         },
         {
             key: 'isActive',
-            label: 'Status',
+            label: t('users.col_status'),
             render: (val) => (
                 <Badge color={val ? 'success' : 'danger'} dot>
-                    {val ? 'Active' : 'Inactive'}
+                    {val ? t('users.active') : t('users.inactive')}
                 </Badge>
             )
         },
@@ -98,7 +100,7 @@ export default function Users() {
                     <button
                         onClick={(e) => { e.stopPropagation(); setEditUser(row) }}
                         className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
-                        title="Edit"
+                        title={t('users.edit_title')}
                     >
                         <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -106,7 +108,7 @@ export default function Users() {
                         <button
                             onClick={(e) => { e.stopPropagation(); setDeleteUser(row) }}
                             className="p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
-                            title="Deactivate"
+                            title={t('users.btn_deactivate')}
                         >
                             <UserX className="h-3.5 w-3.5" />
                         </button>
@@ -114,7 +116,7 @@ export default function Users() {
                         <button
                             onClick={(e) => { e.stopPropagation(); reactivateMutation.mutate(row.id) }}
                             className="p-1.5 rounded-sm text-muted-foreground hover:bg-success/10 hover:text-success transition-colors cursor-pointer"
-                            title="Reactivate"
+                            title={t('users.success_reactivated')}
                         >
                             <UserCheck className="h-3.5 w-3.5" />
                         </button>
@@ -128,23 +130,23 @@ export default function Users() {
         <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Users</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Manage staff accounts</p>
+                    <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
+                    <p className="text-sm text-muted-foreground mt-1">{t('users.subtitle')}</p>
                 </div>
                 <Button onClick={() => setShowAddModal(true)}>
                     <Plus className="h-4 w-4" />
-                    Add User
+                    {t('users.btn_add')}
                 </Button>
             </div>
 
             {isLoading ? (
-                <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
+                <div className="text-center py-12 text-sm text-muted-foreground">{t('users.loading')}</div>
             ) : (
                 <Table
                     columns={columns}
                     data={data || []}
-                    emptyTitle="No users"
-                    emptyDescription="Create your first staff account to get started."
+                    emptyTitle={t('users.empty_title')}
+                    emptyDescription={t('users.empty_desc')}
                 />
             )}
 
@@ -154,7 +156,8 @@ export default function Users() {
                 onClose={() => setShowAddModal(false)}
                 onSubmit={(data) => createMutation.mutate(data)}
                 loading={createMutation.isPending}
-                title="Add User"
+                title={t('users.add_title')}
+                t={t}
             />
 
             {/* Edit User Modal */}
@@ -163,9 +166,10 @@ export default function Users() {
                 onClose={() => setEditUser(null)}
                 onSubmit={(data) => updateMutation.mutate({ id: editUser?.id, ...data })}
                 loading={updateMutation.isPending}
-                title="Edit User"
+                title={t('users.edit_title')}
                 defaultValues={editUser}
                 isEdit
+                t={t}
             />
 
             {/* Deactivate Confirm */}
@@ -173,16 +177,16 @@ export default function Users() {
                 open={!!deleteUser}
                 onClose={() => setDeleteUser(null)}
                 onConfirm={() => deactivateMutation.mutate(deleteUser?.id)}
-                title="Deactivate User"
-                message={`Are you sure you want to deactivate ${deleteUser?.name}? They will no longer be able to log in.`}
-                confirmText="Deactivate"
+                title={t('users.modal_deactivate_title')}
+                message={t('users.modal_deactivate_msg', { name: deleteUser?.name })}
+                confirmText={t('users.btn_deactivate')}
                 loading={deactivateMutation.isPending}
             />
         </div>
     )
 }
 
-function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues, isEdit }) {
+function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues, isEdit, t }) {
     const [form, setForm] = useState({
         name: defaultValues?.name || '',
         email: defaultValues?.email || '',
@@ -216,43 +220,43 @@ function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues,
             title={title}
             footer={
                 <>
-                    <Button variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
+                    <Button variant="outline" onClick={onClose} disabled={loading}>{t('users.btn_cancel')}</Button>
                     <Button onClick={handleSubmit} loading={loading}>
-                        {isEdit ? 'Save Changes' : 'Create User'}
+                        {isEdit ? t('users.btn_save') : t('users.btn_create')}
                     </Button>
                 </>
             }
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
-                    label="Name"
+                    label={t('users.lbl_name')}
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     required
                 />
                 <Input
-                    label="Email"
+                    label={t('users.lbl_email')}
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                 />
                 <Input
-                    label={isEdit ? 'New Password (leave blank to keep)' : 'Password'}
+                    label={isEdit ? t('users.lbl_pwd_edit') : t('users.lbl_pwd')}
                     type="password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     required={!isEdit}
                 />
                 <div className="space-y-1.5">
-                    <label className="text-sm font-medium text-foreground">Role</label>
+                    <label className="text-sm font-medium text-foreground">{t('users.lbl_role')}</label>
                     <select
                         value={form.role}
                         onChange={(e) => setForm({ ...form, role: e.target.value })}
                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                     >
-                        <option value="STAFF">Staff</option>
-                        <option value="OWNER">Owner</option>
+                        <option value="STAFF">{t('users.role_staff')}</option>
+                        <option value="OWNER">{t('users.role_owner')}</option>
                     </select>
                 </div>
             </form>

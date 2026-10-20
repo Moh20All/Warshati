@@ -1,22 +1,29 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Plus, User, Check, X } from 'lucide-react'
 import api from '../../lib/api'
+import { useCurrency } from '../../lib/currency'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
+import DevicePicker from '../../components/DevicePicker'
+import { storageText } from '../../lib/catalog'
 
 const conditions = ['EXCELLENT', 'GOOD', 'FAIR', 'POOR', 'BROKEN']
 
 export default function TradeInList() {
+  const cur = useCurrency()
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const toast = useToast()
   const [statusFilter, setStatusFilter] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ customerName: '', brand: '', model: '', imei: '', storage: '', color: '', condition: 'GOOD', conditionNotes: '', appraisedValue: '' })
+  const emptyForm = { customerName: '', deviceCategory: 'PHONE', brand: '', model: '', imei: '', storage: '', color: '', condition: 'GOOD', conditionNotes: '', appraisedValue: '', payoutMethod: 'CASH' }
+  const [form, setForm] = useState(emptyForm)
 
   const { data, isLoading } = useQuery({
     queryKey: ['trade-ins', statusFilter],
@@ -27,9 +34,10 @@ export default function TradeInList() {
     mutationFn: (d) => api.post('/trade-ins', d),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trade-ins'] })
+      queryClient.invalidateQueries({ queryKey: ['catalog'] }) // a hand-typed device may have been remembered
       setShowForm(false)
-      setForm({ customerName: '', brand: '', model: '', imei: '', storage: '', color: '', condition: 'GOOD', conditionNotes: '', appraisedValue: '' })
-      toast.success('Trade-in appraised')
+      setForm(emptyForm)
+      toast.success(t('repairs.tradeins.appraised'))
     },
     onError: (err) => toast.error(err.response?.data?.error || 'Failed')
   })
@@ -39,7 +47,7 @@ export default function TradeInList() {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['trade-ins'] })
       queryClient.invalidateQueries({ queryKey: ['inventory'] })
-      toast.success(`Accepted! Added to inventory as "${res.data.tradeIn.inventoryItem?.name}"`)
+      toast.success(t('repairs.tradeins.accepted', { name: res.data.tradeIn.inventoryItem?.name }))
     },
     onError: (err) => toast.error(err.response?.data?.error || 'Failed')
   })
@@ -48,68 +56,66 @@ export default function TradeInList() {
     mutationFn: (id) => api.post(`/trade-ins/${id}/reject`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trade-ins'] })
-      toast.success('Trade-in rejected')
+      toast.success(t('repairs.tradeins.rejected'))
     }
   })
 
   const columns = [
-    { key: 'customer', label: 'Customer', render: (v) => <span className="font-medium">{v?.name}</span> },
-    { key: 'brand', label: 'Device', render: (v, r) => `${v} ${r.model}` },
-    { key: 'imei', label: 'IMEI', render: (v) => v || '—' },
-    { key: 'condition', label: 'Condition', render: (v) => v ? <Badge color={v === 'EXCELLENT' || v === 'GOOD' ? 'success' : v === 'POOR' || v === 'BROKEN' ? 'danger' : 'warning'}>{v}</Badge> : '—' },
-    { key: 'appraisedValue', label: 'Value', render: (v) => <span className="font-medium">{Number(v).toLocaleString()} DZD</span> },
-    { key: 'status', label: 'Status', render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{v}</Badge> },
-    { key: 'createdAt', label: 'Date', render: (v) => new Date(v).toLocaleDateString() },
-    { key: 'actions', label: '', className: 'text-right',
-      render: (_, r) => r.status === 'APPRAISED' && (
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); acceptMutation.mutate(r.id) }}><Check className="h-3.5 w-3.5" /> Accept</Button>
-          <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); rejectMutation.mutate(r.id) }}><X className="h-3.5 w-3.5" /> Reject</Button>
-        </div>
-      )
-    }
+    { key: 'customer', label: t('repairs.tradeins.customer'), render: (v) => <span className="font-medium">{v?.name}</span> },
+    { key: 'brand', label: t('repairs.tradeins.device'), render: (v, r) => `${v} ${r.model}` },
+    { key: 'imei', label: t('repairs.tradeins.imei'), render: (v) => v || '—' },
+    { key: 'condition', label: t('repairs.tradeins.condition'), render: (v) => v ? <Badge color={v === 'EXCELLENT' || v === 'GOOD' ? 'success' : v === 'POOR' || v === 'BROKEN' ? 'danger' : 'warning'}>{t(`repairs.conditions.${v}`)}</Badge> : '—' },
+    { key: 'appraisedValue', label: t('repairs.tradeins.value'), render: (v) => <span className="font-medium">{Number(v).toLocaleString()} {cur}</span> },
+    { key: 'status', label: t('repairs.tradeins.status'), render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{t(`repairs.statuses.${v}`)}</Badge> },
+    { key: 'createdAt', label: t('repairs.tradeins.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
 
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">Trade-Ins</h1><p className="text-sm text-muted-foreground mt-1">Appraise and accept used devices</p></div>
-        <Button onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> New Trade-In</Button>
+        <div><h1 className="text-2xl font-bold text-foreground">{t('repairs.tradeins.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tradeins.subtitle')}</p></div>
+        <Button onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> {t('repairs.tradeins.new')}</Button>
       </div>
 
       <div className="mb-4">
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-          <option value="">All</option><option value="APPRAISED">Appraised</option><option value="ACCEPTED">Accepted</option><option value="REJECTED">Rejected</option>
+          <option value="">{t('repairs.tradeins.all')}</option><option value="APPRAISED">{t('repairs.statuses.APPRAISED')}</option><option value="ACCEPTED">{t('repairs.statuses.ACCEPTED')}</option><option value="REJECTED">{t('repairs.statuses.REJECTED')}</option>
         </select>
       </div>
 
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
-        : <Table columns={columns} data={data || []} emptyTitle="No trade-ins" emptyDescription="Appraise your first trade-in." />}
+        : <Table columns={columns} data={data || []} emptyTitle={t('repairs.tradeins.empty_title')} emptyDescription={t('repairs.tradeins.empty_desc')} />}
 
-      <Modal open={showForm} onClose={() => setShowForm(false)} title="Appraise Trade-In" size="lg"
-        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>Cancel</Button><Button onClick={() => createMutation.mutate({...form, appraisedValue: parseFloat(form.appraisedValue)})} loading={createMutation.isPending} disabled={!form.customerName || !form.brand || !form.model || !form.appraisedValue}>Appraise</Button></>}
+      <Modal open={showForm} onClose={() => setShowForm(false)} title={t('repairs.tradeins.modal_title')} size="lg"
+        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>{t('repairs.tradeins.cancel')}</Button><Button onClick={() => createMutation.mutate({...form, appraisedValue: parseFloat(form.appraisedValue)})} loading={createMutation.isPending} disabled={!form.customerName || !form.brand || !form.model || !form.appraisedValue}>{t('repairs.tradeins.btn_appraise')}</Button></>}
       >
         <div className="space-y-4">
-          <Input label="Customer Name" value={form.customerName} onChange={e => setForm({...form, customerName: e.target.value})} icon={User} required />
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Brand" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} placeholder="Samsung, iPhone..." required />
-            <Input label="Model" value={form.model} onChange={e => setForm({...form, model: e.target.value})} placeholder="Galaxy S24..." required />
-          </div>
+          <Input label={t('repairs.tradeins.lbl_customer')} value={form.customerName} onChange={e => setForm({...form, customerName: e.target.value})} icon={User} required />
+          <DevicePicker required
+            value={{ category: form.deviceCategory, brand: form.brand, model: form.model }}
+            onChange={(v, device) => setForm({ ...form, deviceCategory: v.category, brand: v.brand, model: v.model, ...(device && storageText(device) ? { storage: storageText(device) } : {}) })} />
           <div className="grid grid-cols-3 gap-4">
-            <Input label="IMEI" value={form.imei} onChange={e => setForm({...form, imei: e.target.value})} />
-            <Input label="Storage" value={form.storage} onChange={e => setForm({...form, storage: e.target.value})} placeholder="128GB" />
-            <Input label="Color" value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
+            <Input label={t('repairs.tradeins.lbl_imei')} value={form.imei} onChange={e => setForm({...form, imei: e.target.value})} />
+            <Input label={t('repairs.tradeins.lbl_storage')} value={form.storage} onChange={e => setForm({...form, storage: e.target.value})} placeholder="128GB" />
+            <Input label={t('repairs.tradeins.lbl_color')} value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground">Condition</label>
+              <label className="text-sm font-medium text-foreground">{t('repairs.tradeins.lbl_condition')}</label>
               <select value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                {conditions.map(c => <option key={c} value={c}>{c}</option>)}
+                {conditions.map(c => <option key={c} value={c}>{t(`repairs.conditions.${c}`)}</option>)}
               </select>
             </div>
-            <Input label="Appraised Value (DZD)" type="number" value={form.appraisedValue} onChange={e => setForm({...form, appraisedValue: e.target.value})} required />
+            <Input label={t('repairs.tradeins.lbl_value')} type="number" value={form.appraisedValue} onChange={e => setForm({...form, appraisedValue: e.target.value})} required />
           </div>
-          <Input label="Condition Notes" value={form.conditionNotes} onChange={e => setForm({...form, conditionNotes: e.target.value})} placeholder="Scratches, battery health..." />
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">{t('repairs.tradeins.lbl_payout')}</label>
+            <select value={form.payoutMethod} onChange={e => setForm({...form, payoutMethod: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="CASH">{t('repairs.tradeins.payout_cash')}</option>
+              <option value="STORE_CREDIT">{t('repairs.tradeins.payout_credit')}</option>
+            </select>
+          </div>
+          <Input label={t('repairs.tradeins.lbl_notes')} value={form.conditionNotes} onChange={e => setForm({...form, conditionNotes: e.target.value})} placeholder={t('repairs.tradeins.ph_notes')} />
         </div>
       </Modal>
     </div>

@@ -7,7 +7,6 @@ import AppShell from './components/layout/AppShell'
 
 // Licensing & Auto-Update Overlays
 import ActivationScreen from './components/ActivationScreen'
-import UpdaterToast from './components/UpdaterToast'
 
 // Auth pages
 import Login from './pages/Login'
@@ -30,10 +29,13 @@ import SupplierList from './pages/finance/SupplierList'
 import SupplierDetail from './pages/finance/SupplierDetail'
 import ExpenseList from './pages/finance/ExpenseList'
 import DailyClose from './pages/finance/DailyClose'
+import MonthlySummary from './pages/finance/MonthlySummary'
 import UsersPage from './pages/settings/Users'
 import StoreSettings from './pages/settings/StoreSettings'
 import BackupPage from './pages/settings/Backup'
-
+import AboutApp from './pages/settings/AboutApp'
+import DeviceCatalogPage from './pages/settings/DeviceCatalog'
+import DevicesPage from './pages/catalog/Devices'
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
   if (loading) return <FullPageSpinner />
@@ -42,6 +44,13 @@ function ProtectedRoute({ children }) {
 }
 
 function P({ children }) { return <ProtectedRoute>{children}</ProtectedRoute> }
+
+// Owner-only pages: staff are sent back to the dashboard
+function O({ children }) {
+  const { isOwner, loading } = useAuth()
+  if (!loading && !isOwner) return <Navigate to="/dashboard" replace />
+  return <ProtectedRoute>{children}</ProtectedRoute>
+}
 
 export default function App() {
   const [checking, setChecking] = useState(true)
@@ -99,9 +108,10 @@ export default function App() {
 
         {/* Inventory */}
         <Route path="/inventory" element={<P><InventoryList /></P>} />
+        <Route path="/devices" element={<P><DevicesPage /></P>} />
 
         {/* Repairs */}
-        <Route path="/repairs/checkin" element={<P><CheckInList /></P>} />
+        <Route path="/repairs/checkins" element={<P><CheckInList /></P>} />
         <Route path="/repairs/tickets" element={<P><TicketList /></P>} />
         <Route path="/repairs/tickets/:id" element={<P><TicketDetail /></P>} />
         <Route path="/repairs/warranty" element={<P><WarrantyList /></P>} />
@@ -113,19 +123,21 @@ export default function App() {
 
         {/* Finance */}
         <Route path="/finance/expenses" element={<P><ExpenseList /></P>} />
-        <Route path="/finance/suppliers" element={<P><SupplierList /></P>} />
-        <Route path="/finance/suppliers/:id" element={<P><SupplierDetail /></P>} />
+        <Route path="/finance/suppliers" element={<O><SupplierList /></O>} />
+        <Route path="/finance/suppliers/:id" element={<O><SupplierDetail /></O>} />
         <Route path="/finance/debts" element={<P><DebtLedger /></P>} />
         <Route path="/finance/daily-close" element={<P><DailyClose /></P>} />
+        <Route path="/finance/monthly-summary" element={<O><MonthlySummary /></O>} />
 
         {/* Settings */}
-        <Route path="/settings/users" element={<P><UsersPage /></P>} />
-        <Route path="/settings/store" element={<P><StoreSettings /></P>} />
-        <Route path="/settings/backup" element={<P><BackupPage /></P>} />
+        <Route path="/settings/users" element={<O><UsersPage /></O>} />
+        <Route path="/settings/store" element={<O><StoreSettings /></O>} />
+        <Route path="/settings/backup" element={<O><BackupPage /></O>} />
+        <Route path="/settings/catalog" element={<O><DeviceCatalogPage /></O>} />
+        <Route path="/settings/about" element={<P><AboutApp /></P>} />
 
         <Route path="*" element={<Navigate to={needsSetup ? '/setup' : '/dashboard'} replace />} />
       </Routes>
-      <UpdaterToast />
     </>
   )
 }
