@@ -60,7 +60,7 @@ export default function CheckInList() {
 
   const handlePrint = async (checkin) => {
     const dir = i18n.dir()
-    const storeName = store?.name || 'Rakam — رقم'
+    const storeName = store?.name || 'Warshati — ورشتي'
     const storeAddress = store?.address || ''
     const storePhone = store?.phone || ''
 

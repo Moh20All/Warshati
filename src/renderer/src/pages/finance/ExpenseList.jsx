@@ -96,7 +96,7 @@ export default function ExpenseList() {
           <p className="text-sm text-muted-foreground mt-1">{t('finance.expenses.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <ExportButton fileName="rakam-expenses" sheetName={t('finance.expenses.title')} columns={exportColumns} rows={exportRows} />
+          <ExportButton fileName="warshati-expenses" sheetName={t('finance.expenses.title')} columns={exportColumns} rows={exportRows} />
           <Button onClick={openAdd}><Plus className="h-4 w-4" /> {t('finance.expenses.btn_add')}</Button>
         </div>
       </div>

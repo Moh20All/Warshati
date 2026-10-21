@@ -28,7 +28,7 @@ const HOST = '127.0.0.1' // local only — never expose the API to the shop netw
 app.use(cors())
 app.use(express.json())
 
-// Only the Rakam window knows this launch's key; any other caller (e.g. a web page) is refused
+// Only the Warshati window knows this launch's key; any other caller (e.g. a web page) is refused
 app.use('/api', (req, res, next) => {
     if (req.path === '/health') return next()
     if (req.get(SESSION_HEADER) !== SESSION_KEY) return res.status(403).json({ error: 'Forbidden' })
@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
                      `--------------------------------------------------\n`;
     
     try {
-        const logPath = path.join(electronApp.getPath('userData'), 'rakam-error.log');
+        const logPath = path.join(electronApp.getPath('userData'), 'warshati-error.log');
         fs.appendFileSync(logPath, errorLog);
         logger.error(errorLog);
     } catch (e) {
@@ -101,14 +101,14 @@ export async function startServer() {
 
     return new Promise((resolve, reject) => {
         const server = app.listen(PORT, HOST, () => {
-            logger.info(`Rakam API running on http://${HOST}:${PORT}`)
+            logger.info(`Warshati API running on http://${HOST}:${PORT}`)
             resolve(server)
         })
 
         server.on('error', (err) => {
             if (err.code === 'EADDRINUSE') {
                 logger.error(`Port ${PORT} is already in use. Is another instance running?`)
-                reject(new Error(`Port ${PORT} is already in use. Please close any other running instances or development servers of Rakam.`))
+                reject(new Error(`Port ${PORT} is already in use. Please close any other running instances or development servers of Warshati.`))
             } else {
                 reject(err)
             }

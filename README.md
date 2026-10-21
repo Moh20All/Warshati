@@ -1,14 +1,14 @@
-# Rakam — رقم | The Digital Nervous System for Repair Stores
+# Warshati — ورشتي | The Digital Nervous System for Repair Stores
 
-![Rakam Logo](assets/r.png)
+<img src="assets/icon.png" alt="Warshati" width="120">
 
-**Rakam — رقم** is a high-end, "Artisan Premium" desktop application designed exclusively for phone repair shops. It replaces chaotic paper trails and scattered spreadsheets with a sleek, unified, and **Offline-First** management ecosystem.
+**Warshati — ورشتي** is a high-end, "Artisan Premium" desktop application designed exclusively for phone repair shops. It replaces chaotic paper trails and scattered spreadsheets with a sleek, unified, and **Offline-First** management ecosystem.
 
-Built with **Electron**, **React**, and **Prisma**, Rakam provides a blistering fast, secure, and native experience that works flawlessly with or without an internet connection.
+Built with **Electron**, **React**, and **Prisma**, Warshati provides a blistering fast, secure, and native experience that works flawlessly with or without an internet connection.
 
 ---
 
-## 🏛️ The 6 Pillars of Rakam
+## 🏛️ The 6 Pillars of Warshati
 
 ### 1. High-Precision Repair Tracking
 The core of your shop. Seamlessly transition devices from "Check-In" to "Completed" and "Collected".
@@ -35,7 +35,7 @@ Stay on top of every penny owed to you or your suppliers.
 
 ### 5. Native Hardware & Local Privacy
 Your data is **yours**.
-*   **Offline-First**: Rakam stores everything locally on your machine via SQLite. No cloud outages, no data snooping, no monthly subscriptions required to access your information.
+*   **Offline-First**: Warshati stores everything locally on your machine via SQLite. No cloud outages, no data snooping, no monthly subscriptions required to access your information.
 *   **Machine-ID Security**: Each license is cryptographically bound to a single hardware machine, ensuring maximum security and licensing integrity.
 *   **Thermal Printing**: Built-in support for 58mm and 80mm thermal printers to provide professional receipts instantly.
 
@@ -49,16 +49,16 @@ Designed for the local market with deep Arabic integration.
 ## 🚀 Getting Started (How to Use)
 
 ### First Launch: The Activation Gate
-Rakam is a premium tool. On first launch, the app will generate a unique **Machine ID**.
+Warshati is a premium tool. On first launch, the app will generate a unique **Machine ID**.
 1.  **Activate**: Enter your valid **Activation Key** provided after purchase.
 2.  **Setup Wizard**: Follow the 3-step guide to enter your Store Name, Currency (DA/EUR/USD), and create your Administrator account.
 
-### Workflow: A Typical Day with Rakam
-1.  **Morning**: Open Rakam. Check the "Repairs Pending" section on the Dashboard.
+### Workflow: A Typical Day with Warshati
+1.  **Morning**: Open Warshati. Check the "Repairs Pending" section on the Dashboard.
 2.  **Check-In**: A customer brings a broken iPhone. Use **Check-In** to log the ticket. Print a receipt for the customer to keep.
 3.  **Repair**: Once fixed, update the status to "Ready". The customer receives their device, and you mark it as "Collected".
 4.  **Sales**: Use the **POS** to sell chargers or accessories. Scan the barcode, select the payment method, and done.
-5.  **Evening**: Go to **Daily Close**. Verify your earnings, and hit "Close Day". Rakam securely saves your daily performance history.
+5.  **Evening**: Go to **Daily Close**. Verify your earnings, and hit "Close Day". Warshati securely saves your daily performance history.
 
 ---
 
@@ -74,7 +74,7 @@ Rakam is a premium tool. On first launch, the app will generate a unique **Machi
     ```bash
     npm install
     ```
-3.  Configure environment: Create a `.env` in the root and in `rakam-dashboard`.
+3.  Configure environment: Create a `.env` in the root (and in the license dashboard project).
 4.  Generate database client:
     ```bash
     npm run prisma:generate
@@ -92,7 +92,8 @@ The installer will be generated in the `/release` directory.
 
 ## 📜 Release History (Changelog)
 
-*   **v1.5.2 (Current)**: Add existing debts, cancel a wrong payment, payment receipts, safe partial payments and new customers at the POS, WhatsApp reminders and "device ready" messages, Devices page with full specs and value-for-money ratings.
+*   **v1.6.0 (Current)**: Warshati is now **Warshati — ورشتي**: new name, new icon, new installer. The installer no longer includes the developer's test database.
+*   **v1.5.2**: Add existing debts, cancel a wrong payment, payment receipts, safe partial payments and new customers at the POS, WhatsApp reminders and "device ready" messages, Devices page with full specs and value-for-money ratings.
 *   **v1.5.1**: Device catalog — choose phones, laptops and consoles from a built-in searchable list (or type them by hand), optional device photos, Check-In page in the menu.
 *   **v1.5.0**: Accurate daily close & real profit, refunds, purchase orders, parts from stock, staff permissions, automatic backups, Excel export and stronger security. See [CHANGELOG.md](CHANGELOG.md).
 *   **v1.4.x**: Thermal printing overhaul, trade-in workflow, crash recovery & feedback.
@@ -114,5 +115,5 @@ The installer will be generated in the `/release` directory.
 
 ---
 
-© 2026 **Rakam — رقم**. Developed with dedication by **Allali Mohamed**.
+© 2026 **Warshati — ورشتي**. Developed with dedication by **Allali Mohamed**.
 *The completes ecosystem for phone repair stores.*

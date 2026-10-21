@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../lib/auth'
-import { Wrench, Mail, Lock } from 'lucide-react'
+import { Mail, Lock } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 
@@ -35,11 +35,11 @@ export default function Login() {
             <div className="w-full max-w-sm animate-fade-in">
                 {/* Logo */}
                 <div className="flex flex-col items-center mb-8">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-primary-foreground mb-3">
-                        <Wrench className="h-6 w-6" />
+                    <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-accent mb-3">
+                        <span className="text-2xl font-bold leading-none pb-1">و</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-foreground">RAKAM</h1>
-                    <p className="text-sm font-semibold text-accent mt-0">رقم</p>
+                    <h1 className="text-2xl font-bold text-foreground">WARSHATI</h1>
+                    <p className="text-sm font-semibold text-accent mt-0">ورشتي</p>
                     <p className="text-sm text-muted-foreground mt-1">{t('auth.slogan')}</p>
                 </div>
 
@@ -58,7 +58,7 @@ export default function Login() {
                         <Input
                             label={t('auth.email')}
                             type="email"
-                            placeholder="admin@rakam.app"
+                            placeholder="admin@warshati.app"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             icon={Mail}

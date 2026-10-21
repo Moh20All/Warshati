@@ -72,22 +72,17 @@ export default function Sidebar() {
     <aside className={`flex flex-col h-screen bg-card border-r border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
       {/* Brand & Logo */}
       <div className="flex items-center gap-3 px-4 py-4 border-b border-border shrink-0 bg-[#0c0f1a]">
-        {/* Rakam Icon Mark (36x36) */}
-        <div className="relative flex flex-col justify-center items-start h-9 w-9 rounded-md shrink-0 bg-[#0c0f1a] overflow-hidden" style={{ minWidth: '36px' }}>
-          {/* Horizontal lines */}
-          <div className="w-5 h-[2px] bg-white opacity-100 mb-1 rounded-sm ml-1.5" />
-          <div className="w-4 h-[2px] bg-white opacity-75 mb-1 rounded-sm ml-1.5" />
-          <div className="w-3 h-[2px] bg-white opacity-50 rounded-sm ml-1.5" />
-          {/* Gold circle in lower right */}
-          <div className="absolute bottom-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#c9972b]" />
+        {/* Warshati Icon Mark (36x36) */}
+        <div className="flex justify-center items-center h-9 w-9 rounded-md shrink-0 bg-[#161b2e] border border-[#c9972b]/40" style={{ minWidth: '36px' }}>
+          <span className="text-[#c9972b] text-xl font-bold leading-none pb-1">و</span>
         </div>
 
         {/* Text Area */}
         {!collapsed && (
           <div className="flex flex-col justify-center overflow-hidden">
             <div className="flex items-end gap-1.5 leading-none mb-0.5">
-              <span className="font-bold text-white text-base tracking-wide">RAKAM</span>
-              <span className="text-[#c9972b] text-xs font-semibold mb-[2px]">رقم</span>
+              <span className="font-bold text-white text-base tracking-wide">WARSHATI</span>
+              <span className="text-[#c9972b] text-xs font-semibold mb-[2px]">ورشتي</span>
             </div>
             <span className="text-muted-foreground text-[10px] uppercase font-medium tracking-wider leading-none">
               Shop Manager

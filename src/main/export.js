@@ -15,7 +15,7 @@ const FORMATS = {
 /** Builds the workbook. columns: [{ header, key, type?: 'text'|'money'|'number'|'date'|'datetime', width? }] */
 export async function buildWorkbook({ sheetName, columns, rows, rtl }) {
   const wb = new ExcelJS.Workbook()
-  wb.creator = 'Rakam'
+  wb.creator = 'Warshati'
   wb.created = new Date()
   const ws = wb.addWorksheet(String(sheetName || 'Sheet').slice(0, 31), {
     views: [{ state: 'frozen', ySplit: 1, rightToLeft: !!rtl }]
@@ -51,7 +51,7 @@ export async function exportXlsx(win, payload) {
     }
     const { canceled, filePath } = await dialog.showSaveDialog(win, {
       title: 'Export to Excel',
-      defaultPath: path.join(app.getPath('documents'), `${fileName || 'rakam-export'}.xlsx`),
+      defaultPath: path.join(app.getPath('documents'), `${fileName || 'warshati-export'}.xlsx`),
       filters: [{ name: 'Excel', extensions: ['xlsx'] }]
     })
     if (canceled || !filePath) return { success: false, canceled: true }

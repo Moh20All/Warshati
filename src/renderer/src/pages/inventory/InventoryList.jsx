@@ -155,7 +155,7 @@ export default function InventoryList() {
           <p className="text-sm text-muted-foreground mt-1">{t('inventory.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <ExportButton fileName="rakam-inventory" sheetName={t('inventory.title')} rows={(data || []).map(i => ({ ...i, type: i.type.replace('_', ' ') }))} columns={[
+          <ExportButton fileName="warshati-inventory" sheetName={t('inventory.title')} rows={(data || []).map(i => ({ ...i, type: i.type.replace('_', ' ') }))} columns={[
             { header: t('inventory.columns.item'), key: 'name', width: 30 },
             { header: t('inventory.columns.type'), key: 'type', width: 14 },
             { header: t('inventory.modal.brand'), key: 'brand', width: 14 },

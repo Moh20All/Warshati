@@ -13,11 +13,11 @@ export default function StoreSettings() {
   const toast = useToast()
   // Printer settings (stored in localStorage)
   const [printers, setPrinters] = useState([])
-  const [selectedPrinter, setSelectedPrinter] = useState(localStorage.getItem('rakam_printer') || '')
-  const [receiptWidth, setReceiptWidth] = useState(localStorage.getItem('rakam_receipt_width') || '80mm')
-  const [ticketWidth, setTicketWidth] = useState(localStorage.getItem('rakam_ticket_width') || '80mm')
-  const [reportWidth, setReportWidth] = useState(localStorage.getItem('rakam_report_width') || 'A4')
-  const [showDialog, setShowDialog] = useState(localStorage.getItem('rakam_show_print_dialog') === 'true')
+  const [selectedPrinter, setSelectedPrinter] = useState(localStorage.getItem('warshati_printer') || '')
+  const [receiptWidth, setReceiptWidth] = useState(localStorage.getItem('warshati_receipt_width') || '80mm')
+  const [ticketWidth, setTicketWidth] = useState(localStorage.getItem('warshati_ticket_width') || '80mm')
+  const [reportWidth, setReportWidth] = useState(localStorage.getItem('warshati_report_width') || 'A4')
+  const [showDialog, setShowDialog] = useState(localStorage.getItem('warshati_show_print_dialog') === 'true')
   const [testingPrint, setTestingPrint] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: 30 })
 
@@ -54,11 +54,11 @@ export default function StoreSettings() {
 
   const handleSave = () => {
     // Persist printer settings to localStorage
-    localStorage.setItem('rakam_printer', selectedPrinter)
-    localStorage.setItem('rakam_receipt_width', receiptWidth)
-    localStorage.setItem('rakam_ticket_width', ticketWidth)
-    localStorage.setItem('rakam_report_width', reportWidth)
-    localStorage.setItem('rakam_show_print_dialog', showDialog)
+    localStorage.setItem('warshati_printer', selectedPrinter)
+    localStorage.setItem('warshati_receipt_width', receiptWidth)
+    localStorage.setItem('warshati_ticket_width', ticketWidth)
+    localStorage.setItem('warshati_report_width', reportWidth)
+    localStorage.setItem('warshati_show_print_dialog', showDialog)
     saveMutation.mutate({
       ...form,
       warrantyDays: parseInt(form.warrantyDays)
@@ -73,7 +73,7 @@ export default function StoreSettings() {
     if (!selectedPrinter) return
     setTestingPrint(true)
     try {
-      const storeName = form.name || 'Rakam — رقم'
+      const storeName = form.name || 'Warshati — ورشتي'
       const storeAddress = form.address || ''
       const storePhone = form.phone || ''
 
@@ -118,7 +118,7 @@ export default function StoreSettings() {
       <div className="border border-border rounded-lg bg-card p-6 space-y-5">
         <div className="flex items-center gap-3 pb-4 border-b border-border">
           <div className="flex items-center justify-center h-10 w-10 rounded-md bg-primary text-primary-foreground font-bold text-lg">R</div>
-          <div><p className="font-semibold text-foreground">Rakam — رقم</p><p className="text-xs text-muted-foreground">Phone Repair & Store Management</p></div>
+          <div><p className="font-semibold text-foreground">Warshati — ورشتي</p><p className="text-xs text-muted-foreground">Phone Repair & Store Management</p></div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 pb-4 border-b border-border">

@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./rakam.db"
+  url      = "file:./warshati.db"
 }
 
 // ─────────────────────────────────────────
@@ -109,7 +109,7 @@ enum DebtType {
   REPAIR_CREDIT
   SALE_CREDIT
   PARTIAL_PAYMENT
-  OPENING_BALANCE // owed before the shop started using Rakam (entered by hand)
+  OPENING_BALANCE // owed before the shop started using Warshati (entered by hand)
 }
 
 enum DebtStatus {

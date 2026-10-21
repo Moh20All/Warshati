@@ -30,7 +30,7 @@ async function snapshotTo(destPath) {
 
 // ── Automatic daily backups ───────────────────────────────────────────
 const AUTO_KEEP = 14
-const AUTO_PREFIX = 'rakam-auto-'
+const AUTO_PREFIX = 'warshati-auto-'
 export const autoBackupDir = () => path.join(app.getPath('userData'), 'backups')
 
 function listAutoBackups() {
@@ -98,9 +98,9 @@ export async function backupDatabase(win, token) {
   if (!(await isOwner(token))) return NOT_OWNER
   try {
     const { canceled, filePath } = await dialog.showSaveDialog(win, {
-      title: 'Backup Rakam database',
-      defaultPath: path.join(app.getPath('documents'), `rakam-backup-${timestamp()}.db`),
-      filters: [{ name: 'Rakam backup', extensions: ['db'] }]
+      title: 'Backup Warshati database',
+      defaultPath: path.join(app.getPath('documents'), `warshati-backup-${timestamp()}.db`),
+      filters: [{ name: 'Warshati backup', extensions: ['db'] }]
     })
     if (canceled || !filePath) return { success: false, canceled: true }
 
@@ -113,7 +113,7 @@ export async function backupDatabase(win, token) {
   }
 }
 
-// A backup is valid if SQLite can open it and it has Rakam's core tables
+// A backup is valid if SQLite can open it and it has Warshati's core tables
 async function isValidBackup(filePath) {
   const probe = new PrismaClient({ datasources: { db: { url: `file:${filePath}` } } })
   try {
@@ -137,15 +137,15 @@ export async function restoreDatabase(win, token) {
   if (!(await isOwner(token))) return NOT_OWNER
   try {
     const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-      title: 'Restore Rakam database',
+      title: 'Restore Warshati database',
       properties: ['openFile'],
-      filters: [{ name: 'Rakam backup', extensions: ['db'] }]
+      filters: [{ name: 'Warshati backup', extensions: ['db'] }]
     })
     if (canceled || !filePaths?.length) return { success: false, canceled: true }
     const source = filePaths[0]
 
     if (!(await isValidBackup(source))) {
-      return { success: false, error: 'This file is not a valid Rakam backup.' }
+      return { success: false, error: 'This file is not a valid Warshati backup.' }
     }
 
     const { response } = await dialog.showMessageBox(win, {
@@ -160,7 +160,7 @@ export async function restoreDatabase(win, token) {
     if (response !== 1) return { success: false, canceled: true }
 
     // Safety copy of the current data next to the live database
-    const safetyCopy = path.join(path.dirname(dbPath), `rakam-before-restore-${timestamp()}.db`)
+    const safetyCopy = path.join(path.dirname(dbPath), `warshati-before-restore-${timestamp()}.db`)
     await snapshotTo(safetyCopy)
     log.info(`[RESTORE] Safety copy saved to ${safetyCopy}`)
 

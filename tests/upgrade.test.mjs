@@ -6,7 +6,7 @@ import path from 'path'
 import { prepareEnv, createChecker, importProject, projectRequire, templateDb } from './helpers/setup.mjs'
 
 const dir = prepareEnv({ db: false, packaged: true })
-const oldDb = path.join(dir, 'userData', 'rakam.db')
+const oldDb = path.join(dir, 'userData', 'warshati.db')
 fs.copyFileSync(templateDb, oldDb)
 const { check, finish } = createChecker()
 const { PrismaClient } = projectRequire('@prisma/client')
@@ -52,7 +52,7 @@ try {
   await db.tradeIn.findMany(); await db.localLicense.findMany()
   check('old data kept', (await db.store.findFirst())?.name, 'Old shop')
 
-  const log = fs.readFileSync(path.join(dir, 'userData', 'rakam-prisma.log'), 'utf8')
+  const log = fs.readFileSync(path.join(dir, 'userData', 'warshati-prisma.log'), 'utf8')
   check('upgrade completed without failures', /Migration failed|migration failed/.test(log), false)
   await db.$disconnect()
   finish()

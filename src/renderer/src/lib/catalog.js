@@ -14,7 +14,7 @@ export function useCatalog(category) {
 }
 
 /** URL of a downloaded catalog image (served by the main process from the images folder). */
-export const catalogImageSrc = (file) => (file ? `rakam-media://catalog/${file.split('/').map(encodeURIComponent).join('/')}` : null)
+export const catalogImageSrc = (file) => (file ? `warshati-media://catalog/${file.split('/').map(encodeURIComponent).join('/')}` : null)
 
 const gb = (v) => (v >= 1024 ? `${v / 1024} TB` : `${v} GB`)
 

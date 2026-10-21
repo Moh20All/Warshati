@@ -3,9 +3,9 @@ import { pathToFileURL } from 'url'
 import { resolve as resolvePath, sep } from 'path'
 import { catalogImagesDir } from './server/lib/catalog.js'
 
-// rakam-media://catalog/<file> serves downloaded device images (and nothing outside that folder)
+// warshati-media://catalog/<file> serves downloaded device images (and nothing outside that folder)
 protocol.registerSchemesAsPrivileged([
-    { scheme: 'rakam-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }
+    { scheme: 'warshati-media', privileges: { standard: true, secure: true, supportFetchAPI: true } }
 ])
 import { machineIdSync } from 'node-machine-id'
 import { autoUpdater } from 'electron-updater'
@@ -42,8 +42,8 @@ function createWindow() {
         minWidth: 1024,
         minHeight: 700,
         show: false,
-        title: 'Rakam — رقم',
-        icon: join(__dirname, '../../assets/r.png'),
+        title: 'Warshati — ورشتي',
+        icon: join(__dirname, '../../assets/icon.png'),
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false
@@ -69,14 +69,14 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-    electronApp.setAppUserModelId('com.rakam.desktop')
-    app.setName('Rakam')
+    electronApp.setAppUserModelId('com.warshati.desktop')
+    app.setName('Warshati')
 
     app.on('browser-window-created', (_, window) => {
         optimizer.watchWindowShortcuts(window)
     })
 
-    protocol.handle('rakam-media', (request) => {
+    protocol.handle('warshati-media', (request) => {
         const url = new URL(request.url)
         const base = resolvePath(catalogImagesDir())
         const file = resolvePath(base, decodeURIComponent(url.pathname).replace(/^\/+/, ''))
@@ -205,7 +205,7 @@ process.on('uncaughtException', (error) => {
     try {
         const { writeFileSync, appendFileSync } = require('fs')
         const { join } = require('path')
-        const logPath = join(app.getPath('logs'), 'rakam-crash.log')
+        const logPath = join(app.getPath('logs'), 'warshati-crash.log')
         appendFileSync(logPath, `[${new Date().toISOString()}] UNCAUGHT: ${error.stack || error.message}\n`)
     } catch (e) { /* ignore write errors */ }
 })
@@ -215,7 +215,7 @@ process.on('unhandledRejection', (reason) => {
     try {
         const { appendFileSync } = require('fs')
         const { join } = require('path')
-        const logPath = join(app.getPath('logs'), 'rakam-crash.log')
+        const logPath = join(app.getPath('logs'), 'warshati-crash.log')
         appendFileSync(logPath, `[${new Date().toISOString()}] REJECTION: ${reason?.stack || reason}\n`)
     } catch (e) { /* ignore write errors */ }
 })

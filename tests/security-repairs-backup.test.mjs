@@ -78,14 +78,14 @@ try {
 
   // ── Automatic backups ──
   await runAutoBackup(); await runAutoBackup()
-  const autoFiles = () => fs.readdirSync(autoBackupDir()).filter(f => f.startsWith('rakam-auto-')).sort()
+  const autoFiles = () => fs.readdirSync(autoBackupDir()).filter(f => f.startsWith('warshati-auto-')).sort()
   check('one backup per day', autoFiles().length, 1)
-  for (let i = 1; i <= 16; i++) fs.writeFileSync(path.join(autoBackupDir(), `rakam-auto-2020-01-${String(i).padStart(2, '0')}.db`), 'x')
+  for (let i = 1; i <= 16; i++) fs.writeFileSync(path.join(autoBackupDir(), `warshati-auto-2020-01-${String(i).padStart(2, '0')}.db`), 'x')
   await runAutoBackup()
   const files = autoFiles()
   check('keeps only 14', files.length, 14)
-  check('oldest dropped, today kept', !files.includes('rakam-auto-2020-01-01.db') && files.some(f => !f.startsWith('rakam-auto-2020')), true)
-  const copy = new PrismaClient({ datasources: { db: { url: `file:${path.join(autoBackupDir(), files.find(f => !f.startsWith('rakam-auto-2020')))}` } } })
+  check('oldest dropped, today kept', !files.includes('warshati-auto-2020-01-01.db') && files.some(f => !f.startsWith('warshati-auto-2020')), true)
+  const copy = new PrismaClient({ datasources: { db: { url: `file:${path.join(autoBackupDir(), files.find(f => !f.startsWith('warshati-auto-2020')))}` } } })
   check('backup is a real DB with the data', await copy.inventoryItem.count(), 1)
   await copy.$disconnect()
 

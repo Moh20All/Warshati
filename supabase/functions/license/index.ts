@@ -1,4 +1,4 @@
-// Rakam license service (Supabase Edge Function).
+// Warshati license service (Supabase Edge Function).
 //
 // The desktop app calls this instead of reading the `licenses` table directly, so the table
 // can be locked to the public (anon) key. The service-role key never leaves Supabase.

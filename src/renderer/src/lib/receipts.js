@@ -23,7 +23,7 @@ export function paymentReceiptHtml({ t, dir, store, cur, debt, payment }) {
 
   return `<div dir="${dir}" style="font-family:'Courier New', monospace; box-sizing:border-box; width:100%;">
     <div style="text-align:center; margin-bottom:10px;">
-      <h2 style="margin:0; font-size:16px; text-transform:uppercase;">${esc(store?.name || 'Rakam — رقم')}</h2>
+      <h2 style="margin:0; font-size:16px; text-transform:uppercase;">${esc(store?.name || 'Warshati — ورشتي')}</h2>
       ${store?.address ? `<p style="margin:2px 0; font-size:10px;">${esc(store.address)}</p>` : ''}
       ${store?.phone ? `<p style="margin:2px 0; font-size:10px;">${esc(store.phone)}</p>` : ''}
       <div style="border-top:2px solid #000; margin:8px 0;"></div>

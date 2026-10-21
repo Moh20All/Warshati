@@ -7,8 +7,8 @@
  */
 export function usePrint() {
   const getPrinterConfig = (type = 'receipt') => ({
-    printerName: localStorage.getItem('rakam_printer') || '',
-    width: localStorage.getItem(`rakam_${type}_width`) || '80mm'
+    printerName: localStorage.getItem('warshati_printer') || '',
+    width: localStorage.getItem(`warshati_${type}_width`) || '80mm'
   })
 
   /**
@@ -22,7 +22,7 @@ export function usePrint() {
    */
   const print = async (html, type = 'receipt') => {
     const config = getPrinterConfig(type)
-    const showDialog = localStorage.getItem('rakam_show_print_dialog') === 'true'
+    const showDialog = localStorage.getItem('warshati_show_print_dialog') === 'true'
 
     // Always use Electron IPC — never window.open() which breaks in Electron
     try {

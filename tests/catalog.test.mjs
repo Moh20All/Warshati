@@ -10,7 +10,7 @@ fs.mkdirSync(path.join(appDir, 'assets', 'catalog'), { recursive: true })
 const bundled = JSON.parse(fs.readFileSync(path.join(projectRoot, 'assets', 'catalog', 'devices.json'), 'utf8'))
 const writeBundle = (b) => fs.writeFileSync(path.join(appDir, 'assets', 'catalog', 'devices.json'), JSON.stringify(b))
 writeBundle(bundled)
-process.env.RAKAM_APP_PATH = appDir
+process.env.WARSHATI_APP_PATH = appDir
 
 // Fake image server: every external image URL returns a tiny PNG (one returns 404)
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64')

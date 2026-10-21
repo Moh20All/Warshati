@@ -87,7 +87,7 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
             <div className="text-center py-4">
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
               <h2 className="text-lg font-bold text-gray-800 mb-1">Report sent!</h2>
-              <p className="text-gray-500 text-sm mb-4">Thank you for helping us improve Rakam.</p>
+              <p className="text-gray-500 text-sm mb-4">Thank you for helping us improve Warshati.</p>
               <button
                 onClick={onRestart}
                 className="px-4 py-2 bg-[#1a2744] text-[#c9a84c] font-medium rounded-lg hover:bg-[#23345a] transition-colors cursor-pointer"

@@ -5,13 +5,13 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
         // Per-launch key handed over by the preload; the local API refuses requests without it
-        'X-Rakam-Key': window.api?.apiKey || ''
+        'X-Warshati-Key': window.api?.apiKey || ''
     }
 })
 
 // Attach JWT token to every request
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('rakam_token')
+    const token = localStorage.getItem('warshati_token')
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }
@@ -23,8 +23,8 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('rakam_token')
-            localStorage.removeItem('rakam_user')
+            localStorage.removeItem('warshati_token')
+            localStorage.removeItem('warshati_user')
             // Only redirect if not already on login/setup (app uses HashRouter, so routes live in the hash)
             if (!window.location.hash.includes('/login') && !window.location.hash.includes('/setup')) {
                 window.location.hash = '#/login'

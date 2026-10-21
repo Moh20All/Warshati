@@ -1,19 +1,19 @@
 {
-    "name": "rakam",
-    "productName": "Rakam",
-    "version": "1.5.2",
-    "description": "Phone repair & store management",
+    "name": "warshati",
+    "productName": "Warshati",
+    "version": "1.6.0",
+    "description": "Warshati — ورشتي: phone repair & store management",
     "author": "Allali Mohamed <allalimohamedbahaeddine@gmail.com>",
     "main": "./out/main/index.js",
     "build": {
-        "appId": "com.rakam.desktop",
-        "productName": "Rakam",
-        "copyright": "Copyright © 2026 Rakam",
+        "appId": "com.warshati.desktop",
+        "productName": "Warshati",
+        "copyright": "Copyright © 2026 Warshati",
         "publish": [
             {
                 "provider": "github",
                 "owner": "Moh20All",
-                "repo": "Rakam"
+                "repo": "Warshati"
             }
         ],
         "directories": {
@@ -52,13 +52,13 @@
                 "from": "prisma",
                 "to": "prisma",
                 "filter": [
-                    "**/*"
+                    "schema.prisma"
                 ]
             }
         ],
         "win": {
             "target": "nsis",
-            "icon": "assets/r.ico",
+            "icon": "assets/icon.ico",
             "sign": null
         },
         "nsis": {
@@ -67,14 +67,14 @@
             "perMachine": false,
             "allowElevation": true,
             "allowToChangeInstallationDirectory": true,
-            "installerIcon": "assets/r.ico",
-            "uninstallerIcon": "assets/r.ico",
-            "installerHeaderIcon": "assets/r.ico",
+            "installerIcon": "assets/icon.ico",
+            "uninstallerIcon": "assets/icon.ico",
+            "installerHeaderIcon": "assets/icon.ico",
             "license": "assets/license.txt",
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
-            "shortcutName": "Rakam",
-            "menuCategory": "Rakam",
+            "shortcutName": "Warshati",
+            "menuCategory": "Warshati",
             "deleteAppDataOnUninstall": false,
             "displayLanguageSelector": false,
             "language": "1033"

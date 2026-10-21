@@ -42,7 +42,7 @@ export default function DebtLedger() {
 
   const remind = async (d) => {
     if (!d.customer?.phone) return toast.warning(t('finance.debts.err_no_phone'))
-    const text = t('finance.debts.wa_reminder', { name: d.customer.name, store: store?.name || 'Rakam', amount: `${Number(d.remaining).toLocaleString()} ${cur}` })
+    const text = t('finance.debts.wa_reminder', { name: d.customer.name, store: store?.name || 'Warshati', amount: `${Number(d.remaining).toLocaleString()} ${cur}` })
     const r = await sendWhatsApp(d.customer.phone, store?.currency, text)
     if (!r.success) toast.error(t('finance.debts.err_invalid_phone'))
   }
@@ -147,7 +147,7 @@ export default function DebtLedger() {
         <div><h1 className="text-2xl font-bold text-foreground">{t('finance.debts.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.debts.subtitle')}</p></div>
         <div className="flex gap-2">
         {isOwner && <Button onClick={() => { setDebtForm(emptyDebt()); setAddOpen(true) }}><Plus className="h-4 w-4" /> {t('finance.debts.btn_add_debt')}</Button>}
-        <ExportButton fileName="rakam-debts" sheetName={t('finance.debts.title')} columns={[
+        <ExportButton fileName="warshati-debts" sheetName={t('finance.debts.title')} columns={[
           { header: t('finance.debts.col_customer'), key: 'customer', width: 22 },
           { header: t('customers.columns.phone', 'Phone'), key: 'phone', width: 16 },
           { header: t('finance.debts.col_type'), key: 'type', width: 16 },

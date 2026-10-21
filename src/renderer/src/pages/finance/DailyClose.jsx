@@ -50,7 +50,7 @@ export default function DailyClosePage() {
   const printDailyReport = () => {
     if (!preview) return
     const dir = i18n.dir()
-    const storeName = store?.name || 'Rakam — رقم'
+    const storeName = store?.name || 'Warshati — ورشتي'
     
     const html = `
       <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">
@@ -137,7 +137,7 @@ export default function DailyClosePage() {
       {/* History */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold text-foreground">{t('finance.daily_close.history_title')}</h3>
-        <ExportButton fileName="rakam-daily-closes" sheetName={t('finance.daily_close.title')} rows={history || []} columns={[
+        <ExportButton fileName="warshati-daily-closes" sheetName={t('finance.daily_close.title')} rows={history || []} columns={[
           { header: t('finance.daily_close.col_date'), key: 'date', type: 'date' },
           { header: `${t('finance.daily_close.col_revenue')} (${cur})`, key: 'totalRevenue', type: 'money', width: 16 },
           { header: `${t('finance.daily_close.stat_credit_sales')} (${cur})`, key: 'totalCreditSales', type: 'money', width: 16 },

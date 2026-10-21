@@ -121,7 +121,7 @@ function offlineDecision(local, reason) {
   return {
     valid: false,
     license: null,
-    deactivationMessage: `Rakam could not verify your license for ${days} days. Please connect this computer to the internet and enter your key again.`
+    deactivationMessage: `Warshati could not verify your license for ${days} days. Please connect this computer to the internet and enter your key again.`
   }
 }
 

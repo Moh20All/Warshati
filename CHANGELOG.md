@@ -1,14 +1,27 @@
 # Changelog
 
-All notable changes to Rakam will be documented in this file.
+All notable changes to Warshati will be documented in this file.
 
+## v1.6.0 — 20/10/2026
+Rakam is now Warshati — ورشتي
+
+### 🚀 Major Upgrades
+- **New Name:** Rakam becomes **Warshati — ورشتي** ("my workshop"). The new name is on the window, installer, receipts, menus and every message. Website: warshatidz.com.
+- **New Icon:** A gold و on navy replaces the old logo (temporary until the final logo is ready).
+- **Includes Everything From v1.5.2:** Existing debts, cancelling a wrong payment, safe partial payments, payment receipts, WhatsApp messages, the Devices page and value-for-money ratings (v1.5.2 was never released on its own).
+
+### 🔧 Fixed
+- **Cleaner Installer:** The installer no longer contains the developer's test database, only the empty starting database.
+
+### ℹ️ Good to Know
+- Warshati is installed as a new program, with its own data folder (`%APPDATA%\Warshati`). Existing activation keys keep working (the key format is not checked, only the key itself).
 ## v1.5.2 — 20/10/2026
 Debts & Customer Messages
 
 ### 🚀 Major Upgrades
-- **Add Existing Debts:** Enter what customers (and suppliers) already owed before you started using Rakam — with the original date and a note. It is not counted as today's sales or cash; their payments are.
+- **Add Existing Debts:** Enter what customers (and suppliers) already owed before you started using Warshati — with the original date and a note. It is not counted as today's sales or cash; their payments are.
 - **Cancel a Wrong Payment:** The owner can cancel a mistaken payment (with a reason). Nothing is deleted: a cancelling entry is recorded today, the amount owed goes back up and today's cash is corrected.
-- **Customers Who Can't Pay Everything:** At the POS, a short cash payment can no longer be saved by mistake — Rakam shows what is missing and turns the rest into a debt in one click. The amount that will be owed is shown before you confirm.
+- **Customers Who Can't Pay Everything:** At the POS, a short cash payment can no longer be saved by mistake — Warshati shows what is missing and turns the rest into a debt in one click. The amount that will be owed is shown before you confirm.
 - **New Customer at the POS:** If the phone number is not found, add the customer right there without losing the cart.
 - **Payment Receipts:** Print a receipt for every debt payment (offered right after recording it), showing what was paid and what is left.
 - **WhatsApp Messages:** Send a debt reminder, or tell the customer their device is repaired and ready (with the amount to pay), in one click.
@@ -32,8 +45,8 @@ Device Catalog
 ### 🚀 Major Upgrades
 - **Device Catalog:** Choose the device from a ready list instead of typing it — **617 phones, 578 laptop models and 18 consoles** are built in. Pick a category (Phone / Laptop / Console), then a brand and a model, each with search. Typing "iphone 13" finds every iPhone 13 at once.
 - **Available Everywhere:** The device picker is on repair tickets, check-ins, trade-ins and inventory. Picking a phone fills in its storage (and the item name in inventory).
-- **Type Manually Anytime:** A device that is not in the list can always be typed by hand. Rakam remembers it, so it appears in the list next time.
-- **Device Images (optional):** After you agree, Rakam downloads phone photos once and shows them in the lists. Manage them in **Settings → Device Catalog** (download missing images, delete images, remove devices added by hand).
+- **Type Manually Anytime:** A device that is not in the list can always be typed by hand. Warshati remembers it, so it appears in the list next time.
+- **Device Images (optional):** After you agree, Warshati downloads phone photos once and shows them in the lists. Manage them in **Settings → Device Catalog** (download missing images, delete images, remove devices added by hand).
 
 ### ✨ Improvements
 - **Check-In page in the menu:** Register a device at the counter, print the slip, then turn it into a repair ticket in one click.
@@ -56,7 +69,7 @@ Trusted Numbers & Shop Control
 - **Purchase Orders:** Order stock from suppliers, paid in cash or on credit. Stock updates instantly and credit orders appear in the supplier's debt ledger.
 - **Parts From Stock in Repairs:** Take parts from inventory directly on a repair ticket. Stock goes down and the part cost is used for the repair's profit.
 - **Staff Permissions:** Staff can sell, repair and close the day, but cannot see profit or buy prices, change prices, delete records, or open suppliers, reports, users, settings and backups.
-- **Automatic Daily Backups:** Rakam saves a copy of your data every day and keeps the last 14 days. Manual Backup & Restore now work too, with a safety copy before every restore.
+- **Automatic Daily Backups:** Warshati saves a copy of your data every day and keeps the last 14 days. Manual Backup & Restore now work too, with a safety copy before every restore.
 - **Export to Excel:** Export invoices, expenses, inventory, debts and daily closes to a real Excel file (Arabic, French and English supported).
 
 ### ✨ Improvements
@@ -67,10 +80,10 @@ Trusted Numbers & Shop Control
 - **Setup Wizard:** Currency is now chosen from a list.
 
 ### 🔐 Security
-- **Protected Local Data:** Only the Rakam window can access your shop data — other programs and web pages are blocked.
+- **Protected Local Data:** Only the Warshati window can access your shop data — other programs and web pages are blocked.
 - **Login Protection:** 5 wrong passwords lock that account for 5 minutes.
 - **Owner Lock-Out Prevention:** An owner can no longer remove their own access, and the store always keeps at least one owner.
-- **Stronger Licensing:** License checks run inside the app's secure core. Rakam works offline for up to 30 days, then asks to reconnect once.
+- **Stronger Licensing:** License checks run inside the app's secure core. Warshati works offline for up to 30 days, then asks to reconnect once.
 
 ### 🛠️ Fixed
 - Customer debt payments, supplier pages and supplier payments failed to save.

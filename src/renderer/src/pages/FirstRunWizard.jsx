@@ -189,7 +189,7 @@ export default function FirstRunWizard() {
                                 <Input
                                     label={t('setup.email')}
                                     type="email"
-                                    placeholder="admin@rakam.app"
+                                    placeholder="admin@warshati.app"
                                     value={form.email}
                                     onChange={(e) => update('email', e.target.value)}
                                     required

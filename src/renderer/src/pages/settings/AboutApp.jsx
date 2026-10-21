@@ -6,9 +6,15 @@ export default function AboutApp() {
 
   const phases = [
     {
+      version: 'v1.6.0',
+      title: t('about.phases.v160.title'),
+      status: t('about.current', 'Current'),
+      icon: Sparkles,
+      desc: t('about.phases.v160.desc')
+    },
+    {
       version: 'v1.5.2',
       title: t('about.phases.v152.title'),
-      status: t('about.current', 'Current'),
       icon: Sparkles,
       desc: t('about.phases.v152.desc')
     },
@@ -75,10 +81,10 @@ export default function AboutApp() {
       <div className="text-center space-y-2 mb-10 pt-4">
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3">
           <Info className="h-8 w-8 text-primary" />
-          {t('about.title', 'About Rakam')}
+          {t('about.title', 'About Warshati')}
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          {t('about.subtitle', 'From a concept to a robust production engine, see how Rakam evolved to manage your shop flawlessly.')}
+          {t('about.subtitle', 'From a concept to a robust production engine, see how Warshati evolved to manage your shop flawlessly.')}
         </p>
       </div>
 
@@ -120,7 +126,7 @@ export default function AboutApp() {
       </div>
 
       <div className="text-center text-xs text-muted-foreground mt-8">
-        &copy; 2024 Rakam. All rights reserved.<br/>
+        &copy; 2026 Warshati — ورشتي. All rights reserved.<br/>
         Made with dedication for phone repair artisans.
       </div>
       

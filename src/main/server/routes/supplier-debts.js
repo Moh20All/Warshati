@@ -66,7 +66,7 @@ router.post('/:id/payment', async (req, res) => {
 // Thrown inside a transaction to roll it back and answer with a 400
 class DebtError extends Error {}
 
-// POST /api/supplier-debts/opening — what the shop already owed a supplier before using Rakam.
+// POST /api/supplier-debts/opening — what the shop already owed a supplier before using Warshati.
 // Stored as an order with no items (number OB-YYYY-NNNN): no stock change, no expense today.
 router.post('/opening', async (req, res) => {
   try {

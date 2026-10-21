@@ -11,17 +11,17 @@ export const templateDb = path.join(projectRoot, 'assets', 'db', 'template.db')
 export const projectRequire = createRequire(path.join(projectRoot, 'package.json'))
 export const importProject = (p) => import(pathToFileURL(path.join(projectRoot, p)).href)
 
-/** Temp folder with userData/ (and prisma/rakam.db unless `db: false`). Must run before importing app code. */
+/** Temp folder with userData/ (and prisma/warshati.db unless `db: false`). Must run before importing app code. */
 export function prepareEnv({ db = true, packaged = false } = {}) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'rakam-test-'))
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'warshati-test-'))
   fs.mkdirSync(path.join(dir, 'userData'))
   if (db) {
     fs.mkdirSync(path.join(dir, 'prisma'))
-    fs.copyFileSync(templateDb, path.join(dir, 'prisma', 'rakam.db'))
+    fs.copyFileSync(templateDb, path.join(dir, 'prisma', 'warshati.db'))
   }
-  process.env.RAKAM_TEST_DIR = dir
-  process.env.RAKAM_PACKAGED = packaged ? '1' : '0'
-  process.env.RAKAM_APP_PATH = process.env.RAKAM_APP_PATH || projectRoot
+  process.env.WARSHATI_TEST_DIR = dir
+  process.env.WARSHATI_PACKAGED = packaged ? '1' : '0'
+  process.env.WARSHATI_APP_PATH = process.env.WARSHATI_APP_PATH || projectRoot
   process.resourcesPath = dir // only defined inside Electron
   process.chdir(dir)          // prisma.js resolves the dev DB from the working directory
   process.on('exit', () => { try { fs.rmSync(dir, { recursive: true, force: true }) } catch { /* DB may still be locked */ } })
@@ -41,7 +41,7 @@ export async function startServer() {
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...(key ? { 'x-rakam-key': key } : {}),
+        ...(key ? { 'x-warshati-key': key } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: body ? JSON.stringify(body) : undefined

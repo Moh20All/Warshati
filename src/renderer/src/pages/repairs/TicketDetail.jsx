@@ -151,7 +151,7 @@ export default function TicketDetail() {
   const printTicket = () => {
     if (isNew || !ticket) return
     const dir = i18n.dir()
-    const storeName = store?.name || 'Rakam — رقم'
+    const storeName = store?.name || 'Warshati — ورشتي'
     const storeAddress = store?.address || ''
     const storePhone = store?.phone || ''
 
@@ -223,7 +223,7 @@ export default function TicketDetail() {
   // "Your phone is ready" on WhatsApp, with what is left to pay after the deposit
   const notifyReady = async () => {
     const due = Math.max(0, Number(ticket.finalCost || 0) - Number(ticket.deposit || 0))
-    const vars = { name: ticket.customer.name, device: `${ticket.deviceBrand} ${ticket.deviceModel}`, store: store?.name || 'Rakam', ticket: ticket.ticketNumber, amount: `${due.toLocaleString()} ${cur}` }
+    const vars = { name: ticket.customer.name, device: `${ticket.deviceBrand} ${ticket.deviceModel}`, store: store?.name || 'Warshati', ticket: ticket.ticketNumber, amount: `${due.toLocaleString()} ${cur}` }
     const r = await sendWhatsApp(ticket.customer.phone, store?.currency, t(due > 0 ? 'repairs.details.wa_ready' : 'repairs.details.wa_ready_paid', vars))
     if (!r.success) toast.error(t('finance.debts.err_invalid_phone'))
   }

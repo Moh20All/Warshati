@@ -47,9 +47,9 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
       {/* Brand Header */}
       <div className="absolute top-8 left-8 flex items-center gap-3">
         <div className="w-10 h-10 bg-[#1a2744] rounded-lg flex items-center justify-center shadow">
-          <span className="text-[#c9a84c] font-bold text-xl">R</span>
+          <span className="text-[#c9a84c] font-bold text-xl leading-none pb-1">و</span>
         </div>
-        <span className="text-[#1a2744] font-bold text-xl tracking-wide">Rakam</span>
+        <span className="text-[#1a2744] font-bold text-xl tracking-wide">Warshati</span>
       </div>
 
       <div className="max-w-md w-full bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">

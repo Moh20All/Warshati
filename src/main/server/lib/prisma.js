@@ -5,8 +5,8 @@ import fs from 'fs'
 
 const isDev = !app.isPackaged
 export const dbPath = isDev
-  ? path.join(process.cwd(), 'prisma', 'rakam.db')
-  : path.join(app.getPath('userData'), 'rakam.db')
+  ? path.join(process.cwd(), 'prisma', 'warshati.db')
+  : path.join(app.getPath('userData'), 'warshati.db')
 
 // Ensure the directory exists
 const dbDir = path.dirname(dbPath)
@@ -16,7 +16,7 @@ if (!fs.existsSync(dbDir)) {
 
 function logToDisk(msg) {
   try {
-    fs.appendFileSync(path.join(app.getPath('userData'), 'rakam-prisma.log'), `[${new Date().toISOString()}] ${msg}\n`);
+    fs.appendFileSync(path.join(app.getPath('userData'), 'warshati-prisma.log'), `[${new Date().toISOString()}] ${msg}\n`);
   } catch(e) {}
 }
 

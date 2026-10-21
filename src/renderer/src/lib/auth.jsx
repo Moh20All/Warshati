@@ -5,7 +5,7 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
-    const [token, setToken] = useState(localStorage.getItem('rakam_token'))
+    const [token, setToken] = useState(localStorage.getItem('warshati_token'))
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -17,8 +17,8 @@ export function AuthProvider({ children }) {
                 })
                 .catch(() => {
                     // Token invalid, clear everything
-                    localStorage.removeItem('rakam_token')
-                    localStorage.removeItem('rakam_user')
+                    localStorage.removeItem('warshati_token')
+                    localStorage.removeItem('warshati_user')
                     setToken(null)
                     setUser(null)
                 })
@@ -31,16 +31,16 @@ export function AuthProvider({ children }) {
     const login = async (email, password) => {
         const res = await api.post('/auth/login', { email, password })
         const { token: newToken, user: userData } = res.data
-        localStorage.setItem('rakam_token', newToken)
-        localStorage.setItem('rakam_user', JSON.stringify(userData))
+        localStorage.setItem('warshati_token', newToken)
+        localStorage.setItem('warshati_user', JSON.stringify(userData))
         setToken(newToken)
         setUser(userData)
         return userData
     }
 
     const logout = () => {
-        localStorage.removeItem('rakam_token')
-        localStorage.removeItem('rakam_user')
+        localStorage.removeItem('warshati_token')
+        localStorage.removeItem('warshati_user')
         setToken(null)
         setUser(null)
     }

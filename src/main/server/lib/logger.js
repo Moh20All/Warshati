@@ -3,9 +3,9 @@ import { app } from 'electron';
 import path from 'path';
 import fs from 'fs';
 
-// Override default filename to rakam-debug.log
+// Override default filename to warshati-debug.log
 if (app) {
-    log.transports.file.resolvePath = () => path.join(app.getPath('logs'), 'rakam-debug.log');
+    log.transports.file.resolvePath = () => path.join(app.getPath('logs'), 'warshati-debug.log');
 
     // In production builds, completely silence terminal output
     if (app.isPackaged) {
@@ -19,10 +19,10 @@ export const logger = {
     error: (...args) => {
         log.error(...args);
         
-        // Also write errors to rakam-crash.log for severe issues
+        // Also write errors to warshati-crash.log for severe issues
         if (app) {
             try {
-                const logPath = path.join(app.getPath('logs'), 'rakam-crash.log');
+                const logPath = path.join(app.getPath('logs'), 'warshati-crash.log');
                 const msg = args.map(a => (a instanceof Error ? a.stack || a.message : (typeof a === 'object' ? JSON.stringify(a) : String(a)))).join(' ');
                 fs.appendFileSync(logPath, `[${new Date().toISOString()}] RUNTIME ERROR: ${msg}\n`);
             } catch (e) {

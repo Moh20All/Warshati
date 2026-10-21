@@ -7,7 +7,7 @@ if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir);
 
 // Check if icon.ico exists, warn if not
 if (!fs.existsSync(path.join(assetsDir, 'icon.ico'))) {
-  console.warn('⚠️  assets/icon.ico missing — add your Rakam icon before final build');
+  console.warn('⚠️  assets/icon.ico missing — add your Warshati icon before final build');
 }
 
 // Check license.txt

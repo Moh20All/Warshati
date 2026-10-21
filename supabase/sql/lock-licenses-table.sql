@@ -2,7 +2,7 @@
 -- read, list or rebind licenses. Only the `license` Edge Function and your dashboard
 -- (both use the service-role key, which bypasses RLS) can touch it.
 --
--- ⚠ Run this ONLY after every customer runs Rakam v1.5+ (which uses the Edge Function).
+-- ⚠ Run this ONLY after every customer runs Warshati v1.5+ (which uses the Edge Function).
 --   Older versions read the table directly: once it is locked they would see
 --   "license not found" and deactivate themselves.
 

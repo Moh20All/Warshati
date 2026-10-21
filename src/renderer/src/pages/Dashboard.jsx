@@ -63,7 +63,7 @@ export default function Dashboard() {
 
   const printOverview = () => {
     const dir = i18n.dir()
-    const storeName = store?.name || 'Rakam — رقم'
+    const storeName = store?.name || 'Warshati — ورشتي'
     
     const html = `
       <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">

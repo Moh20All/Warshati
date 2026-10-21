@@ -1,12 +1,12 @@
 // Minimal stand-in for the 'electron' module so the server code runs in plain Node.
 import path from 'path'
 
-const dir = () => process.env.RAKAM_TEST_DIR
+const dir = () => process.env.WARSHATI_TEST_DIR
 
 export const app = {
-  isPackaged: process.env.RAKAM_PACKAGED === '1',
+  isPackaged: process.env.WARSHATI_PACKAGED === '1',
   getPath: () => path.join(dir(), 'userData'),
-  getAppPath: () => process.env.RAKAM_APP_PATH // where assets/ (e.g. the bundled device catalog) live
+  getAppPath: () => process.env.WARSHATI_APP_PATH // where assets/ (e.g. the bundled device catalog) live
 }
 export const dialog = {}
 export const shell = { openPath: async () => '' }

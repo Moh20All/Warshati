@@ -53,7 +53,7 @@ export default function InvoiceList() {
   const printReceipt = (s) => {
     const dir = i18n.dir()
     
-    const storeName = store?.name || 'Rakam — رقم'
+    const storeName = store?.name || 'Warshati — ورشتي'
     const storeAddress = store?.address || ''
     const storePhone = store?.phone || ''
 
@@ -156,7 +156,7 @@ export default function InvoiceList() {
     <div className="animate-fade-in">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div><h1 className="text-2xl font-bold text-foreground">{t('sales.invoices.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('sales.invoices.subtitle')}</p></div>
-        <ExportButton fileName="rakam-invoices" sheetName={t('sales.invoices.title')} rows={exportRows} columns={[
+        <ExportButton fileName="warshati-invoices" sheetName={t('sales.invoices.title')} rows={exportRows} columns={[
           { header: t('sales.invoices.col_inv'), key: 'number', width: 18 },
           { header: t('sales.invoices.col_date'), key: 'date', type: 'datetime', width: 18 },
           { header: t('sales.invoices.col_customer'), key: 'customer', width: 22 },
