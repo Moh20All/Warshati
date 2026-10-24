@@ -66,7 +66,7 @@
             "oneClick": false,
             "perMachine": false,
             "allowElevation": true,
-            "allowToChangeInstallationDirectory": true,
+            "allowToChangeInstallationDirectory": false,
             "installerIcon": "assets/icon.ico",
             "uninstallerIcon": "assets/icon.ico",
             "installerHeaderIcon": "assets/icon.ico",
@@ -80,7 +80,8 @@
             "menuCategory": "Warshati",
             "deleteAppDataOnUninstall": false,
             "displayLanguageSelector": false,
-            "language": "1033"
+            "installerLanguages": ["en_US", "fr_FR", "ar_SA"],
+            "include": "build/installer.nsh"
         }
     },
     "scripts": {
