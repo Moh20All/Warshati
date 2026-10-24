@@ -5,6 +5,7 @@
 // before and after the migration.
 import nodeMachineId from 'node-machine-id' // CommonJS package: default import works in Node and the bundle
 const { machineIdSync } = nodeMachineId
+import { app } from 'electron'
 import log from 'electron-log'
 import prisma from './server/lib/prisma.js'
 
@@ -44,7 +45,7 @@ async function request(url, options = {}) {
 async function askLicenseService(action, key, machineId) {
   const fn = await request(`${SUPABASE_URL}/functions/v1/license`, {
     method: 'POST',
-    body: JSON.stringify({ action, key, machineId })
+    body: JSON.stringify({ action, key, machineId, appVersion: app.getVersion() }) // version shows in the dashboard
   })
   if (fn.status !== 404) {
     if (!fn.ok) throw new Unreachable(`license function HTTP ${fn.status}`)
