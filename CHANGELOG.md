@@ -6,7 +6,7 @@ All notable changes to Warshati will be documented in this file.
 Rakam is now Warshati — ورشتي
 
 ### 🚀 Major Upgrades
-- **New Name:** Rakam becomes **Warshati — ورشتي** ("my workshop"). The new name is on the window, installer, receipts, menus and every message. Website: warshatidz.com.
+- **New Name:** Rakam becomes **Warshati — ورشتي** ("my workshop"). The new name is on the window, installer, receipts, menus and every message. Website: warshatydz.com.
 - **New Icon:** A gold و on navy replaces the old logo (temporary until the final logo is ready).
 - **Includes Everything From v1.5.2:** Existing debts, cancelling a wrong payment, safe partial payments, payment receipts, WhatsApp messages, the Devices page and value-for-money ratings (v1.5.2 was never released on its own).
 
