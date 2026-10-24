@@ -93,6 +93,7 @@
         "electron:build": "npm run clean:locks && npm run prisma:generate && npm run build:catalog && npm test && npm run stage-db && npm run build && npm run check-assets && electron-builder",
         "start": "electron-vite preview",
         "test": "node tests/run.mjs",
+        "seed:dev": "node --import ./tests/helpers/register.mjs scripts/seed-dev.mjs",
         "build:catalog": "node scripts/build-catalog.js",
         "postinstall": "electron-builder install-app-deps",
         "prisma:generate": "prisma generate",
