@@ -130,7 +130,7 @@ export default function TicketList() {
       </div>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="max-w-sm flex-1"><Input placeholder={t('repairs.tickets.search')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
+        <div className="max-w-sm flex-1"><Input placeholder={t('repairs.tickets.search')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('repairs.tickets.all_statuses')}</option>
           {statusOptions.filter(Boolean).map(s => <option key={s} value={s}>{t(`repairs.statuses.${s}`)}</option>)}

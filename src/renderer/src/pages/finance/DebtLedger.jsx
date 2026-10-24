@@ -166,7 +166,7 @@ export default function DebtLedger() {
       </div>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="max-w-sm flex-1"><Input placeholder={t('finance.debts.search_ph')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
+        <div className="max-w-sm flex-1"><Input placeholder={t('finance.debts.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('finance.debts.filter_all')}</option><option value="OPEN">{t('finance.debts.filter_open')}</option><option value="PARTIAL">{t('finance.debts.filter_partial')}</option><option value="SETTLED">{t('finance.debts.filter_settled')}</option>
         </select>

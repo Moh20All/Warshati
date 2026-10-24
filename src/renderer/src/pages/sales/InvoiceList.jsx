@@ -169,7 +169,7 @@ export default function InvoiceList() {
           { header: t('sales.invoices.btn_refund'), key: 'refunded', type: 'datetime', width: 18 }
         ]} />
       </div>
-      <div className="mb-4 max-w-sm"><Input placeholder={t('sales.invoices.search_ph')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
+      <div className="mb-4 max-w-sm"><Input placeholder={t('sales.invoices.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
         : <Table columns={columns} data={data || []} emptyTitle={t('sales.invoices.empty_title')} emptyDescription={t('sales.invoices.empty_desc')} />}
 

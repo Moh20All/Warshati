@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus, Search, Printer, ArrowRight, User } from 'lucide-react'
 import api from '../../lib/api'
@@ -24,6 +24,11 @@ export default function CheckInList() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [showForm, setShowForm] = useState(false)
+  // F4 ("new check-in") opens this page with ?new=1
+  const [params, setParams] = useSearchParams()
+  useEffect(() => {
+    if (params.get('new') === '1') { setShowForm(true); setParams({}, { replace: true }) }
+  }, [params, setParams])
   const [form, setForm] = useState({
     customerName: '', customerPhone: '',
     deviceCategory: 'PHONE', deviceBrand: '', deviceModel: '', imei: '', color: '', issueDesc: '', condition: ''
@@ -135,7 +140,7 @@ export default function CheckInList() {
       </div>
 
       <div className="flex items-center gap-3 mb-4">
-        <div className="max-w-sm flex-1"><Input placeholder={t('repairs.checkin.search')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
+        <div className="max-w-sm flex-1"><Input placeholder={t('repairs.checkin.search')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('repairs.checkin.all')}</option><option value="pending">{t('repairs.checkin.pending')}</option><option value="converted">{t('repairs.checkin.converted')}</option>
         </select>

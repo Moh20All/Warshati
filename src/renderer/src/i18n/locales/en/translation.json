@@ -1,4 +1,15 @@
 {
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "help": "Show keyboard shortcuts",
+    "search": "Go to the search box",
+    "close": "Close the window on top",
+    "scan": "Add the scanned or only matching item",
+    "print_after_sale": "Print the receipt (after a sale)",
+    "group_anywhere": "Anywhere",
+    "group_pos": "Point of sale",
+    "group_ticket": "Repair ticket"
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "customers": "Customers",

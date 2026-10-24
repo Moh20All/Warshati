@@ -7,15 +7,16 @@ import {
   CalendarCheck, Store, Users, Database,
   ChevronLeft, ChevronRight, LayoutDashboard,
   Contact, Package, BarChart3, Info,
-  MessageSquarePlus, Smartphone
+  MessageSquarePlus, Smartphone, Keyboard
 } from 'lucide-react'
 import { useState } from 'react'
 import FeedbackModal from '../FeedbackModal'
 import markTile from '../../assets/brand/mark-trace-tile.svg'
 import { useAuth } from '../../lib/auth'
+import { KBD_CLASS } from '../../lib/hotkeys'
 
 
-export default function Sidebar() {
+export default function Sidebar({ onShowShortcuts }) {
   const { t } = useTranslation()
   const { isOwner } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
@@ -27,15 +28,15 @@ export default function Sidebar() {
       items: [
         { name: t('navigation.dashboard'), path: '/dashboard', icon: LayoutDashboard },
         { name: t('navigation.customers'), path: '/customers', icon: Contact },
-        { name: t('navigation.inventory'), path: '/inventory', icon: Package },
+        { name: t('navigation.inventory'), path: '/inventory', icon: Package, kbd: 'F7' },
         { name: t('navigation.devices'), path: '/devices', icon: Smartphone }
       ]
     },
     {
       group: t('navigation.groups.repairs'),
       items: [
-        { name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList },
-        { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket },
+        { name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList, kbd: 'F4' },
+        { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket, kbd: 'F6' },
         { name: t('navigation.warranty'), path: '/repairs/warranty', icon: Shield },
         { name: t('navigation.trade_ins'), path: '/repairs/trade-ins', icon: ArrowLeftRight }
       ]
@@ -43,7 +44,7 @@ export default function Sidebar() {
     {
       group: t('navigation.groups.sales'),
       items: [
-        { name: t('navigation.pos'), path: '/sales/pos', icon: ShoppingCart },
+        { name: t('navigation.pos'), path: '/sales/pos', icon: ShoppingCart, kbd: 'F2' },
         { name: t('navigation.invoices'), path: '/sales/invoices', icon: Receipt }
       ]
     },
@@ -52,8 +53,8 @@ export default function Sidebar() {
       items: [
         { name: t('navigation.expenses'), path: '/finance/expenses', icon: CreditCard },
         { name: t('navigation.suppliers'), path: '/finance/suppliers', icon: BookOpen, ownerOnly: true },
-        { name: t('navigation.debt_ledger'), path: '/finance/debts', icon: FileWarning },
-        { name: t('navigation.daily_close'), path: '/finance/daily-close', icon: CalendarCheck },
+        { name: t('navigation.debt_ledger'), path: '/finance/debts', icon: FileWarning, kbd: 'F8' },
+        { name: t('navigation.daily_close'), path: '/finance/daily-close', icon: CalendarCheck, kbd: 'F9' },
         { name: t('navigation.monthly_summary'), path: '/finance/monthly-summary', icon: BarChart3, ownerOnly: true }
       ]
     },
@@ -110,10 +111,11 @@ export default function Sidebar() {
                     ${isActive ? 'bg-primary-soft text-primary-soft-foreground font-semibold [&>svg]:text-primary' : 'text-foreground hover:bg-accent hover:text-accent-foreground [&>svg]:text-muted-foreground'}
                     ${collapsed ? 'justify-center' : ''}
                   `}
-                  title={collapsed ? item.name : undefined}
+                  title={collapsed ? (item.kbd ? `${item.name} (${item.kbd})` : item.name) : undefined}
                 >
                   <item.icon className="h-[17px] w-[17px] shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
+                  {!collapsed && <span className="flex-1 truncate">{item.name}</span>}
+                  {!collapsed && item.kbd && <kbd className={`${KBD_CLASS} h-[18px] px-1 text-[10px]`}>{item.kbd}</kbd>}
                 </NavLink>
               ))}
             </div>
@@ -125,6 +127,11 @@ export default function Sidebar() {
         <button onClick={() => setShowFeedback(true)} className={`flex items-center gap-2.5 w-full h-[30px] px-2.5 rounded-sm text-[13px] font-medium text-foreground hover:bg-accent hover:text-accent-foreground [&>svg]:text-muted-foreground transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`} title={collapsed ? 'Send Feedback' : undefined}>
           <MessageSquarePlus className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Send Feedback</span>}
+        </button>
+        <button onClick={onShowShortcuts} className={`flex items-center gap-2.5 w-full h-[30px] px-2.5 rounded-sm text-[13px] font-medium text-foreground hover:bg-accent hover:text-accent-foreground [&>svg]:text-muted-foreground transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`} title={`${t('shortcuts.title', 'Keyboard shortcuts')} (F1)`}>
+          <Keyboard className="h-4 w-4 shrink-0" />
+          {!collapsed && <span className="flex-1 text-start truncate">{t('shortcuts.title', 'Keyboard shortcuts')}</span>}
+          {!collapsed && <kbd className={`${KBD_CLASS} h-[18px] px-1 text-[10px]`}>F1</kbd>}
         </button>
         <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center w-full h-[30px] rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer rtl:[&>svg]:-scale-x-100">
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

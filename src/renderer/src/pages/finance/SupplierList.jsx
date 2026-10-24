@@ -43,7 +43,7 @@ export default function SupplierList() {
         <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.suppliers.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.suppliers.subtitle')}</p></div>
         <Button onClick={() => setShowAdd(true)}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_add')}</Button>
       </div>
-      <div className="mb-4 max-w-sm"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
+      <div className="mb-4 max-w-sm"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
         : <Table columns={columns} data={data || []} emptyTitle={t('finance.suppliers.empty_title')} emptyDescription={t('finance.suppliers.empty_desc')} onRowClick={r => navigate(`/finance/suppliers/${r.id}`)} />}
 

@@ -10,6 +10,7 @@ import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Modal from '../../components/ui/Modal'
+import { useHotkeys, KBD_CLASS } from '../../lib/hotkeys'
 
 export default function POS() {
   const cur = useCurrency()
@@ -237,6 +238,10 @@ export default function POS() {
     print.print(html)
   }
 
+  // F10 completes the sale; after a sale, Enter prints the receipt (the dialog says so)
+  useHotkeys({ F10: () => { if (!saleMutation.isPending) completeSale() } })
+  useHotkeys({ Enter: () => { printReceipt(); setShowPrintPrompt(false) } }, { enabled: showPrintPrompt, whenModal: true })
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
@@ -253,7 +258,7 @@ export default function POS() {
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
               onKeyDown={handleKeyDown}
-              icon={Search} 
+              icon={Search} data-search 
             />
           </div>
           <div className="flex-1 overflow-y-auto space-y-2 pr-2 border border-border rounded-lg p-2 bg-muted/20">
@@ -385,6 +390,7 @@ export default function POS() {
 
           <Button variant="flux" onClick={completeSale} loading={saleMutation.isPending} className="w-full h-12 text-base">
             {t('sales.pos.btn_complete')}
+            <kbd className={`${KBD_CLASS} bg-transparent border-flux-soft-foreground/40 text-flux-foreground`}>F10</kbd>
           </Button>
 
           {lastSale && (

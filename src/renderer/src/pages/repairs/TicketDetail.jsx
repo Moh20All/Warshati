@@ -15,6 +15,7 @@ import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
+import { useHotkeys } from '../../lib/hotkeys'
 
 const statusFlow = {
   DIAGNOSING: ['WAITING_PARTS', 'IN_REPAIR', 'DONE', 'CANCELLED'],
@@ -219,6 +220,12 @@ export default function TicketDetail() {
       })
     }
   }, [ticket, isNew])
+
+  // Ctrl+S saves, Ctrl+P prints (an existing ticket)
+  useHotkeys({
+    'Ctrl+S': () => { if (!saveMutation.isPending) handleSave() },
+    'Ctrl+P': () => { if (!isNew) printTicket() }
+  })
 
   if (!isNew && isLoading) return <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
 

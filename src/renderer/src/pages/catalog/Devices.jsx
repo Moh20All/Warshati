@@ -58,7 +58,7 @@ export default function DevicesPage() {
             )
           })}
         </div>
-        <div className="flex-1 min-w-[220px] max-w-sm"><Input icon={Search} placeholder={t('catalog.search_ph')} value={query} onChange={e => { setQuery(e.target.value); setShown(PAGE) }} /></div>
+        <div className="flex-1 min-w-[220px] max-w-sm"><Input icon={Search} data-search placeholder={t('catalog.search_ph')} value={query} onChange={e => { setQuery(e.target.value); setShown(PAGE) }} /></div>
         <select value={brand} onChange={e => { setBrand(e.target.value); setShown(PAGE) }} className={select}>
           <option value="">{t('catalog.all_brands')}</option>
           {brands.map(b => <option key={b} value={b}>{b}</option>)}

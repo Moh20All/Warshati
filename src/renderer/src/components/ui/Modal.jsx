@@ -14,6 +14,9 @@ const sizeClasses = {
 // only when the last one closes (a modal can open another, e.g. device details from a form).
 const openStack = []
 
+/** True while any dialog is open: page shortcuts pause so nothing happens behind it. */
+export const hasOpenModal = () => openStack.length > 0
+
 export default function Modal({
     open,
     onClose,

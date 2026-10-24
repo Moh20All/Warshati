@@ -84,7 +84,7 @@ export default function Customers() {
       <div className="mb-4 max-w-sm">
         <Input
           placeholder={t('customers.search_placeholder')}
-          icon={Search}
+          icon={Search} data-search
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

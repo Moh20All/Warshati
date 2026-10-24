@@ -1,4 +1,15 @@
 {
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "help": "Afficher les raccourcis clavier",
+    "search": "Aller à la recherche",
+    "close": "Fermer la fenêtre du dessus",
+    "scan": "Ajouter l'article scanné ou le seul trouvé",
+    "print_after_sale": "Imprimer le reçu (après une vente)",
+    "group_anywhere": "Partout",
+    "group_pos": "Caisse",
+    "group_ticket": "Ticket de réparation"
+  },
   "navigation": {
     "dashboard": "Tableau de bord",
     "customers": "Clients",
