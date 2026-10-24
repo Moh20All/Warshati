@@ -520,6 +520,8 @@
       "stat_debt_collected": "Debt Collected",
       "stat_expenses": "Expenses",
       "stat_net_cash": "Net Cash",
+      "stat_cogs": "Parts & goods cost",
+      "stat_profit": "Net Profit",
       "history_title": "Close History",
       "col_date": "Date",
       "col_revenue": "Revenue",

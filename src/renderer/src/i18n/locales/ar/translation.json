@@ -520,6 +520,8 @@
       "stat_debt_collected": "ديون محصلة",
       "stat_expenses": "المصاريف",
       "stat_net_cash": "صافي الصندوق",
+      "stat_cogs": "تكلفة القطع والسلع",
+      "stat_profit": "الربح الصافي",
       "history_title": "سجل الإغلاقات",
       "col_date": "التاريخ",
       "col_revenue": "المداخيل",

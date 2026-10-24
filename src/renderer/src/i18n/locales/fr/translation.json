@@ -520,6 +520,8 @@
       "stat_debt_collected": "Dettes Recouvrées",
       "stat_expenses": "Dépenses",
       "stat_net_cash": "Caisse Nette",
+      "stat_cogs": "Coût des pièces et articles",
+      "stat_profit": "Bénéfice net",
       "history_title": "Historique des Clôtures",
       "col_date": "Date",
       "col_revenue": "Revenu",

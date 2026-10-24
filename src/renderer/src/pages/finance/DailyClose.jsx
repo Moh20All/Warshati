@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle, Printer } from 'lucide-react'
+import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle, Printer, Package } from 'lucide-react'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
@@ -92,7 +92,13 @@ export default function DailyClosePage() {
     { label: t('finance.daily_close.stat_credit_sales'), value: `${(preview?.totalCreditSales || 0).toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning' },
     { label: t('finance.daily_close.stat_debt_collected'), value: `${(preview?.totalDebtCollected || 0).toLocaleString()} ${cur}`, icon: Receipt, color: 'text-primary' },
     { label: t('finance.daily_close.stat_expenses'), value: `${(preview?.totalExpenses || 0).toLocaleString()} ${cur}`, icon: AlertTriangle, color: 'text-destructive' },
-    { label: t('finance.daily_close.stat_net_cash'), value: `${(preview?.netCash || 0).toLocaleString()} ${cur}`, icon: DollarSign, color: preview?.netCash >= 0 ? 'text-success' : 'text-destructive' }
+    { label: t('finance.daily_close.stat_net_cash'), value: `${(preview?.netCash || 0).toLocaleString()} ${cur}`, icon: DollarSign, color: preview?.netCash >= 0 ? 'text-success' : 'text-destructive' },
+    // Owner only (the server leaves these out for staff): what the day really earned
+    // = revenue - cost of the parts/items sold - running expenses (stock purchases are not counted twice)
+    ...(preview?.netProfit !== undefined ? [
+      { label: t('finance.daily_close.stat_cogs'), value: `${(preview.cogs || 0).toLocaleString()} ${cur}`, icon: Package, color: 'text-muted-foreground' },
+      { label: t('finance.daily_close.stat_profit'), value: `${(preview.netProfit || 0).toLocaleString()} ${cur}`, icon: TrendingUp, color: preview.netProfit >= 0 ? 'text-primary' : 'text-destructive', key: true }
+    ] : [])
   ]
 
   const historyColumns = [
@@ -122,14 +128,14 @@ export default function DailyClosePage() {
       </div>
 
       {/* Today's Preview */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+      <div className={`grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 ${stats.length > 6 ? 'lg:grid-cols-4' : 'lg:grid-cols-6'}`}>
         {stats.map(s => (
-          <div key={s.label} className="border border-border rounded-md bg-card p-3">
+          <div key={s.label} className={`border rounded-md bg-card p-3 ${s.key ? 'border-input' : 'border-border'}`}>
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">{s.label}</span>
               <s.icon className={`h-3.5 w-3.5 ${s.color}`} />
             </div>
-            <p className="text-lg font-bold text-foreground">{s.value}</p>
+            <p className={`text-lg font-bold ${s.key ? s.color : 'text-foreground'}`}>{s.value}</p>
           </div>
         ))}
       </div>

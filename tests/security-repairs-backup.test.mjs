@@ -76,6 +76,21 @@ try {
   check('parts locked after invoice', (await o('POST', `/tickets/${ticket.id}/parts`, { inventoryItemId: part.id, quantity: 1 })).status, 400)
   check('repair profit uses part cost (5000 - 1500)', (await o('GET', '/daily-close/preview')).data.netProfit, 3500)
 
+  // Owner's example: 10 000 repair (9 000 parts) paid cash, 24 000 repair (20 000 parts) on credit then paid
+  const repair = async (price, parts, method) => {
+    const tk = (await o('POST', '/tickets', { customerId: cust.id, deviceBrand: 'Samsung', deviceModel: 'A54', issueDesc: 'Screen' })).data.ticket
+    await o('POST', `/tickets/${tk.id}/transition`, { status: 'DONE', finalCost: price, partsCost: parts })
+    return (await o('POST', `/tickets/${tk.id}/transition`, { status: 'DELIVERED', paymentMethod: method })).data.ticket
+  }
+  await repair(10000, 9000, 'CASH')
+  const credit = await repair(24000, 20000, 'CREDIT')
+  const owed = (await o('GET', '/debts')).data.debts.find(d => d.repairTicketId === credit.id)
+  await o('POST', `/debts/${owed.id}/payment`, { amount: 24000 })
+  const day = (await o('GET', '/daily-close/preview')).data
+  check('day: parts cost of the repairs (1500 + 9000 + 20000)', day.cogs, 30500)
+  check('day: net profit = revenue - parts (3500 + 1000 + 4000)', day.netProfit, 8500)
+  check('day: drawer cash counts the cash repair and the paid debt (5000 + 10000 + 24000)', day.netCash, 39000)
+
   // ── Automatic backups ──
   await runAutoBackup(); await runAutoBackup()
   const autoFiles = () => fs.readdirSync(autoBackupDir()).filter(f => f.startsWith('warshati-auto-')).sort()
