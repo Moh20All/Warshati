@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import FeedbackModal from '../FeedbackModal'
+import markTile from '../../assets/brand/mark-trace-tile.svg'
 import { useAuth } from '../../lib/auth'
 
 
@@ -72,10 +73,8 @@ export default function Sidebar() {
     <aside className={`flex flex-col h-screen bg-muted border-e border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
       {/* Brand & Logo */}
       <div className="flex items-center gap-2.5 h-14 px-3.5 shrink-0 bg-inverse">
-        {/* Warshati Icon Mark (36x36) */}
-        <div className="flex justify-center items-center h-9 w-9 rounded-md shrink-0 bg-inverse-raised border border-flux/40" style={{ minWidth: '36px' }}>
-          <span className="text-flux text-xl font-bold leading-none pb-1">و</span>
-        </div>
+        {/* Warshati Trace app tile */}
+        <img src={markTile} alt="Warshati" className="h-8 w-8 shrink-0" />
 
         {/* Text Area */}
         {!collapsed && (

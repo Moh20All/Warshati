@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { Mail, Lock } from 'lucide-react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import markTile from '../assets/brand/mark-trace-tile.svg'
 
 export default function Login() {
     const { t } = useTranslation()
@@ -35,11 +36,9 @@ export default function Login() {
             <div className="w-full max-w-sm animate-fade-in">
                 {/* Logo */}
                 <div className="flex flex-col items-center mb-8">
-                    <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-primary text-flux mb-3">
-                        <span className="text-2xl font-bold leading-none pb-1">و</span>
-                    </div>
-                    <h1 className="text-2xl font-bold text-primary">WARSHATI</h1>
-                    <p className="text-sm font-semibold text-foreground font-arabic mt-0">ورشتي</p>
+                    <img src={markTile} alt="" className="h-[52px] w-[52px] mb-3" />
+                    <h1 className="text-base font-bold tracking-[.08em] text-foreground">WARSHATI</h1>
+                    <p className="text-xl font-bold text-primary font-arabic mt-0">ورشتي</p>
                     <p className="text-sm text-muted-foreground mt-1">{t('auth.slogan')}</p>
                 </div>
 

@@ -6,6 +6,7 @@ import api from '../../lib/api'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
+import markTile from '../../assets/brand/mark-trace-tile.svg'
 
 export default function StoreSettings() {
   const { t, i18n } = useTranslation()
@@ -117,7 +118,7 @@ export default function StoreSettings() {
 
       <div className="border border-border rounded-md bg-card p-6 space-y-5">
         <div className="flex items-center gap-3 pb-4 border-b border-border">
-          <div className="flex items-center justify-center h-10 w-10 rounded-md bg-primary text-primary-foreground font-bold text-lg">R</div>
+          <img src={markTile} alt="" className="h-10 w-10 shrink-0" />
           <div><p className="font-semibold text-foreground">Warshati — ورشتي</p><p className="text-xs text-muted-foreground">Phone Repair & Store Management</p></div>
         </div>
 

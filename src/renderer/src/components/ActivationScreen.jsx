@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ShieldAlert, KeyRound, CheckCircle2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import markTile from '../assets/brand/mark-trace-tile.svg'
 
 export default function ActivationScreen({ onActivated, deactivationMessage }) {
   const { t } = useTranslation()
@@ -45,11 +46,9 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
   return (
     <div className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center p-4">
       {/* Brand Header */}
-      <div className="absolute top-8 left-8 flex items-center gap-3">
-        <div className="w-10 h-10 bg-inverse rounded-lg flex items-center justify-center">
-          <span className="text-flux font-bold text-xl leading-none pb-1">و</span>
-        </div>
-        <span className="text-foreground font-bold text-xl tracking-wide">Warshati</span>
+      <div className="absolute top-6 start-6 flex items-center gap-2.5">
+        <img src={markTile} alt="" className="w-8 h-8" />
+        <span className="text-foreground font-bold text-base">Warshati</span>
       </div>
 
       <div className="max-w-md w-full bg-card rounded-lg overflow-hidden border border-border">
