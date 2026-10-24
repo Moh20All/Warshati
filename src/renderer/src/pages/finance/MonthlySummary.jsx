@@ -19,6 +19,7 @@ import Spinner from '../../components/ui/Spinner'
 import Table from '../../components/ui/Table'
 import { useQuery } from '@tanstack/react-query'
 import { usePrint } from '../../lib/usePrint'
+import { signed } from '../../lib/printKit'
 
 export default function MonthlySummary() {
   const cur = useCurrency()
@@ -64,57 +65,57 @@ export default function MonthlySummary() {
     const storeName = store?.name || 'Warshati — ورشتي'
     
     const html = `
-      <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">
+      <div dir="${dir}" style="padding: 20px; color: #000;">
         <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
           <h1 style="margin:0; font-size:24px;">${storeName}</h1>
-          <h2 style="margin:5px 0 0 0; font-size:18px; color: #666;">MONTHLY SUMMARY / تقرير شهري</h2>
+          <h2 style="margin:5px 0 0 0; font-size:18px; color: #000;">MONTHLY SUMMARY / تقرير شهري</h2>
           <p style="margin:5px 0 0 0; font-size:14px;">Month: ${selectedMonth}</p>
           <p style="margin:2px 0 0 0; font-size:12px;">Generated: ${new Date().toLocaleString()}</p>
         </div>
 
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
-          <div style="border: 1px solid #ddd; padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 3px; text-transform: uppercase;">Total Revenue</div>
+          <div style="border: 1px solid #000; padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 3px; text-transform: uppercase;">Total Revenue</div>
             <div style="font-size: 18px; font-weight: bold;">${summary.totalRevenue.toLocaleString()} ${cur}</div>
           </div>
-          <div style="border: 1px solid #ddd; padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 3px; text-transform: uppercase;">Total Expenses</div>
+          <div style="border: 1px solid #000; padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 3px; text-transform: uppercase;">Total Expenses</div>
             <div style="font-size: 18px; font-weight: bold;">${summary.totalExpenses.toLocaleString()} ${cur}</div>
           </div>
-          <div style="border: 1px solid #ddd; padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 3px; text-transform: uppercase;">Net Profit</div>
-            <div style="font-size: 18px; font-weight: bold; color: ${summary.netProfit >= 0 ? '#10b981' : '#f43f5e'};">${summary.netProfit.toLocaleString()} ${cur}</div>
+          <div style="border: 1px solid #000; padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 3px; text-transform: uppercase;">Net Profit</div>
+            <div style="font-size: 18px; font-weight: bold; ">${signed(summary.netProfit)} ${cur}</div>
           </div>
-          <div style="border: 1px solid #ddd; padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 3px; text-transform: uppercase;">Net Cash</div>
-            <div style="font-size: 18px; font-weight: bold; color: ${summary.netCash >= 0 ? '#10b981' : '#f43f5e'};">${summary.netCash.toLocaleString()} ${cur}</div>
+          <div style="border: 1px solid #000; padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 3px; text-transform: uppercase;">Net Cash</div>
+            <div style="font-size: 18px; font-weight: bold; ">${signed(summary.netCash)} ${cur}</div>
           </div>
-          <div style="border: 1px solid #ddd; padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #666; margin-bottom: 3px; text-transform: uppercase;">Debt Collected</div>
+          <div style="border: 1px solid #000; padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #000; margin-bottom: 3px; text-transform: uppercase;">Debt Collected</div>
             <div style="font-size: 18px; font-weight: bold;">${summary.totalDebtCollected.toLocaleString()} ${cur}</div>
           </div>
         </div>
 
         <div style="margin-bottom: 30px;">
-          <h3 style="font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">Repairs Stats</h3>
+          <h3 style="font-size: 16px; border-bottom: 1px dotted #000; padding-bottom: 5px; margin-bottom: 10px;">Repairs Stats</h3>
           <p>Tickets Received: <strong>${stats.ticketsReceived}</strong></p>
           <p>Tickets Delivered: <strong>${stats.ticketsDelivered}</strong></p>
         </div>
 
         <div>
-          <h3 style="font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px;">Top Items Sold</h3>
+          <h3 style="font-size: 16px; border-bottom: 1px dotted #000; padding-bottom: 5px; margin-bottom: 10px;">Top Items Sold</h3>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
-              <tr style="background: #f9f9f9;">
-                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Item Name</th>
-                <th style="text-align: right; padding: 8px; border-bottom: 1px solid #ddd;">Qty</th>
+              <tr>
+                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #000;">Item Name</th>
+                <th style="text-align: right; padding: 8px; border-bottom: 2px solid #000;">Qty</th>
               </tr>
             </thead>
             <tbody>
               ${topItems.map(item => `
                 <tr>
-                  <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
-                  <td style="text-align: right; padding: 8px; border-bottom: 1px solid #eee;">x${item.quantity}</td>
+                  <td style="padding: 8px; border-bottom: 1px dotted #000;">${item.name}</td>
+                  <td style="text-align: right; padding: 8px; border-bottom: 1px dotted #000;">x${item.quantity}</td>
                 </tr>
               `).join('')}
             </tbody>

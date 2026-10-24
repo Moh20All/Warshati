@@ -53,24 +53,24 @@ export default function DailyClosePage() {
     const storeName = store?.name || 'Warshati — ورشتي'
     
     const html = `
-      <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">
+      <div dir="${dir}" style="padding: 20px; color: #000;">
         <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
           <h1 style="margin:0; font-size:24px;">${storeName}</h1>
-          <h2 style="margin:5px 0 0 0; font-size:18px; color: #666;">DAILY X-REPORT / تقرير Daily Close</h2>
+          <h2 style="margin:5px 0 0 0; font-size:18px; color: #000;">DAILY X-REPORT / تقرير Daily Close</h2>
           <p style="margin:5px 0 0 0; font-size:14px;">Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
         </div>
 
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
           ${stats.map(s => `
-            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
-              <div style="font-size: 12px; color: #666; margin-bottom: 5px; text-transform: uppercase;">${s.label}</div>
+            <div style="border: 1px solid #000; padding: 15px; border-radius: 8px;">
+              <div style="font-size: 12px; color: #000; margin-bottom: 5px; text-transform: uppercase;">${s.label}</div>
               <div style="font-size: 20px; font-weight: bold;">${s.value}</div>
             </div>
           `).join('')}
         </div>
 
         <div style="margin-top: 50px;">
-          <div style="display:flex; justify-content:space-between; border-top: 1px solid #ddd; padding-top: 10px;">
+          <div style="display:flex; justify-content:space-between; border-top: 1px solid #000; padding-top: 10px;">
             <div style="text-align:center; width: 45%;">
               <p style="margin-bottom: 40px;">Manager Signature</p>
               <div style="border-bottom: 1px solid #000; width: 100%;"></div>

@@ -1,5 +1,7 @@
 import { BrowserWindow } from 'electron'
 import log from 'electron-log'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 /**
  * Sanitise raw HTML: strip any existing <html>, <head>, <body> wrappers
@@ -25,14 +27,38 @@ export function pageSizeFromWidth(width) {
   return 'A4'
 }
 
+// Design system print fonts (IBM Plex, OFL), embedded in every printout: the print window is a
+// data: URL page and cannot load the app's font files. Read once; missing files fall back to system fonts.
+const PRINT_FONTS = [
+  ['IBM Plex Sans', 500, 'ibm-plex-sans-latin-500-normal'],
+  ['IBM Plex Sans', 700, 'ibm-plex-sans-latin-700-normal'],
+  ['IBM Plex Sans Arabic', 500, 'ibm-plex-sans-arabic-arabic-500-normal'],
+  ['IBM Plex Sans Arabic', 700, 'ibm-plex-sans-arabic-arabic-700-normal'],
+  ['IBM Plex Mono', 500, 'ibm-plex-mono-latin-500-normal']
+]
+let fontCss = null
+function printFontCss() {
+  if (fontCss !== null) return fontCss
+  fontCss = PRINT_FONTS.map(([family, weight, file]) => {
+    try {
+      const b64 = readFileSync(join(__dirname, '../../assets/fonts', `${file}.woff2`)).toString('base64')
+      return `@font-face { font-family: "${family}"; font-weight: ${weight}; src: url(data:font/woff2;base64,${b64}) format("woff2"); }`
+    } catch {
+      return ''
+    }
+  }).join('\n')
+  return fontCss
+}
+
 /**
- * Wrap sanitised HTML in a print-ready document with monospace font
- * and zero margins.
+ * Wrap sanitised HTML in a print-ready document: Plex Sans 500 (700 for bold),
+ * Plex Mono for document numbers (.p-mono), black only, zero margins.
  */
 export function wrapForPrint(cleanHtml, width) {
   let pageCss = '@page { margin: 0; }'
   if (width === '80mm') pageCss = '@page { margin: 0; size: 80mm 297mm; }'
   if (width === '58mm') pageCss = '@page { margin: 0; size: 58mm 297mm; }'
+  const logo = width === '58mm' ? 30 : 40
 
   return `
     <!DOCTYPE html>
@@ -40,17 +66,25 @@ export function wrapForPrint(cleanHtml, width) {
     <head>
       <meta charset="utf-8">
       <style>
+        ${printFontCss()}
         ${pageCss}
         body {
           margin: 0;
           padding: 4px 8px 4px 14px;
           width: 100%;
           box-sizing: border-box;
-          font-family: 'Courier New', Courier, monospace;
+          font-family: "IBM Plex Sans", "IBM Plex Sans Arabic", Tahoma, sans-serif;
+          font-weight: 500;
           font-size: 11px;
-          line-height: 1.2;
+          line-height: 1.3;
+          color: #000;
+          background: #fff;
         }
-        * { box-sizing: border-box; overflow-wrap: break-word; }
+        [dir="rtl"] { font-family: "IBM Plex Sans Arabic", "IBM Plex Sans", Tahoma, sans-serif; }
+        * { box-sizing: border-box; overflow-wrap: break-word; color: #000; }
+        b, strong, h1, h2, h3, h4, th { font-weight: 700; }
+        .p-mono { font-family: "IBM Plex Mono", Consolas, monospace; font-weight: 500; direction: ltr; unicode-bidi: isolate; }
+        .p-logo { display: block; width: ${logo}px; height: ${logo}px; margin: 0 auto 4px; }
       </style>
     </head>
     <body>

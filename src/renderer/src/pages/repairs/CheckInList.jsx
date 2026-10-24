@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus, Search, Printer, ArrowRight, User } from 'lucide-react'
 import api from '../../lib/api'
+import { PRINT_LOGO } from '../../lib/printKit'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
@@ -65,18 +66,18 @@ export default function CheckInList() {
     const storeAddress = store?.address || ''
     const storePhone = store?.phone || ''
 
-    const html = `<div dir="${dir}" style="font-family:'Courier New', monospace; box-sizing: border-box; width: 100%;">
+    const html = `<div dir="${dir}" style="box-sizing: border-box; width: 100%;">
       <div style="text-align:center; margin-bottom:10px;">
-        <div style="display:inline-block; width:40px; height:40px; background:#000; color:#fff; line-height:40px; border-radius:50%; font-weight:bold; font-size:24px; margin-bottom:5px;">R</div>
+        ${PRINT_LOGO}
         <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
-        ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">📍 ${storeAddress}</p>` : ''}
-        ${storePhone ? `<p style="margin:2px 0; font-size:10px;">📞 ${storePhone}</p>` : ''}
+        ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
+        ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
         <div style="border-top:2px solid #000; margin:10px 0;"></div>
         <p style="margin:0; font-size:13px; font-weight:bold;">${t('repairs.checkin.receipt')} / ايصال</p>
       </div>
       
       <div style="font-size: 11px; margin-bottom: 10px;">
-        <div style="display:flex; justify-content:space-between;"><span>${t('repairs.checkin.ci_num')}:</span><strong>${checkin.checkInNumber}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>${t('repairs.checkin.ci_num')}:</span><strong class="p-mono">${checkin.checkInNumber}</strong></div>
         <div style="display:flex; justify-content:space-between;"><span>${t('repairs.checkin.date')}:</span><span>${new Date(checkin.createdAt).toLocaleString()}</span></div>
       </div>
       

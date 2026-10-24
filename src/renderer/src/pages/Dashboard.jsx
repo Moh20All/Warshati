@@ -67,39 +67,39 @@ export default function Dashboard() {
     const storeName = store?.name || 'Warshati — ورشتي'
     
     const html = `
-      <div dir="${dir}" style="font-family:sans-serif; padding: 20px; color: #333;">
+      <div dir="${dir}" style="padding: 20px; color: #000;">
         <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
           <h1 style="margin:0; font-size:24px;">${storeName}</h1>
-          <h2 style="margin:5px 0 0 0; font-size:18px; color: #666;">DASHBOARD OVERVIEW / نظرة عامة</h2>
+          <h2 style="margin:5px 0 0 0; font-size:18px; color: #000;">DASHBOARD OVERVIEW / نظرة عامة</h2>
           <p style="margin:5px 0 0 0; font-size:14px;">Date: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
         </div>
 
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
           ${kpis.map(k => `
-            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px;">
-              <div style="font-size: 11px; color: #666; margin-bottom: 5px; text-transform: uppercase;">${k.label}</div>
+            <div style="border: 1px solid #000; padding: 15px; border-radius: 8px;">
+              <div style="font-size: 11px; color: #000; margin-bottom: 5px; text-transform: uppercase;">${k.label}</div>
               <div style="font-size: 20px; font-weight: bold;">${k.value}</div>
-              <div style="font-size: 11px; color: #888; margin-top: 3px;">${k.sub || ''}</div>
+              <div style="font-size: 11px; color: #000; margin-top: 3px;">${k.sub || ''}</div>
             </div>
           `).join('')}
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 30px;">
           <div>
-            <h3 style="font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px;">Recent Active Tickets</h3>
+            <h3 style="font-size: 16px; border-bottom: 1px dotted #000; padding-bottom: 5px; margin-bottom: 15px;">Recent Active Tickets</h3>
             ${activeTickets.slice(0, 10).map(t => `
-               <div style="font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px;">
-                  <strong>${t.ticketNumber}</strong> - ${t.customer?.name} (${t.deviceBrand} ${t.deviceModel})
-                  <div style="color: #666;">Status: ${t.status} | Priority: ${t.priority}</div>
+               <div style="font-size: 12px; margin-bottom: 8px; border-bottom: 1px dotted #000; padding-bottom: 5px;">
+                  <strong class="p-mono">${t.ticketNumber}</strong> - ${t.customer?.name} (${t.deviceBrand} ${t.deviceModel})
+                  <div style="color: #000;">Status: ${t.status} | Priority: ${t.priority}</div>
                </div>
             `).join('')}
           </div>
           <div>
-            <h3 style="font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px;">Recent Shop Sales</h3>
+            <h3 style="font-size: 16px; border-bottom: 1px dotted #000; padding-bottom: 5px; margin-bottom: 15px;">Recent Shop Sales</h3>
             ${todaySales.slice(0, 10).map(s => `
-               <div style="font-size: 12px; margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 5px;">
-                  <strong>${s.saleNumber}</strong> - ${s.total.toLocaleString()} ${cur}
-                  <div style="color: #666;">${s.customer?.name || 'Walk-in'} | ${s.paymentMethod}</div>
+               <div style="font-size: 12px; margin-bottom: 8px; border-bottom: 1px dotted #000; padding-bottom: 5px;">
+                  <strong class="p-mono">${s.saleNumber}</strong> - ${s.total.toLocaleString()} ${cur}
+                  <div style="color: #000;">${s.customer?.name || 'Walk-in'} | ${s.paymentMethod}</div>
                </div>
             `).join('')}
           </div>

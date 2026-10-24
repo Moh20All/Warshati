@@ -21,7 +21,7 @@ export function paymentReceiptHtml({ t, dir, store, cur, debt, payment }) {
   const row = (label, value, strong = false) =>
     `<div style="display:flex; justify-content:space-between; margin:3px 0;${strong ? ' font-weight:bold; font-size:14px;' : ''}"><span>${esc(label)}:</span><span>${value}</span></div>`
 
-  return `<div dir="${dir}" style="font-family:'Courier New', monospace; box-sizing:border-box; width:100%;">
+  return `<div dir="${dir}" style="box-sizing:border-box; width:100%;">
     <div style="text-align:center; margin-bottom:10px;">
       <h2 style="margin:0; font-size:16px; text-transform:uppercase;">${esc(store?.name || 'Warshati — ورشتي')}</h2>
       ${store?.address ? `<p style="margin:2px 0; font-size:10px;">${esc(store.address)}</p>` : ''}
@@ -32,7 +32,7 @@ export function paymentReceiptHtml({ t, dir, store, cur, debt, payment }) {
     <div style="font-size:11px;">
       ${row(t('sales.receipt.date'), esc(new Date(payment.paidAt).toLocaleString()))}
       ${row(t('sales.receipt.customer'), esc(debt.customer?.name))}
-      ${row(t('finance.debts.receipt_for'), esc(reference))}
+      ${row(t('finance.debts.receipt_for'), `<span class="p-mono">${esc(reference)}</span>`)}
       <div style="border-top:1px dashed #000; margin:8px 0;"></div>
       ${row(t('finance.debts.receipt_total'), money(debt.totalAmount))}
       ${row(t('finance.debts.receipt_paid'), money(payment.amount), true)}

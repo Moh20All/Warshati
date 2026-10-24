@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Store, Save, Printer } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
+import { PRINT_LOGO } from '../../lib/printKit'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -79,11 +80,11 @@ export default function StoreSettings() {
       const storePhone = form.phone || ''
 
       const html = `
-        <div style="font-family:'Courier New', monospace; box-sizing: border-box; width: 100%; text-align:center;">
-          <div style="display:inline-block; width:40px; height:40px; background:#000; color:#fff; line-height:40px; border-radius:50%; font-weight:bold; font-size:24px; margin-bottom:5px;">R</div>
+        <div style="box-sizing: border-box; width: 100%; text-align:center;">
+          ${PRINT_LOGO}
           <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
-          ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">📍 ${storeAddress}</p>` : ''}
-          ${storePhone ? `<p style="margin:2px 0; font-size:10px;">📞 ${storePhone}</p>` : ''}
+          ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
+          ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
           <div style="border-top:2px solid #000; margin:10px 0;"></div>
           <p style="margin:0; font-size:11px;">Test Print / تجربة الطباعة</p>
           <div style="border-top:1px dashed #000; margin:8px 0;"></div>

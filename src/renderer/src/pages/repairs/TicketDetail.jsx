@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save, Printer, Plus, Trash2, MessageCircle } from 'lucide-react'
 import { sendWhatsApp } from '../../lib/whatsapp'
 import api from '../../lib/api'
+import { PRINT_LOGO } from '../../lib/printKit'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
@@ -157,15 +158,15 @@ export default function TicketDetail() {
     const storePhone = store?.phone || ''
 
     const html = `
-      <div dir="${dir}" style="font-family:'Courier New', monospace; box-sizing: border-box; width: 100%;">
+      <div dir="${dir}" style="box-sizing: border-box; width: 100%;">
         <div style="text-align:center; margin-bottom:15px;">
-          <div style="display:inline-block; width:50px; height:50px; background:#000; color:#fff; line-height:50px; border-radius:50%; font-weight:bold; font-size:28px; margin-bottom:5px;">R</div>
+          ${PRINT_LOGO}
           <h2 style="margin:0; font-size:18px; text-transform: uppercase;">${storeName}</h2>
-          ${storeAddress ? `<p style="margin:2px 0; font-size:11px;">📍 ${storeAddress}</p>` : ''}
-          ${storePhone ? `<p style="margin:2px 0; font-size:11px;">📞 ${storePhone}</p>` : ''}
+          ${storeAddress ? `<p style="margin:2px 0; font-size:11px;">${storeAddress}</p>` : ''}
+          ${storePhone ? `<p style="margin:2px 0; font-size:11px;">${storePhone}</p>` : ''}
           <div style="border-top:2px solid #000; margin:10px 0;"></div>
           <h3 style="margin:0; font-size:15px; font-weight:bold;">REPAIR TICKET / تذكرة إصلاح</h3>
-          <p style="margin:5px 0; font-size:14px; font-weight:bold;">${ticket.ticketNumber}</p>
+          <p class="p-mono" style="margin:5px 0; font-size:16px; font-weight:bold;">${ticket.ticketNumber}</p>
         </div>
 
         <div style="font-size: 12px; margin-bottom: 8px; border: 1px solid #000; padding: 6px; border-radius: 4px;">
@@ -198,7 +199,7 @@ export default function TicketDetail() {
           ${parseFloat(ticket.deposit) > 0 ? `<div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Deposit / العربون:</span><span>-${Number(ticket.deposit).toLocaleString()} ${cur}</span></div>` : ''}
         </div>
         
-        <p style="text-align:center; font-size:10px; margin-top:20px; color: #666;">${t('sales.receipt.footer')}</p>
+        <p style="text-align:center; font-size:10px; margin-top:20px; color: #000;">${t('sales.receipt.footer')}</p>
       </div>
     `
     print.print(html, 'ticket')

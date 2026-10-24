@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Search, Printer, Undo2 } from 'lucide-react'
 import api from '../../lib/api'
+import { PRINT_LOGO } from '../../lib/printKit'
 import { useCurrency } from '../../lib/currency'
 import { useAuth } from '../../lib/auth'
 import { usePrint } from '../../lib/usePrint'
@@ -58,23 +59,23 @@ export default function InvoiceList() {
     const storeAddress = store?.address || ''
     const storePhone = store?.phone || ''
 
-    const html = `<div dir="${dir}" style="font-family:'Courier New', monospace; box-sizing: border-box; width: 100%;">
+    const html = `<div dir="${dir}" style="box-sizing: border-box; width: 100%;">
       <div style="text-align:center; margin-bottom:10px;">
-        <div style="display:inline-block; width:40px; height:40px; background:#000; color:#fff; line-height:40px; border-radius:50%; font-weight:bold; font-size:24px; margin-bottom:5px;">R</div>
+        ${PRINT_LOGO}
         <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
-        ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">📍 ${storeAddress}</p>` : ''}
-        ${storePhone ? `<p style="margin:2px 0; font-size:10px;">📞 ${storePhone}</p>` : ''}
+        ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
+        ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
         <div style="border-top:2px solid #000; margin:10px 0;"></div>
         <p style="margin:0; font-size:13px; font-weight:bold;">${t('sales.receipt.title')} / فاتورة</p>
       </div>
       
       <div style="font-size: 11px; margin-bottom: 10px;">
-        <div style="display:flex; justify-content:space-between;"><span>${t('sales.receipt.inv')}:</span><strong>${s.saleNumber}</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>${t('sales.receipt.inv')}:</span><strong class="p-mono">${s.saleNumber}</strong></div>
         <div style="display:flex; justify-content:space-between;"><span>${t('sales.receipt.date')}:</span><span>${new Date(s.createdAt).toLocaleString()}</span></div>
         ${s.customer ? `<div style="display:flex; justify-content:space-between;"><span>${t('sales.receipt.customer')}:</span><span>${s.customer.name}</span></div>` : ''}
       </div>
       
-      <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-family:monospace; font-size:11px;">
+      <table style="width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px;">
         <thead>
           <tr style="border-bottom:1px dashed #000;">
             <th style="text-align:${dir === 'rtl' ? 'right' : 'left'}; width:45%; padding-bottom:5px;">ITEM</th>
