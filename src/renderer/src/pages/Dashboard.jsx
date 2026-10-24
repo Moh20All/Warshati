@@ -140,11 +140,11 @@ export default function Dashboard() {
       {/* Quick Access Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
         {[
-          { label: t('dashboard.new_ticket'), icon: Plus, path: '/repairs/tickets/new', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' },
-          { label: t('dashboard.new_sale'), icon: ShoppingCart, path: '/sales/pos', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20' },
-          { label: t('dashboard.add_customer'), icon: UserPlus, path: '/customers?new=1', color: 'bg-violet-500/10 text-violet-500 border-violet-500/20 hover:bg-violet-500/20' },
-          { label: t('dashboard.add_expense'), icon: Receipt, path: '/finance/expenses?new=1', color: 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20' },
-          { label: t('dashboard.daily_close'), icon: CalendarCheck, path: '/finance/daily-close', color: 'bg-pink-500/10 text-pink-500 border-pink-500/20 hover:bg-pink-500/20' },
+          { label: t('dashboard.new_ticket'), icon: Plus, path: '/repairs/tickets/new', color: 'bg-primary text-primary-foreground border-primary hover:bg-primary-hover' },
+          { label: t('dashboard.new_sale'), icon: ShoppingCart, path: '/sales/pos', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.add_customer'), icon: UserPlus, path: '/customers?new=1', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.add_expense'), icon: Receipt, path: '/finance/expenses?new=1', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.daily_close'), icon: CalendarCheck, path: '/finance/daily-close', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
         ].map(btn => (
           <button
             key={btn.label}

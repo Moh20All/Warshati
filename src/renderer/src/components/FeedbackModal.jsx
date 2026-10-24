@@ -68,14 +68,14 @@ export default function FeedbackModal({ open, onClose }) {
     >
       {sent ? (
         <div className="text-center py-8">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <CheckCircle2 className="w-16 h-16 text-success mx-auto mb-4" />
           <h2 className="text-xl font-bold text-foreground mb-2">Thank you!</h2>
           <p className="text-muted-foreground">Your feedback was sent.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-100 rounded text-red-700 text-sm">{error}</div>
+            <div className="p-3 bg-destructive-soft rounded-sm text-destructive-soft-foreground text-sm">{error}</div>
           )}
 
           <div className="space-y-1.5">

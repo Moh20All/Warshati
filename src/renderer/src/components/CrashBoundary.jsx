@@ -71,26 +71,26 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#f3f4f6] flex items-center justify-center p-4">
-      <div className="max-w-lg w-full bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+    <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center p-4">
+      <div className="max-w-lg w-full bg-card rounded-lg overflow-hidden border border-border">
         {/* Header */}
-        <div className="bg-[#1a2744] p-6 text-center">
-          <div className="w-14 h-14 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <AlertTriangle className="w-7 h-7 text-amber-400" />
+        <div className="bg-inverse text-inverse-foreground p-6 text-center">
+          <div className="w-14 h-14 bg-inverse-raised rounded-full flex items-center justify-center mx-auto mb-3">
+            <AlertTriangle className="w-7 h-7 text-flux" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-1">Something went wrong</h1>
-          <p className="text-gray-400 text-sm">The app encountered an unexpected error.</p>
+          <h1 className="text-xl font-bold text-inverse-foreground mb-1">Something went wrong</h1>
+          <p className="text-inverse-foreground/75 text-sm">The app encountered an unexpected error.</p>
         </div>
 
         <div className="p-6 space-y-4">
           {sent ? (
             <div className="text-center py-4">
-              <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h2 className="text-lg font-bold text-gray-800 mb-1">Report sent!</h2>
-              <p className="text-gray-500 text-sm mb-4">Thank you for helping us improve Warshati.</p>
+              <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" />
+              <h2 className="text-lg font-bold text-foreground mb-1">Report sent!</h2>
+              <p className="text-muted-foreground text-sm mb-4">Thank you for helping us improve Warshati.</p>
               <button
                 onClick={onRestart}
-                className="px-4 py-2 bg-[#1a2744] text-[#c9a84c] font-medium rounded-lg hover:bg-[#23345a] transition-colors cursor-pointer"
+                className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary-hover transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4 inline mr-2" /> Restart App
               </button>
@@ -106,7 +106,7 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
                   {showStack ? '▼' : '▶'} Error details
                 </button>
                 {showStack && (
-                  <pre className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded text-[10px] text-gray-600 max-h-32 overflow-auto whitespace-pre-wrap">
+                  <pre className="mt-2 p-3 bg-muted border border-border rounded-sm text-[10px] text-muted-foreground font-mono max-h-32 overflow-auto whitespace-pre-wrap">
                     {errorMessage}{'\n\n'}{stackTrace}
                   </pre>
                 )}
@@ -114,7 +114,7 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
 
               {/* Context field */}
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-foreground">
                   What were you doing when this happened?
                 </label>
                 <textarea
@@ -122,7 +122,7 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
                   onChange={(e) => setContext(e.target.value)}
                   placeholder="e.g. I was creating a new repair ticket..."
                   rows={3}
-                  className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9a84c] resize-none"
+                  className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
                 />
               </div>
 
@@ -131,14 +131,14 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
                 <button
                   onClick={handleReport}
                   disabled={sending}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1a2744] text-[#c9a84c] font-medium rounded-lg hover:bg-[#23345a] transition-colors disabled:opacity-70 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground font-medium rounded-sm hover:bg-primary-hover transition-colors disabled:opacity-70 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   {sending ? 'Sending...' : 'Report Problem'}
                 </button>
                 <button
                   onClick={onRestart}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-input bg-card text-foreground font-medium rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-4 h-4" /> Restart App
                 </button>

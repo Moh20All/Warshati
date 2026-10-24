@@ -101,7 +101,7 @@ export default function AboutApp() {
             <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
               
               {/* Icon / Marker */}
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-primary/20 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors group-hover:text-amber-500">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-primary/20 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors group-hover:text-primary-hover">
                 <phase.icon className="h-4 w-4" />
               </div>
               

@@ -71,20 +71,20 @@ export default function Sidebar() {
   return (
     <aside className={`flex flex-col h-screen bg-card border-r border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
       {/* Brand & Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-border shrink-0 bg-[#0c0f1a]">
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-border shrink-0 bg-inverse">
         {/* Warshati Icon Mark (36x36) */}
-        <div className="flex justify-center items-center h-9 w-9 rounded-md shrink-0 bg-[#161b2e] border border-[#c9972b]/40" style={{ minWidth: '36px' }}>
-          <span className="text-[#c9972b] text-xl font-bold leading-none pb-1">و</span>
+        <div className="flex justify-center items-center h-9 w-9 rounded-md shrink-0 bg-inverse-raised border border-flux/40" style={{ minWidth: '36px' }}>
+          <span className="text-flux text-xl font-bold leading-none pb-1">و</span>
         </div>
 
         {/* Text Area */}
         {!collapsed && (
           <div className="flex flex-col justify-center overflow-hidden">
             <div className="flex items-end gap-1.5 leading-none mb-0.5">
-              <span className="font-bold text-white text-base tracking-wide">WARSHATI</span>
-              <span className="text-[#c9972b] text-xs font-semibold mb-[2px]">ورشتي</span>
+              <span className="font-bold text-inverse-foreground text-base tracking-wide">WARSHATI</span>
+              <span className="text-flux text-xs font-semibold mb-[2px] font-arabic">ورشتي</span>
             </div>
-            <span className="text-muted-foreground text-[10px] uppercase font-medium tracking-wider leading-none">
+            <span className="text-inverse-foreground/75 text-[10px] uppercase font-medium tracking-wider leading-none">
               Shop Manager
             </span>
           </div>

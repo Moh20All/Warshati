@@ -74,14 +74,14 @@ export default function UpdaterIndicator() {
                 onClick={() => setIsOpen(!isOpen)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors cursor-pointer ${
                     status === 'downloaded'
-                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                        ? 'bg-flux-soft text-flux-soft-foreground hover:bg-flux'
                         : 'bg-primary/10 text-primary hover:bg-primary/20'
                 }`}
             >
                 {status === 'downloading' ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : status === 'error' ? (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-destructive" />
                 ) : (
                     <HardDriveDownload className={`h-4 w-4 ${status === 'downloaded' ? 'animate-bounce' : ''}`} />
                 )}
@@ -91,7 +91,7 @@ export default function UpdaterIndicator() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-popover border border-border rounded-xl shadow-lg p-4 animate-slide-down z-[100]">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-popover border border-border rounded-md shadow-pop p-4 animate-slide-down z-[100]">
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="font-semibold text-foreground">
                             {status === 'available' && 'Update Available'}
@@ -138,7 +138,7 @@ export default function UpdaterIndicator() {
                     )}
 
                     {status === 'error' && (
-                        <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
+                        <div className="p-3 bg-destructive-soft rounded-sm text-destructive-soft-foreground text-sm">
                             {errorMsg}
                         </div>
                     )}

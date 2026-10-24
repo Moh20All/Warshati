@@ -183,24 +183,24 @@ export default function MonthlySummary() {
               label={t('finance.reports.stat_revenue')} 
               value={summary.totalRevenue} 
               icon={TrendingUp} 
-              color="text-emerald-500" 
-              bg="bg-emerald-500/10"
+              color="text-muted-foreground" 
+              bg="bg-muted"
               currency={t('settings.currency_placeholder')}
             />
             <StatCard 
               label={t('finance.reports.stat_expenses')} 
               value={summary.totalExpenses} 
               icon={TrendingDown} 
-              color="text-rose-500" 
-              bg="bg-rose-500/10"
+              color="text-muted-foreground" 
+              bg="bg-muted"
               currency={t('settings.currency_placeholder')}
             />
             <StatCard 
               label={t('finance.reports.stat_profit')}
               value={summary.netProfit}
               icon={DollarSign} 
-              color="text-blue-500" 
-              bg="bg-blue-500/10"
+              color="text-primary" 
+              bg="bg-primary-soft"
               currency={t('settings.currency_placeholder')}
               isProfit
             />
@@ -208,16 +208,16 @@ export default function MonthlySummary() {
               label={t('finance.reports.stat_collected')} 
               value={summary.totalDebtCollected} 
               icon={TrendingUp} 
-              color="text-amber-500"
-              bg="bg-amber-500/10"
+              color="text-muted-foreground"
+              bg="bg-muted"
               currency={t('settings.currency_placeholder')}
             />
             <StatCard
               label={t('finance.reports.stat_net_cash')}
               value={summary.netCash}
               icon={DollarSign}
-              color="text-sky-500"
-              bg="bg-sky-500/10"
+              color="text-muted-foreground"
+              bg="bg-muted"
               currency={t('settings.currency_placeholder')}
               isProfit
             />
@@ -313,7 +313,7 @@ function StatCard({ label, value, icon: Icon, color, bg, currency, isProfit }) {
       </div>
       <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
       <div className="flex items-baseline gap-1">
-        <span className={`text-xl font-bold ${isNegative ? 'text-rose-500' : 'text-foreground'}`}>
+        <span className={`text-xl font-bold ${isNegative ? 'text-destructive' : 'text-foreground'}`}>
           {value.toLocaleString()}
         </span>
         <span className="text-[10px] text-muted-foreground font-bold">{currency}</span>
