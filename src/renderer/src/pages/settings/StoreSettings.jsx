@@ -109,13 +109,13 @@ export default function StoreSettings() {
     <div className="animate-fade-in max-w-2xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('settings.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('settings.subtitle')}</p>
         </div>
         <Button onClick={handleSave} loading={saveMutation.isPending}><Save className="h-4 w-4" /> {t('settings.save')}</Button>
       </div>
 
-      <div className="border border-border rounded-lg bg-card p-6 space-y-5">
+      <div className="border border-border rounded-md bg-card p-6 space-y-5">
         <div className="flex items-center gap-3 pb-4 border-b border-border">
           <div className="flex items-center justify-center h-10 w-10 rounded-md bg-primary text-primary-foreground font-bold text-lg">R</div>
           <div><p className="font-semibold text-foreground">Warshati — ورشتي</p><p className="text-xs text-muted-foreground">Phone Repair & Store Management</p></div>
@@ -124,7 +124,7 @@ export default function StoreSettings() {
         <div className="grid grid-cols-2 gap-4 pb-4 border-b border-border">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('settings.language')}</label>
-            <select value={i18n.language.split('-')[0]} onChange={handleLanguageChange} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={i18n.language.split('-')[0]} onChange={handleLanguageChange} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="en">{t('settings.english')}</option>
               <option value="fr">{t('settings.french')}</option>
               <option value="ar">{t('settings.arabic')}</option>
@@ -139,7 +139,7 @@ export default function StoreSettings() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('settings.currency')}</label>
-            <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={form.currency} onChange={e => setForm({...form, currency: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="DZD">DZD (Algerian Dinar)</option>
               <option value="USD">USD (US Dollar)</option>
               <option value="EUR">EUR (Euro)</option>
@@ -164,7 +164,7 @@ export default function StoreSettings() {
               <select 
                 value={selectedPrinter} 
                 onChange={e => setSelectedPrinter(e.target.value)} 
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">{t('settings.printer_none')}</option>
                 {printers.map(p => (
@@ -175,21 +175,21 @@ export default function StoreSettings() {
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('settings.receipt_width', 'Receipt Paper Size')}</label>
-              <select value={receiptWidth} onChange={e => setReceiptWidth(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={receiptWidth} onChange={e => setReceiptWidth(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="58mm">58mm</option><option value="80mm">80mm</option><option value="A4">A4</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('settings.ticket_width', 'Ticket Paper Size')}</label>
-              <select value={ticketWidth} onChange={e => setTicketWidth(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={ticketWidth} onChange={e => setTicketWidth(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="58mm">58mm</option><option value="80mm">80mm</option><option value="A4">A4</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('settings.report_width', 'Report Paper Size')}</label>
-              <select value={reportWidth} onChange={e => setReportWidth(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" disabled>
+              <select value={reportWidth} onChange={e => setReportWidth(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" disabled>
                 <option value="A4">A4</option>
               </select>
             </div>

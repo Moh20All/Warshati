@@ -1,25 +1,25 @@
 const colorMap = {
     default: 'bg-secondary text-secondary-foreground',
-    primary: 'bg-primary text-primary-foreground',
-    success: 'bg-success/15 text-success',
-    warning: 'bg-warning/15 text-warning',
-    danger: 'bg-destructive/15 text-destructive',
-    info: 'bg-info/15 text-info',
+    primary: 'bg-primary-soft text-primary-soft-foreground',
+    success: 'bg-success-soft text-success-soft-foreground',
+    warning: 'bg-warning-soft text-warning-soft-foreground',
+    danger: 'bg-destructive-soft text-destructive-soft-foreground',
+    info: 'bg-info-soft text-info-soft-foreground',
     // Ticket statuses
-    DIAGNOSING: 'bg-info/15 text-info',
-    WAITING_PARTS: 'bg-warning/15 text-warning',
-    IN_REPAIR: 'bg-info/15 text-info',
-    DONE: 'bg-success/15 text-success',
-    DELIVERED: 'bg-secondary text-secondary-foreground',
-    CANCELLED: 'bg-destructive/15 text-destructive',
+    DIAGNOSING: 'bg-ticket-diagnosing-bg text-ticket-diagnosing-fg',
+    WAITING_PARTS: 'bg-ticket-waiting-parts-bg text-ticket-waiting-parts-fg',
+    IN_REPAIR: 'bg-ticket-in-repair-bg text-ticket-in-repair-fg',
+    DONE: 'bg-ticket-done-bg text-ticket-done-fg',
+    DELIVERED: 'bg-ticket-delivered-bg text-ticket-delivered-fg',
+    CANCELLED: 'bg-ticket-cancelled-bg text-ticket-cancelled-fg',
     // Priorities
-    LOW: 'bg-secondary text-secondary-foreground',
-    NORMAL: 'bg-info/15 text-info',
-    URGENT: 'bg-destructive/15 text-destructive',
+    LOW: 'bg-priority-low-bg text-priority-low-fg',
+    NORMAL: 'bg-priority-normal-bg text-priority-normal-fg',
+    URGENT: 'bg-priority-urgent-bg text-priority-urgent-fg',
     // Debt
-    OPEN: 'bg-destructive/15 text-destructive',
-    PARTIAL: 'bg-warning/15 text-warning',
-    SETTLED: 'bg-success/15 text-success'
+    OPEN: 'bg-debt-open-bg text-debt-open-fg',
+    PARTIAL: 'bg-debt-partial-bg text-debt-partial-fg',
+    SETTLED: 'bg-debt-settled-bg text-debt-settled-fg'
 }
 
 export default function Badge({
@@ -30,8 +30,8 @@ export default function Badge({
 }) {
     return (
         <span className={`
-      inline-flex items-center gap-1.5 px-2 py-0.5
-      text-xs font-medium rounded-sm
+      inline-flex items-center gap-[5px] h-[22px] px-[9px]
+      text-xs leading-4 font-semibold rounded-full whitespace-nowrap
       ${colorMap[color] || colorMap.default}
       ${className}
     `}>

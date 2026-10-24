@@ -40,7 +40,7 @@ export default function SupplierList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('finance.suppliers.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.suppliers.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.suppliers.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.suppliers.subtitle')}</p></div>
         <Button onClick={() => setShowAdd(true)}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_add')}</Button>
       </div>
       <div className="mb-4 max-w-sm"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
@@ -54,7 +54,7 @@ export default function SupplierList() {
           <Input label={t('finance.suppliers.lbl_name')} value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
           <Input label={t('finance.suppliers.lbl_phone')} value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} icon={Phone} />
           <Input label={t('finance.suppliers.lbl_address')} value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
-          <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t('finance.suppliers.lbl_notes')}</label><textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
+          <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t('finance.suppliers.lbl_notes')}</label><textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" /></div>
         </div>
       </Modal>
     </div>

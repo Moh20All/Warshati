@@ -55,22 +55,22 @@ export default function DeviceCatalogPage() {
   return (
     <div className="animate-fade-in max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('catalog.title')}</h1>
+        <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('catalog.title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('catalog.subtitle')}</p>
       </div>
 
       <div className="space-y-6">
-        <div className="border border-border rounded-lg bg-card p-6 flex items-center gap-3">
-          <div className="p-2 rounded-md bg-primary/10"><BookOpen className="h-5 w-5 text-primary" /></div>
+        <div className="border border-border rounded-md bg-card p-6 flex items-center gap-3">
+          <div className="p-2 rounded-sm bg-primary-soft"><BookOpen className="h-5 w-5 text-primary" /></div>
           <div>
             <p className="font-semibold text-foreground">{status ? t('catalog.devices', { phones: status.counts.PHONE, laptops: status.counts.LAPTOP, consoles: status.counts.CONSOLE }) : '…'}</p>
             {status?.custom > 0 && <p className="text-sm text-muted-foreground">{t('catalog.custom_count', { count: status.custom })}</p>}
           </div>
         </div>
 
-        <div className="border border-border rounded-lg bg-card p-6">
+        <div className="border border-border rounded-md bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-md bg-info/10"><Image className="h-5 w-5 text-info" /></div>
+            <div className="p-2 rounded-sm bg-info-soft"><Image className="h-5 w-5 text-info" /></div>
             <div>
               <h3 className="font-semibold text-foreground">{t('catalog.images_title')}</h3>
               <p className="text-sm text-muted-foreground">{t('catalog.images_desc')}</p>
@@ -98,9 +98,9 @@ export default function DeviceCatalogPage() {
           </div>
         </div>
 
-        <div className="border border-border rounded-lg bg-card p-6">
+        <div className="border border-border rounded-md bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-md bg-warning/10"><PencilLine className="h-5 w-5 text-warning" /></div>
+            <div className="p-2 rounded-sm bg-warning-soft"><PencilLine className="h-5 w-5 text-warning" /></div>
             <h3 className="font-semibold text-foreground">{t('catalog.custom_title')}</h3>
           </div>
           {custom.length === 0

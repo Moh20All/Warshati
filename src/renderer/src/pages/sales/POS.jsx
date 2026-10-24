@@ -239,7 +239,7 @@ export default function POS() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('sales.pos.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('sales.pos.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('sales.pos.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('sales.pos.subtitle')}</p></div>
       </div>
 
       <div className="grid grid-cols-12 gap-6 relative">
@@ -357,7 +357,7 @@ export default function POS() {
           <div className="border border-border rounded-lg p-4 space-y-3">
             <div className="space-y-1.5">
               <label className="text-sm font-medium">{t('sales.pos.lbl_payment_method')}</label>
-              <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="CASH">{t('sales.pos.method_cash')}</option><option value="CREDIT">{t('sales.pos.method_credit')}</option><option value="SPLIT">{t('sales.pos.method_split')}</option>
               </select>
             </div>
@@ -365,16 +365,16 @@ export default function POS() {
               <Input label={t('sales.pos.lbl_amount_paid')} type="number" value={amountPaid} onChange={e => setAmountPaid(e.target.value)} placeholder={total.toString()} />
             )}
             {change > 0 && paymentMethod === 'CASH' && (
-              <div className="bg-success/10 text-success p-2 rounded-md text-center font-bold">{t('sales.pos.change')}: {change.toLocaleString()} {cur}</div>
+              <div className="bg-success-soft text-success-soft-foreground p-2 rounded-sm text-center font-bold">{t('sales.pos.change')}: {change.toLocaleString()} {cur}</div>
             )}
             {cashShort > 0 && (
-              <div className="bg-warning/10 text-warning p-2 rounded-md text-sm space-y-2">
+              <div className="bg-warning-soft text-warning-soft-foreground p-2 rounded-sm text-sm space-y-2">
                 <p className="font-medium">{t('sales.pos.cash_short', { rest: `${cashShort.toLocaleString()} ${cur}` })}</p>
                 <Button size="sm" variant="outline" className="w-full" onClick={() => setPaymentMethod('SPLIT')}>{t('sales.pos.btn_rest_as_debt')}</Button>
               </div>
             )}
             {owed > 0 && cart.length > 0 && (
-              <div className={`p-2 rounded-md text-sm font-medium ${customerId ? 'bg-info/10 text-info' : 'bg-destructive/10 text-destructive'}`}>
+              <div className={`p-2 rounded-sm text-sm font-medium ${customerId ? 'bg-info-soft text-info-soft-foreground' : 'bg-destructive-soft text-destructive-soft-foreground'}`}>
                 {customerId
                   ? t('sales.pos.will_owe', { amount: `${owed.toLocaleString()} ${cur}`, name: customerName })
                   : t('sales.pos.need_customer', { amount: `${owed.toLocaleString()} ${cur}` })}
@@ -382,7 +382,7 @@ export default function POS() {
             )}
           </div>
 
-          <Button onClick={completeSale} loading={saleMutation.isPending} className="w-full h-12 text-base">
+          <Button variant="flux" onClick={completeSale} loading={saleMutation.isPending} className="w-full h-12 text-base">
             {t('sales.pos.btn_complete')}
           </Button>
 
@@ -395,7 +395,7 @@ export default function POS() {
       {/* Print Prompt Modal */}
       <Modal open={showPrintPrompt} onClose={() => setShowPrintPrompt(false)} title={t('sales.pos.prompt_title', 'Sale Completed')} size="sm">
         <div className="py-4 text-center space-y-4">
-          <div className="p-3 bg-success/10 text-success rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
+          <div className="p-3 bg-success-soft text-success rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
             <Printer className="w-8 h-8" />
           </div>
           <p className="text-sm text-foreground">{t('sales.pos.prompt_msg', 'Would you like to print the receipt?')}</p>

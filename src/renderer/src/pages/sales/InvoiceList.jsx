@@ -131,7 +131,7 @@ export default function InvoiceList() {
   }))
 
   const columns = [
-    { key: 'saleNumber', label: t('sales.invoices.col_inv'), render: (v) => <span className="font-medium text-primary">{v}</span> },
+    { key: 'saleNumber', label: t('sales.invoices.col_inv'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
     { key: 'customer', label: t('sales.invoices.col_customer'), render: (v) => v ? <div><p className="font-medium">{v.name}</p><p className="text-xs text-muted-foreground">{v.phone}</p></div> : <span className="text-muted-foreground">{t('sales.invoices.walk_in')}</span> },
     { key: 'total', label: t('sales.invoices.col_total'), render: (v) => <span className="font-medium">{Number(v).toLocaleString()} {cur}</span> },
     { key: 'paymentMethod', label: t('sales.invoices.col_payment'), render: (v) => <Badge>{v}</Badge> },
@@ -155,7 +155,7 @@ export default function InvoiceList() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-start justify-between gap-4">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('sales.invoices.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('sales.invoices.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('sales.invoices.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('sales.invoices.subtitle')}</p></div>
         <ExportButton fileName="warshati-invoices" sheetName={t('sales.invoices.title')} rows={exportRows} columns={[
           { header: t('sales.invoices.col_inv'), key: 'number', width: 18 },
           { header: t('sales.invoices.col_date'), key: 'date', type: 'datetime', width: 18 },

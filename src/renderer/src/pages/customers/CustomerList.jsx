@@ -73,7 +73,7 @@ export default function Customers() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('customers.title')}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('customers.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('customers.subtitle')}</p>
         </div>
         <Button onClick={() => setShowAdd(true)}>
@@ -123,7 +123,7 @@ export default function Customers() {
             <textarea
               value={form.notes}
               onChange={e => setForm({...form, notes: e.target.value})}
-              className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+              className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
               placeholder={t('customers.modal.notes_placeholder')}
             />
           </div>

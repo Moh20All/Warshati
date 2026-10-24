@@ -136,7 +136,7 @@ export default function SupplierDetail() {
     <div className="animate-fade-in">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate('/finance/suppliers')} className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><ArrowLeft className="h-5 w-5" /></button>
-        <div className="flex-1"><h1 className="text-2xl font-bold text-foreground">{supplier.name}</h1>
+        <div className="flex-1"><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{supplier.name}</h1>
           <p className="text-sm text-muted-foreground">{[supplier.phone, supplier.address].filter(Boolean).join(' · ') || t('finance.suppliers.no_contact')}</p>
         </div>
         <Button variant="outline" onClick={() => setOpening({ amount: '', date: today(), notes: '' })}><BookPlus className="h-4 w-4" /> {t('finance.suppliers.btn_opening')}</Button>
@@ -200,12 +200,12 @@ export default function SupplierDetail() {
             </div>
             {poLines.map((line, idx) => (
               <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                <select value={line.inventoryItemId} onChange={e => pickItem(idx, e.target.value)} className="col-span-6 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                <select value={line.inventoryItemId} onChange={e => pickItem(idx, e.target.value)} className="col-span-6 h-9 rounded-sm border border-input bg-popover px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="">{t('finance.suppliers.po_select_item')}</option>
                   {(items || []).map(i => <option key={i.id} value={i.id}>{i.name}{i.brand ? ` (${i.brand} ${i.model || ''})` : ''}</option>)}
                 </select>
-                <input type="number" min="1" value={line.quantity} onChange={e => setLine(idx, { quantity: e.target.value })} className="col-span-2 h-9 rounded-md border border-input bg-background px-2 text-sm" />
-                <input type="number" min="0" value={line.unitCost} onChange={e => setLine(idx, { unitCost: e.target.value })} className="col-span-3 h-9 rounded-md border border-input bg-background px-2 text-sm" />
+                <input type="number" min="1" value={line.quantity} onChange={e => setLine(idx, { quantity: e.target.value })} className="col-span-2 h-9 rounded-sm border border-input bg-popover px-2 text-sm" />
+                <input type="number" min="0" value={line.unitCost} onChange={e => setLine(idx, { unitCost: e.target.value })} className="col-span-3 h-9 rounded-sm border border-input bg-popover px-2 text-sm" />
                 <button type="button" onClick={() => setPoLines(poLines.filter((_, i) => i !== idx))} disabled={poLines.length === 1} className="col-span-1 p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-30 cursor-pointer"><Trash2 className="h-4 w-4" /></button>
               </div>
             ))}
@@ -213,7 +213,7 @@ export default function SupplierDetail() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('finance.suppliers.po_payment')}</label>
-            <select value={poPayment} onChange={e => setPoPayment(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={poPayment} onChange={e => setPoPayment(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="CREDIT">{t('finance.suppliers.po_pay_credit')}</option>
               <option value="CASH">{t('finance.suppliers.po_pay_cash')}</option>
             </select>

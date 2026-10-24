@@ -50,21 +50,21 @@ export default function DevicePicker({ value, onChange, categories = DEVICE_CATE
 
   const manualToggle = (
     <button type="button" disabled={disabled} onClick={() => setManual(!manual)}
-      className="inline-flex items-center gap-1 text-xs text-primary hover:underline cursor-pointer disabled:opacity-50">
+      className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer disabled:opacity-50">
       {manual ? <><List className="h-3.5 w-3.5" /> {t('catalog.choose_from_list')}</> : <><PencilLine className="h-3.5 w-3.5" /> {t('catalog.type_manually')}</>}
     </button>
   )
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-3 p-3 border border-border rounded-md bg-card">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="inline-flex rounded-md border border-input p-0.5 bg-muted/40">
+        <div className="inline-flex gap-0.5 p-[3px] rounded-full border border-border bg-muted">
           {categories.map(c => {
             const Icon = ICONS[c]
             return (
               <button key={c} type="button" disabled={disabled}
                 onClick={() => c !== category && onChange({ category: c, brand: '', model: '' }, null)}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium cursor-pointer disabled:cursor-not-allowed ${c === category ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+                className={`inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-xs cursor-pointer disabled:cursor-not-allowed ${c === category ? 'bg-card text-foreground font-semibold ring-1 ring-input' : 'font-medium text-muted-foreground hover:text-foreground'}`}>
                 <Icon className="h-3.5 w-3.5" /> {t(`catalog.categories.${c}`)}
               </button>
             )
@@ -73,7 +73,7 @@ export default function DevicePicker({ value, onChange, categories = DEVICE_CATE
         <div className="flex items-center gap-3">
           {!manual && selectedId && (
             <button type="button" onClick={() => setDetails(devices.find(d => d.id === selectedId))}
-              className="inline-flex items-center gap-1 text-xs text-primary hover:underline cursor-pointer">
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline cursor-pointer">
               <Info className="h-3.5 w-3.5" /> {t('catalog.details')}
             </button>
           )}
@@ -97,7 +97,7 @@ export default function DevicePicker({ value, onChange, categories = DEVICE_CATE
             onChange={(_, opt) => opt ? set({ brand: opt.device.brand, model: opt.device.model }, opt.device) : set({ model: '' })}
             footer={(close, query) => (
               <button type="button" onMouseDown={(e) => { e.preventDefault(); close(); setManual(true); if (query) set({ model: query }) }}
-                className="w-full text-start px-3 py-2 text-xs text-primary hover:bg-accent cursor-pointer inline-flex items-center gap-1">
+                className="w-full text-start px-2 py-2 text-[13px] font-semibold text-primary hover:bg-accent rounded-sm cursor-pointer inline-flex items-center gap-1.5">
                 <PencilLine className="h-3.5 w-3.5" /> {query ? t('catalog.use_typed', { text: query }) : t('catalog.not_in_list')}
               </button>
             )} />

@@ -108,7 +108,7 @@ export default function DailyClosePage() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('finance.daily_close.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.daily_close.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.daily_close.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.daily_close.subtitle')}</p></div>
         <div className="flex gap-2">
           {preview && (
             <Button variant="outline" onClick={printDailyReport}><Printer className="h-4 w-4" /> {t('common.print', 'Print Report')}</Button>
@@ -124,7 +124,7 @@ export default function DailyClosePage() {
       {/* Today's Preview */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
         {stats.map(s => (
-          <div key={s.label} className="border border-border rounded-lg bg-card p-3">
+          <div key={s.label} className="border border-border rounded-md bg-card p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">{s.label}</span>
               <s.icon className={`h-3.5 w-3.5 ${s.color}`} />

@@ -37,12 +37,12 @@ export default function DevicesPage() {
   }, [devices, query, brand, rating, sort])
 
   const switchCategory = (c) => { setCategory(c); setBrand(''); setRating(''); setSort('name'); setShown(PAGE) }
-  const select = 'h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
+  const select = 'h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('catalog.browse_title')}</h1>
+        <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('catalog.browse_title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">{t('catalog.browse_subtitle')}</p>
       </div>
 
@@ -86,7 +86,7 @@ export default function DevicesPage() {
               const image = catalogImageSrc(d.imageFile)
               return (
                 <button key={d.id} type="button" onClick={() => setOpen(d)}
-                  className="text-start border border-border rounded-lg bg-card p-3 hover:border-primary/50 hover:shadow-sm transition cursor-pointer flex gap-3">
+                  className="text-start border border-border rounded-md bg-card p-3 hover:border-primary/50 hover:shadow-sm transition cursor-pointer flex gap-3">
                   <div className="h-16 w-16 shrink-0 rounded-md bg-muted flex items-center justify-center overflow-hidden">
                     {image ? <img src={image} alt="" loading="lazy" className="h-full w-full object-contain" /> : <Icon className="h-6 w-6 text-muted-foreground" />}
                   </div>

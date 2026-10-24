@@ -82,7 +82,7 @@ export default function TicketList() {
   const daysSince = (date) => Math.floor((Date.now() - new Date(date).getTime()) / 86400000)
 
   const columns = [
-    { key: 'ticketNumber', label: t('repairs.tickets.ticket_num'), render: (v) => <span className="font-medium text-primary">{v}</span> },
+    { key: 'ticketNumber', label: t('repairs.tickets.ticket_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
     { key: 'customer', label: t('repairs.tickets.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground">{v?.phone || ''}</p></div> },
     { key: 'deviceBrand', label: t('repairs.tickets.device'), render: (v, r) => `${v} ${r.deviceModel}` },
     { key: 'status', label: t('repairs.tickets.status'), render: (v) => <Badge color={v}>{t(`repairs.statuses.${v}`)}</Badge> },
@@ -124,13 +124,13 @@ export default function TicketList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('repairs.tickets.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tickets.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.tickets.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tickets.subtitle')}</p></div>
         <Button onClick={() => navigate('/repairs/tickets/new')}><Plus className="h-4 w-4" /> {t('repairs.tickets.new')}</Button>
       </div>
 
       <div className="flex items-center gap-3 mb-4">
         <div className="max-w-sm flex-1"><Input placeholder={t('repairs.tickets.search')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('repairs.tickets.all_statuses')}</option>
           {statusOptions.filter(Boolean).map(s => <option key={s} value={s}>{t(`repairs.statuses.${s}`)}</option>)}
         </select>

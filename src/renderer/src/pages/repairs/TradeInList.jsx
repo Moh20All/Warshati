@@ -73,12 +73,12 @@ export default function TradeInList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('repairs.tradeins.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tradeins.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.tradeins.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tradeins.subtitle')}</p></div>
         <Button onClick={() => setShowForm(true)}><Plus className="h-4 w-4" /> {t('repairs.tradeins.new')}</Button>
       </div>
 
       <div className="mb-4">
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('repairs.tradeins.all')}</option><option value="APPRAISED">{t('repairs.statuses.APPRAISED')}</option><option value="ACCEPTED">{t('repairs.statuses.ACCEPTED')}</option><option value="REJECTED">{t('repairs.statuses.REJECTED')}</option>
         </select>
       </div>
@@ -87,7 +87,7 @@ export default function TradeInList() {
         : <Table columns={columns} data={data || []} emptyTitle={t('repairs.tradeins.empty_title')} emptyDescription={t('repairs.tradeins.empty_desc')} />}
 
       <Modal open={showForm} onClose={() => setShowForm(false)} title={t('repairs.tradeins.modal_title')} size="lg"
-        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>{t('repairs.tradeins.cancel')}</Button><Button onClick={() => createMutation.mutate({...form, appraisedValue: parseFloat(form.appraisedValue)})} loading={createMutation.isPending} disabled={!form.customerName || !form.brand || !form.model || !form.appraisedValue}>{t('repairs.tradeins.btn_appraise')}</Button></>}
+        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>{t('repairs.tradeins.cancel')}</Button><Button variant="flux" onClick={() => createMutation.mutate({...form, appraisedValue: parseFloat(form.appraisedValue)})} loading={createMutation.isPending} disabled={!form.customerName || !form.brand || !form.model || !form.appraisedValue}>{t('repairs.tradeins.btn_appraise')}</Button></>}
       >
         <div className="space-y-4">
           <Input label={t('repairs.tradeins.lbl_customer')} value={form.customerName} onChange={e => setForm({...form, customerName: e.target.value})} icon={User} required />
@@ -102,7 +102,7 @@ export default function TradeInList() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('repairs.tradeins.lbl_condition')}</label>
-              <select value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 {conditions.map(c => <option key={c} value={c}>{t(`repairs.conditions.${c}`)}</option>)}
               </select>
             </div>
@@ -110,7 +110,7 @@ export default function TradeInList() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('repairs.tradeins.lbl_payout')}</label>
-            <select value={form.payoutMethod} onChange={e => setForm({...form, payoutMethod: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={form.payoutMethod} onChange={e => setForm({...form, payoutMethod: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="CASH">{t('repairs.tradeins.payout_cash')}</option>
               <option value="STORE_CREDIT">{t('repairs.tradeins.payout_credit')}</option>
             </select>

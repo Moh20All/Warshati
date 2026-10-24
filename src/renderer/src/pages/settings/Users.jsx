@@ -130,7 +130,7 @@ export default function Users() {
         <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
+                    <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('users.title')}</h1>
                     <p className="text-sm text-muted-foreground mt-1">{t('users.subtitle')}</p>
                 </div>
                 <Button onClick={() => setShowAddModal(true)}>
@@ -253,7 +253,7 @@ function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues,
                     <select
                         value={form.role}
                         onChange={(e) => setForm({ ...form, role: e.target.value })}
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                        className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                     >
                         <option value="STAFF">{t('users.role_staff')}</option>
                         <option value="OWNER">{t('users.role_owner')}</option>

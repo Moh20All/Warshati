@@ -236,7 +236,7 @@ export default function TicketDetail() {
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate('/repairs/tickets')} className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><ArrowLeft className="h-5 w-5" /></button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">{isNew ? t('repairs.details.new') : ticket?.ticketNumber}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{isNew ? t('repairs.details.new') : ticket?.ticketNumber}</h1>
           {ticket && <div className="flex items-center gap-2 mt-1">
             <Badge color={ticket.status}>{t(`repairs.statuses.${ticket.status}`)}</Badge>
             <Badge color={ticket.priority}>{t(`repairs.priorities.${ticket.priority}`)}</Badge>
@@ -268,7 +268,7 @@ export default function TicketDetail() {
 
       {/* Customer info */}
       {isNew ? (
-        <div className="grid grid-cols-2 gap-4 mb-4 p-4 border border-border rounded-lg bg-card">
+        <div className="grid grid-cols-2 gap-4 mb-4 p-4 border border-border rounded-md bg-card">
           <Input label={`${t('repairs.details.lbl_name')} *`} value={form.customerName} onChange={e => { setForm({...form, customerName: e.target.value}); setMissingField(null) }} placeholder={t('repairs.details.ph_name')} autoFocus
             error={missingField === 'customer' ? t('repairs.details.err_missing_customer') : undefined} />
           <Input label={t('repairs.details.lbl_phone')} value={form.customerPhone} onChange={e => setForm({...form, customerPhone: e.target.value})} placeholder={t('repairs.details.ph_phone')} />
@@ -297,14 +297,14 @@ export default function TicketDetail() {
       </div>
       <div className="space-y-1.5 mb-4">
         <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_diag')}</label>
-        <textarea value={form.diagnosis} onChange={e => setForm({...form, diagnosis: e.target.value})} className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_diag')} />
+        <textarea value={form.diagnosis} onChange={e => setForm({...form, diagnosis: e.target.value})} className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_diag')} />
       </div>
       <div className="space-y-1.5 mb-4">
         <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_parts_notes')}</label>
-        <textarea value={form.partsUsedNotes} onChange={e => setForm({...form, partsUsedNotes: e.target.value})} className="flex min-h-[40px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_parts_notes')} />
+        <textarea value={form.partsUsedNotes} onChange={e => setForm({...form, partsUsedNotes: e.target.value})} className="flex min-h-[40px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_parts_notes')} />
       </div>
       {!isNew && (
-        <div className="mb-4 p-4 border border-border rounded-lg bg-card space-y-3">
+        <div className="mb-4 p-4 border border-border rounded-md bg-card space-y-3">
           <div>
             <h3 className="text-sm font-semibold text-foreground">{t('repairs.details.parts_title')}</h3>
             <p className="text-xs text-muted-foreground">{t('repairs.details.parts_desc')}</p>
@@ -328,13 +328,13 @@ export default function TicketDetail() {
             )}
           {ticket && !ticket.sale && !['DELIVERED', 'CANCELLED'].includes(ticket.status) && (
             <div className="flex items-center gap-2">
-              <select value={partPick.inventoryItemId} onChange={e => setPartPick({ ...partPick, inventoryItemId: e.target.value })} className="flex-1 h-9 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={partPick.inventoryItemId} onChange={e => setPartPick({ ...partPick, inventoryItemId: e.target.value })} className="flex-1 h-9 rounded-sm border border-input bg-popover px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">{t('repairs.details.parts_select')}</option>
                 {(stockItems || []).filter(i => i.quantity > 0 && ['PART', 'ACCESSORY'].includes(i.type)).map(i => (
                   <option key={i.id} value={i.id}>{i.name}{i.model ? ` (${i.model})` : ''} — {i.quantity} {t('repairs.details.parts_in_stock')}</option>
                 ))}
               </select>
-              <input type="number" min="1" value={partPick.quantity} onChange={e => setPartPick({ ...partPick, quantity: e.target.value })} aria-label={t('repairs.details.parts_qty')} className="w-20 h-9 rounded-md border border-input bg-background px-2 text-sm" />
+              <input type="number" min="1" value={partPick.quantity} onChange={e => setPartPick({ ...partPick, quantity: e.target.value })} aria-label={t('repairs.details.parts_qty')} className="w-20 h-9 rounded-sm border border-input bg-popover px-2 text-sm" />
               <Button size="sm" onClick={() => addPartMutation.mutate({ inventoryItemId: partPick.inventoryItemId, quantity: parseInt(partPick.quantity) })} disabled={!partPick.inventoryItemId} loading={addPartMutation.isPending}><Plus className="h-3.5 w-3.5" /> {t('repairs.details.parts_add')}</Button>
             </div>
           )}
@@ -349,7 +349,7 @@ export default function TicketDetail() {
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_priority')}</label>
-          <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+          <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="LOW">{t('repairs.priorities.LOW')}</option><option value="NORMAL">{t('repairs.priorities.NORMAL')}</option><option value="URGENT">{t('repairs.priorities.URGENT')}</option>
           </select>
         </div>

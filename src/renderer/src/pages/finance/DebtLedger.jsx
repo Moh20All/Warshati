@@ -144,7 +144,7 @@ export default function DebtLedger() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-start justify-between gap-4">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('finance.debts.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.debts.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.debts.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.debts.subtitle')}</p></div>
         <div className="flex gap-2">
         {isOwner && <Button onClick={() => { setDebtForm(emptyDebt()); setAddOpen(true) }}><Plus className="h-4 w-4" /> {t('finance.debts.btn_add_debt')}</Button>}
         <ExportButton fileName="warshati-debts" sheetName={t('finance.debts.title')} columns={[
@@ -166,7 +166,7 @@ export default function DebtLedger() {
 
       <div className="flex items-center gap-3 mb-4">
         <div className="max-w-sm flex-1"><Input placeholder={t('finance.debts.search_ph')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('finance.debts.filter_all')}</option><option value="OPEN">{t('finance.debts.filter_open')}</option><option value="PARTIAL">{t('finance.debts.filter_partial')}</option><option value="SETTLED">{t('finance.debts.filter_settled')}</option>
         </select>
       </div>

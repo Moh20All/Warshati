@@ -16,16 +16,16 @@ export default function Table({
     }
 
     return (
-        <div className="w-full overflow-auto border border-border rounded-lg">
-            <table className="w-full text-sm">
+        <div className="w-full overflow-auto border border-border rounded-md bg-card">
+            <table className="w-full text-[13px] leading-5 border-collapse">
                 <thead>
-                    <tr className="border-b border-border bg-muted/50">
+                    <tr className="border-b border-border bg-muted">
                         {columns.map((col, c) => (
                             <th
                                 // Several columns may read the same field (e.g. _count), so keys include the position
                                 key={col.id || `${col.key}-${c}`}
                                 className={`
-                  px-4 py-3 text-left font-medium text-muted-foreground
+                  px-3 py-2 text-start text-xs font-semibold text-muted-foreground whitespace-nowrap
                   ${col.sortable ? 'cursor-pointer select-none hover:text-foreground' : ''}
                   ${col.className || ''}
                 `}
@@ -48,14 +48,13 @@ export default function Table({
                         <tr
                             key={row.id || i}
                             className={`
-                border-b border-border last:border-0
-                hover:bg-muted/50 transition-colors duration-100
-                ${onRowClick ? 'cursor-pointer' : ''}
+                border-b border-border last:border-0 transition-colors duration-100
+                ${onRowClick ? 'cursor-pointer hover:bg-accent' : ''}
               `}
                             onClick={() => onRowClick?.(row)}
                         >
                             {columns.map((col, c) => (
-                                <td key={col.id || `${col.key}-${c}`} className={`px-4 py-3 ${col.className || ''}`}>
+                                <td key={col.id || `${col.key}-${c}`} className={`px-3 py-[9px] align-middle ${col.className || ''}`}>
                                     {col.render ? col.render(row[col.key], row) : row[col.key]}
                                 </td>
                             ))}

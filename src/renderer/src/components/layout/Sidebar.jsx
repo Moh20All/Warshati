@@ -69,9 +69,9 @@ export default function Sidebar() {
   ].map(section => ({ ...section, items: section.items.filter(i => isOwner || !i.ownerOnly) }))
 
   return (
-    <aside className={`flex flex-col h-screen bg-card border-r border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
+    <aside className={`flex flex-col h-screen bg-muted border-e border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>
       {/* Brand & Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b border-border shrink-0 bg-inverse">
+      <div className="flex items-center gap-2.5 h-14 px-3.5 shrink-0 bg-inverse">
         {/* Warshati Icon Mark (36x36) */}
         <div className="flex justify-center items-center h-9 w-9 rounded-md shrink-0 bg-inverse-raised border border-flux/40" style={{ minWidth: '36px' }}>
           <span className="text-flux text-xl font-bold leading-none pb-1">و</span>
@@ -92,28 +92,28 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2">
+      <nav className="flex-1 overflow-y-auto py-1.5 px-2">
         {navigation.map((section) => (
-          <div key={section.group} className="mb-4">
+          <div key={section.group} className="mb-2">
             {!collapsed && (
-              <p className="px-2 mb-1 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              <p className="px-2.5 pt-2 pb-[3px] text-[11px] leading-[14px] font-semibold text-muted-foreground uppercase tracking-[.04em] rtl:normal-case rtl:tracking-normal">
                 {section.group}
               </p>
             )}
-            <div className="space-y-0.5">
+            <div className="flex flex-col gap-px">
               {section.items.map((item) => (
                 <NavLink
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) => `
-                    flex items-center gap-2.5 px-2.5 py-1.5 rounded-md
-                    text-sm transition-colors duration-100
-                    ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}
+                    flex items-center gap-2.5 h-[30px] px-2.5 rounded-sm
+                    text-[13px] font-medium transition-colors duration-100
+                    ${isActive ? 'bg-primary-soft text-primary-soft-foreground font-semibold [&>svg]:text-primary' : 'text-foreground hover:bg-accent hover:text-accent-foreground [&>svg]:text-muted-foreground'}
                     ${collapsed ? 'justify-center' : ''}
                   `}
                   title={collapsed ? item.name : undefined}
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <item.icon className="h-[17px] w-[17px] shrink-0" />
                   {!collapsed && <span>{item.name}</span>}
                 </NavLink>
               ))}
@@ -122,12 +122,12 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-border p-2 shrink-0 space-y-1">
-        <button onClick={() => setShowFeedback(true)} className={`flex items-center gap-2.5 w-full px-2.5 py-1.5 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`} title={collapsed ? 'Send Feedback' : undefined}>
+      <div className="border-t border-border p-1.5 px-2 shrink-0 flex flex-col gap-1">
+        <button onClick={() => setShowFeedback(true)} className={`flex items-center gap-2.5 w-full h-[30px] px-2.5 rounded-sm text-[13px] font-medium text-foreground hover:bg-accent hover:text-accent-foreground [&>svg]:text-muted-foreground transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`} title={collapsed ? 'Send Feedback' : undefined}>
           <MessageSquarePlus className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Send Feedback</span>}
         </button>
-        <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center w-full py-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer">
+        <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center w-full h-[30px] rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer rtl:[&>svg]:-scale-x-100">
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
       </div>

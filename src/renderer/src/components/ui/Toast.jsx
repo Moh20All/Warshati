@@ -10,11 +10,12 @@ const icons = {
     info: Info
 }
 
+// Design system: a card with a coloured icon, so the message text stays readable
 const colors = {
-    success: 'border-success/30 bg-success/10 text-success',
-    error: 'border-destructive/30 bg-destructive/10 text-destructive',
-    warning: 'border-warning/30 bg-warning/10 text-warning',
-    info: 'border-info/30 bg-info/10 text-info'
+    success: 'text-success',
+    error: 'text-destructive',
+    warning: 'text-warning',
+    info: 'text-info'
 }
 
 let toastId = 0
@@ -50,23 +51,19 @@ export function ToastProvider({ children }) {
         <ToastContext.Provider value={toast}>
             {children}
             {/* Toast container */}
-            <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
+            <div className="fixed bottom-6 end-6 z-[100] flex flex-col gap-2">
                 {toasts.map((t) => {
                     const Icon = icons[t.type] || icons.info
                     return (
                         <div
                             key={t.id}
-                            className={`
-                flex items-start gap-3 px-4 py-3 rounded-md
-                border shadow-sm animate-slide-up
-                ${colors[t.type] || colors.info}
-              `}
+                            className="flex items-start gap-2.5 min-w-[280px] max-w-[380px] px-3 py-2.5 rounded-md bg-popover text-popover-foreground border border-border shadow-pop animate-slide-up"
                         >
-                            <Icon className="h-4 w-4 mt-0.5 shrink-0" />
-                            <p className="text-sm flex-1">{t.message}</p>
+                            <Icon className={`h-5 w-5 shrink-0 ${colors[t.type] || colors.info}`} />
+                            <p className="text-[13px] leading-[18px] font-medium flex-1 pt-px">{t.message}</p>
                             <button
                                 onClick={() => removeToast(t.id)}
-                                className="shrink-0 hover:opacity-70 transition-opacity cursor-pointer"
+                                className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                             >
                                 <X className="h-3.5 w-3.5" />
                             </button>

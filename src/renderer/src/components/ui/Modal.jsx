@@ -4,10 +4,10 @@ import { X } from 'lucide-react'
 import Button from './Button'
 
 const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl'
+    sm: 'max-w-[400px]',
+    md: 'max-w-[520px]',
+    lg: 'max-w-[720px]',
+    xl: 'max-w-[960px]'
 }
 
 // Open modals, newest last: Escape closes only the top one, and the page scroll comes back
@@ -50,7 +50,7 @@ export default function Modal({
     return createPortal(
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-overlay animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-overlay animate-fade-in"
             onClick={(e) => {
                 if (e.target === overlayRef.current) onClose()
             }}
@@ -58,12 +58,12 @@ export default function Modal({
             <div className={`
         w-full ${sizeClasses[size] || sizeClasses.md}
         bg-card text-card-foreground rounded-lg
-        border border-border shadow-lg animate-slide-up
+        shadow-dialog animate-slide-up
         ${className}
       `}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-                    <h2 className="text-lg font-semibold">{title}</h2>
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+                    <h2 className="flex-1 text-base leading-6 font-semibold">{title}</h2>
                     <button
                         onClick={onClose}
                         className="rounded-sm p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
@@ -73,13 +73,13 @@ export default function Modal({
                 </div>
 
                 {/* Body */}
-                <div className="px-6 py-4">
+                <div className="p-5">
                     {children}
                 </div>
 
                 {/* Footer */}
                 {footer && (
-                    <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
+                    <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border">
                         {footer}
                     </div>
                 )}

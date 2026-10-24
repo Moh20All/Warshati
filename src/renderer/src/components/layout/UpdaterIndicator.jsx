@@ -75,7 +75,7 @@ export default function UpdaterIndicator() {
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors cursor-pointer ${
                     status === 'downloaded'
                         ? 'bg-flux-soft text-flux-soft-foreground hover:bg-flux'
-                        : 'bg-primary/10 text-primary hover:bg-primary/20'
+                        : 'bg-flux-soft text-flux-soft-foreground hover:bg-flux'
                 }`}
             >
                 {status === 'downloading' ? (

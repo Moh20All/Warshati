@@ -106,7 +106,7 @@ export default function CheckInList() {
   }
 
   const columns = [
-    { key: 'checkInNumber', label: t('repairs.checkin.ci_num'), render: (v) => <span className="font-medium text-primary">{v}</span> },
+    { key: 'checkInNumber', label: t('repairs.checkin.ci_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
     { key: 'customer', label: t('repairs.checkin.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p>{v?.phone && <p className="text-xs text-muted-foreground">{v.phone}</p>}</div> },
     { key: 'deviceBrand', label: t('repairs.checkin.device'), render: (v, r) => `${v} ${r.deviceModel}` },
     { key: 'issueDesc', label: t('repairs.checkin.issue'), render: (v) => <span className="truncate max-w-[200px] inline-block">{v}</span> },
@@ -128,13 +128,13 @@ export default function CheckInList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('repairs.checkin.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.checkin.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.checkin.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.checkin.subtitle')}</p></div>
         <Button onClick={() => { resetForm(); setShowForm(true) }}><Plus className="h-4 w-4" /> {t('repairs.checkin.new')}</Button>
       </div>
 
       <div className="flex items-center gap-3 mb-4">
         <div className="max-w-sm flex-1"><Input placeholder={t('repairs.checkin.search')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} /></div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('repairs.checkin.all')}</option><option value="pending">{t('repairs.checkin.pending')}</option><option value="converted">{t('repairs.checkin.converted')}</option>
         </select>
       </div>
@@ -144,7 +144,7 @@ export default function CheckInList() {
 
       {/* New Check-In Modal */}
       <Modal open={showForm} onClose={() => setShowForm(false)} title={t('repairs.checkin.modal_title')} size="lg"
-        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>{t('repairs.checkin.cancel')}</Button><Button onClick={handleCreate} loading={createMutation.isPending} disabled={!form.customerName}>{t('repairs.checkin.create_btn')}</Button></>}
+        footer={<><Button variant="outline" onClick={() => setShowForm(false)}>{t('repairs.checkin.cancel')}</Button><Button variant="flux" onClick={handleCreate} loading={createMutation.isPending} disabled={!form.customerName}>{t('repairs.checkin.create_btn')}</Button></>}
       >
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="p-3 bg-muted rounded-md space-y-3">
@@ -162,7 +162,7 @@ export default function CheckInList() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('repairs.checkin.lbl_issue')}</label>
-            <textarea value={form.issueDesc} onChange={e => setForm({...form, issueDesc: e.target.value})} className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.checkin.ph_issue')} required />
+            <textarea value={form.issueDesc} onChange={e => setForm({...form, issueDesc: e.target.value})} className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.checkin.ph_issue')} required />
           </div>
           <Input label={t('repairs.checkin.lbl_condition')} value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} placeholder={t('repairs.checkin.ph_condition')} />
         </form>

@@ -39,7 +39,7 @@ export default function CatalogImagesPrompt() {
     <Modal open={!!open} onClose={() => answer(false)} title={t('catalog.prompt_title')}
       footer={<><Button variant="outline" onClick={() => answer(false)} disabled={busy}>{t('catalog.prompt_later')}</Button><Button onClick={() => answer(true)} loading={busy}>{t('catalog.prompt_download')}</Button></>}>
       <div className="flex gap-3">
-        <div className="p-2 h-fit rounded-md bg-info/10"><Image className="h-5 w-5 text-info" /></div>
+        <div className="p-2 h-fit rounded-sm bg-info-soft"><Image className="h-5 w-5 text-info" /></div>
         <p className="text-sm text-muted-foreground">{t('catalog.prompt_desc', { count: status?.images.available || 0 })}</p>
       </div>
     </Modal>

@@ -129,7 +129,7 @@ export default function Dashboard() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('dashboard.welcome')}, {user?.name?.split(' ')[0]}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('dashboard.welcome')}, {user?.name?.split(' ')[0]}</h1>
           <p className="text-sm text-muted-foreground mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
         <Button variant="outline" size="sm" onClick={printOverview}>
@@ -161,12 +161,12 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {kpis.map((kpi) => (
           <div key={kpi.label} onClick={kpi.onClick}
-            className="border border-border rounded-lg bg-card p-4 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
+            className="border border-border rounded-md bg-card p-4 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">{kpi.label}</span>
               <kpi.icon className={`h-4 w-4 ${kpi.color}`} />
             </div>
-            <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+            <p className="text-[22px] leading-[30px] font-semibold text-foreground">{kpi.value}</p>
             {kpi.sub && <p className={`text-xs mt-1 ${kpi.subColor || 'text-muted-foreground'}`}>{kpi.sub}</p>}
           </div>
         ))}
@@ -175,7 +175,7 @@ export default function Dashboard() {
       {/* Two column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Tickets */}
-        <div className="border border-border rounded-lg bg-card">
+        <div className="border border-border rounded-md bg-card">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">{t('dashboard.recent_tickets')}</h3>
             <button onClick={() => navigate('/repairs/tickets')} className="text-xs text-primary hover:underline cursor-pointer">{t('dashboard.view_all')}</button>
@@ -187,7 +187,7 @@ export default function Dashboard() {
               <div key={t.id} onClick={() => navigate(`/repairs/tickets/${t.id}`)} className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-primary">{t.ticketNumber}</span>
+                    <span className="text-sm font-mono font-medium text-primary">{t.ticketNumber}</span>
                     <Badge color={t.status}>{t.status.replace('_', ' ')}</Badge>
                     <Badge color={t.priority}>{t.priority}</Badge>
                   </div>
@@ -203,7 +203,7 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Sales */}
-        <div className="border border-border rounded-lg bg-card">
+        <div className="border border-border rounded-md bg-card">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">{t('dashboard.recent_sales')}</h3>
             <button onClick={() => navigate('/sales/invoices')} className="text-xs text-primary hover:underline cursor-pointer">{t('dashboard.view_all')}</button>
@@ -215,7 +215,7 @@ export default function Dashboard() {
               <div key={s.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-primary">{s.saleNumber}</span>
+                    <span className="text-sm font-mono font-medium text-primary">{s.saleNumber}</span>
                     <Badge color={s.status === 'COMPLETED' ? 'success' : 'warning'}>{s.status}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{s.customer?.name || 'Walk-in'} · {s.items?.length || 0} items</p>

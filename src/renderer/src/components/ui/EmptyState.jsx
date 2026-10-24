@@ -10,12 +10,12 @@ export default function EmptyState({
     className = ''
 }) {
     return (
-        <div className={`flex flex-col items-center justify-center py-12 text-center ${className}`}>
-            <div className="rounded-full bg-muted p-3 mb-3">
-                <Icon className="h-6 w-6 text-muted-foreground" />
+        <div className={`flex flex-col items-center justify-center gap-1 px-4 py-8 text-center ${className}`}>
+            <div className="grid place-items-center h-11 w-11 rounded-full bg-muted mb-1.5">
+                <Icon className="h-5 w-5 text-muted-foreground" />
             </div>
-            <h3 className="text-sm font-medium text-foreground">{title}</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">{description}</p>
+            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            <p className="text-[13px] text-muted-foreground max-w-sm">{description}</p>
             {actionLabel && onAction && (
                 <Button variant="outline" size="sm" className="mt-4" onClick={onAction}>
                     {actionLabel}

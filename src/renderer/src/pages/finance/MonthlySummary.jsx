@@ -137,7 +137,7 @@ export default function MonthlySummary() {
       {/* Header & Month Selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('finance.reports.title')}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.reports.title')}</h1>
           <p className="text-muted-foreground">
             {t('finance.reports.subtitle', { month: selectedMonth })}
           </p>

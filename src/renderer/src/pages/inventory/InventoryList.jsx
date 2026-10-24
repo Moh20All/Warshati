@@ -151,7 +151,7 @@ export default function InventoryList() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('inventory.title')}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('inventory.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('inventory.subtitle')}</p>
         </div>
         <div className="flex gap-2">
@@ -180,7 +180,7 @@ export default function InventoryList() {
         <div className="max-w-sm flex-1">
           <Input placeholder={t('inventory.search_placeholder')} icon={Search} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           {typeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
@@ -199,7 +199,7 @@ export default function InventoryList() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('inventory.modal.type')}</label>
-              <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="PHONE_NEW">{t('inventory.types.phone_new')}</option>
                 <option value="PHONE_USED">{t('inventory.types.phone_used')}</option>
                 <option value="PART">{t('inventory.types.part')}</option>

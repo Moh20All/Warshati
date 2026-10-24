@@ -29,7 +29,7 @@ export default function Breadcrumbs() {
     if (segments.length === 0) return null
 
     return (
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
             <Link
                 to="/dashboard"
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -43,9 +43,9 @@ export default function Breadcrumbs() {
 
                 return (
                     <span key={path} className="flex items-center gap-1">
-                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground rtl:-scale-x-100" />
                         {isLast ? (
-                            <span className="text-foreground font-medium">{name}</span>
+                            <span className="text-foreground font-semibold">{name}</span>
                         ) : (
                             <Link
                                 to={path}

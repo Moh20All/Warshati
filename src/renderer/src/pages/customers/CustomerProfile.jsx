@@ -38,7 +38,7 @@ export default function CustomerProfile() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-foreground">{customer.name}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{customer.name}</h1>
           <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{customer.phone}</span>
             {customer.email && <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{customer.email}</span>}

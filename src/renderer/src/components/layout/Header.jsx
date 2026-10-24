@@ -28,7 +28,7 @@ export default function Header() {
                 <UpdaterIndicator />
 
                 {/* Notification bell */}
-                <button className="relative p-2 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer">
+                <button className="relative p-2 rounded-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer">
                     <Bell className="h-4 w-4" />
                 </button>
 
@@ -36,16 +36,16 @@ export default function Header() {
                 <div ref={menuRef} className="relative">
                     <button
                         onClick={() => setShowUserMenu(!showUserMenu)}
-                        className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-md hover:bg-accent transition-colors cursor-pointer"
+                        className="flex items-center gap-2 h-9 ps-1 pe-2 rounded-full hover:bg-accent transition-colors cursor-pointer"
                     >
-                        <div className="flex items-center justify-center h-7 w-7 rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                        <div className="grid place-items-center h-7 w-7 rounded-full bg-primary-soft text-primary-soft-foreground text-xs font-bold">
                             {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
-                        <span className="text-sm font-medium text-foreground">{user?.name || 'User'}</span>
+                        <span className="text-[13px] font-medium text-foreground">{user?.name || 'User'}</span>
                     </button>
 
                     {showUserMenu && (
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-popover border border-border rounded-md shadow-md py-1 animate-slide-down z-50">
+                        <div className="absolute end-0 top-full mt-1 w-48 bg-popover border border-border rounded-md shadow-pop p-1 animate-slide-down z-50">
                             <div className="px-3 py-2 border-b border-border">
                                 <p className="text-sm font-medium">{user?.name}</p>
                                 <p className="text-xs text-muted-foreground">{user?.email}</p>
@@ -55,7 +55,7 @@ export default function Header() {
                                     setShowUserMenu(false)
                                     logout()
                                 }}
-                                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
+                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-sm text-[13px] text-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer"
                             >
                                 <LogOut className="h-4 w-4" />
                                 Logout

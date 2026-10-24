@@ -78,7 +78,7 @@ export default function WarrantyList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-2xl font-bold text-foreground">{t('repairs.warranty.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.warranty.subtitle')}</p></div>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.warranty.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.warranty.subtitle')}</p></div>
         <Button onClick={() => { setShowFile(true); setFoundTicket(null); setTicketSearch(''); setIssueDesc('') }}><Plus className="h-4 w-4" /> {t('repairs.warranty.file_claim')}</Button>
       </div>
 
@@ -112,7 +112,7 @@ export default function WarrantyList() {
           </div>
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('repairs.warranty.lbl_new_issue')}</label>
-            <textarea value={issueDesc} onChange={e => setIssueDesc(e.target.value)} className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.warranty.ph_new_issue')} required />
+            <textarea value={issueDesc} onChange={e => setIssueDesc(e.target.value)} className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.warranty.ph_new_issue')} required />
           </div>
           <Input label={t('repairs.warranty.lbl_note')} value={responsibleNote} onChange={e => setResponsibleNote(e.target.value)} placeholder={t('repairs.warranty.ph_note')} />
         </div>

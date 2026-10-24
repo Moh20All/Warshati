@@ -92,7 +92,7 @@ export default function ExpenseList() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('finance.expenses.title')}</h1>
+          <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.expenses.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('finance.expenses.subtitle')}</p>
         </div>
         <div className="flex gap-2">
@@ -110,7 +110,7 @@ export default function ExpenseList() {
       )}
 
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} className="h-9 rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
           <option value="">{t('finance.expenses.filter_all')}</option>
           {categories.map(c => <option key={c} value={c}>{t(`finance.categories.${c}`, { defaultValue: c.replace('_', ' ') })}</option>)}
         </select>
@@ -127,7 +127,7 @@ export default function ExpenseList() {
         footer={<><Button variant="outline" onClick={closeForm}>{t('finance.expenses.btn_cancel')}</Button><Button onClick={() => createMutation.mutate({...form, amount: parseFloat(form.amount)})} loading={createMutation.isPending}>{t(editItem ? 'finance.expenses.btn_save' : 'finance.expenses.btn_add_confirm')}</Button></>}>
         <div className="space-y-4">
           <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t('finance.expenses.lbl_category')}</label>
-            <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+            <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               {categories.map(c => <option key={c} value={c}>{t(`finance.categories.${c}`, { defaultValue: c.replace('_', ' ') })}</option>)}
             </select>
           </div>

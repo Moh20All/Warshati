@@ -42,9 +42,9 @@ export default function Combobox({ label, value, options, onChange, placeholder,
   }
 
   return (
-    <div className="space-y-1.5 relative" ref={rootRef}>
-      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
-      <div className={`flex h-9 w-full items-center rounded-md border border-input bg-background text-sm ${disabled ? 'opacity-50 cursor-not-allowed' : 'focus-within:ring-2 focus-within:ring-ring'}`}>
+    <div className="flex flex-col gap-1.5 relative min-w-0" ref={rootRef}>
+      {label && <label className="text-[13px] leading-[18px] font-medium text-foreground">{label}</label>}
+      <div className={`flex h-9 w-full items-center rounded-sm border border-input bg-popover text-sm ${disabled ? 'bg-muted text-disabled-foreground cursor-not-allowed' : 'focus-within:outline-2 focus-within:outline-ring focus-within:outline-offset-1'}`}>
         {open ? <Search className="h-4 w-4 mx-2 shrink-0 text-muted-foreground" /> : selected?.image ? <img src={selected.image} alt="" className="h-6 w-6 mx-1.5 rounded object-contain shrink-0" /> : null}
         <input
           className={`flex-1 min-w-0 bg-transparent outline-none py-1 ${open || selected?.image ? '' : 'ps-3'} placeholder:text-muted-foreground`}
@@ -63,25 +63,25 @@ export default function Combobox({ label, value, options, onChange, placeholder,
       </div>
 
       {open && !disabled && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
-          <ul ref={listRef} className="max-h-64 overflow-auto py-1">
-            {filtered.length === 0 && <li className="px-3 py-2 text-sm text-muted-foreground">{emptyText}</li>}
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-pop p-1">
+          <ul ref={listRef} className="max-h-64 overflow-auto">
+            {filtered.length === 0 && <li className="px-2 py-2 text-[13px] text-muted-foreground">{emptyText}</li>}
             {filtered.map((o, i) => (
               <li key={o.value}
                 onMouseDown={(e) => { e.preventDefault(); pick(o) }}
                 onMouseEnter={() => setActive(i)}
-                className={`flex items-center gap-2 px-3 py-1.5 cursor-pointer text-sm ${i === active ? 'bg-accent' : ''} ${o.value === value ? 'font-medium text-primary' : ''}`}>
+                className={`flex items-center gap-2.5 px-2 py-1.5 rounded-sm cursor-pointer text-[13px] leading-[18px] ${i === active ? 'bg-accent text-accent-foreground' : ''} ${o.value === value ? 'font-semibold text-primary' : ''}`}>
                 {o.image !== undefined && (
-                  o.image ? <img src={o.image} alt="" loading="lazy" className="h-8 w-8 rounded object-contain bg-muted shrink-0" /> : <span className="h-8 w-8 rounded bg-muted shrink-0" />
+                  o.image ? <img src={o.image} alt="" loading="lazy" className="h-7 w-7 rounded-sm object-contain bg-muted shrink-0" /> : <span className="h-7 w-7 rounded-sm bg-muted shrink-0" />
                 )}
                 <span className="min-w-0">
                   <span className="block truncate">{o.label}</span>
-                  {o.sub && <span className="block truncate text-xs text-muted-foreground">{o.sub}</span>}
+                  {o.sub && <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">{o.sub}</span>}
                 </span>
               </li>
             ))}
           </ul>
-          {footer && <div className="border-t border-border">{footer(() => setOpen(false), query)}</div>}
+          {footer && <div className="border-t border-dashed border-border mt-1">{footer(() => setOpen(false), query)}</div>}
         </div>
       )}
     </div>

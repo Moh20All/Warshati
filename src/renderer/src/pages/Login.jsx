@@ -44,12 +44,12 @@ export default function Login() {
                 </div>
 
                 {/* Login Card */}
-                <div className="border border-border rounded-lg bg-card p-6">
+                <div className="border border-border rounded-md bg-card p-6">
                     <h2 className="text-lg font-semibold text-foreground mb-1">{t('auth.login_title')}</h2>
                     <p className="text-sm text-muted-foreground mb-6">{t('auth.login_subtitle')}</p>
 
                     {error && (
-                        <div className="mb-4 px-3 py-2 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
+                        <div className="mb-4 px-3 py-2 text-sm text-destructive-soft-foreground bg-destructive-soft rounded-sm">
                             {error}
                         </div>
                     )}
@@ -73,7 +73,7 @@ export default function Login() {
                             icon={Lock}
                             required
                         />
-                        <Button type="submit" className="w-full" loading={loading}>
+                        <Button type="submit" variant="flux" size="lg" className="w-full" loading={loading}>
                             {t('auth.sign_in')}
                         </Button>
                     </form>
