@@ -418,6 +418,13 @@
     }
   },
   "sales": {
+    "payment_methods": {
+      "CASH": "Cash",
+      "CARD": "Card",
+      "BANK_TRANSFER": "Bank transfer",
+      "CREDIT": "Credit",
+      "SPLIT": "Split"
+    },
     "pos": {
       "title": "Point of Sale",
       "subtitle": "Fast checkout",
@@ -734,7 +741,15 @@
       "CANCELLED": "Cancelled",
       "APPRAISED": "Appraised",
       "ACCEPTED": "Accepted",
-      "REJECTED": "Rejected"
+      "REJECTED": "Rejected",
+      "OPEN": "Open",
+      "PARTIAL": "Partial",
+      "SETTLED": "Settled",
+      "COMPLETED": "Completed",
+      "CREDIT": "Credit",
+      "REFUNDED": "Refunded",
+      "UNPAID": "Unpaid",
+      "PAID": "Paid"
     },
     "conditions": {
       "EXCELLENT": "Excellent",

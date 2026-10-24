@@ -15,6 +15,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import ExportButton from '../../components/ExportButton'
 
@@ -103,11 +104,11 @@ export default function DebtLedger() {
 
   const columns = [
     { key: 'customer', label: t('finance.debts.col_customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground">{v?.phone}</p></div> },
-    { key: 'type', label: t('finance.debts.col_type'), render: (v) => <Badge>{t(`finance.debts.types.${v}`, { defaultValue: v.replace('_', ' ') })}</Badge> },
+    { key: 'type', label: t('finance.debts.col_type'), render: (v) => <StatusBadge kind="debtType" value={v} /> },
     { key: 'totalAmount', label: t('finance.debts.col_total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'paidAmount', label: t('finance.debts.col_paid'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'remaining', label: t('finance.debts.col_remaining'), render: (v) => <span className="font-medium text-destructive">{Number(v).toLocaleString()} {cur}</span> },
-    { key: 'status', label: t('finance.debts.col_status'), render: (v) => <Badge color={v === 'SETTLED' ? 'success' : v === 'PARTIAL' ? 'warning' : 'danger'}>{t(`repairs.statuses.${v}`, { defaultValue: v })}</Badge> },
+    { key: 'status', label: t('finance.debts.col_status'), render: (v) => <StatusBadge kind="debt" value={v} /> },
     {
       key: 'createdAt', label: t('finance.debts.col_age'),
       render: (v, r) => {

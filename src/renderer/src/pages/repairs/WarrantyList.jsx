@@ -9,6 +9,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 
 export default function WarrantyList() {
@@ -62,8 +63,8 @@ export default function WarrantyList() {
     { key: 'originalTicket', label: t('repairs.warranty.orig_ticket'), render: (v) => <span className="font-medium text-primary">{v?.ticketNumber}</span> },
     { key: 'originalTicket', label: t('repairs.warranty.customer'), render: (v) => <div><p className="font-medium">{v?.customer?.name}</p></div> },
     { key: 'issueDesc', label: t('repairs.warranty.issue'), render: (v) => <span className="truncate max-w-[200px] inline-block">{v}</span> },
-    { key: 'isWithinWarranty', label: t('repairs.warranty.warranty'), render: (v) => v ? <Badge color="success">{t('repairs.warranty.within')}</Badge> : <Badge color="danger">{t('repairs.warranty.expired')}</Badge> },
-    { key: 'newTicketId', label: t('repairs.warranty.followup'), render: (v) => v ? <Badge color="info">{t('repairs.warranty.ticket_created')}</Badge> : <Badge color="default">{t('repairs.warranty.pending')}</Badge> },
+    { key: 'isWithinWarranty', label: t('repairs.warranty.warranty'), render: (v) => <StatusBadge kind="warranty" value={v ? 'WITHIN' : 'EXPIRED'} /> },
+    { key: 'newTicketId', label: t('repairs.warranty.followup'), render: (v) => <StatusBadge kind="followup" value={v ? 'TICKET_CREATED' : 'PENDING'} /> },
     { key: 'resolution', label: t('repairs.warranty.resolution'), render: (v) => v || '—' },
     { key: 'createdAt', label: t('repairs.warranty.filed'), render: (v) => new Date(v).toLocaleDateString() },
     { key: 'actions', label: '', className: 'text-right',

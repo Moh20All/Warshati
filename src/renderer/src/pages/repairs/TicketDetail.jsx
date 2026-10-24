@@ -11,6 +11,7 @@ import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
 
@@ -238,8 +239,8 @@ export default function TicketDetail() {
         <div className="flex-1">
           <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{isNew ? t('repairs.details.new') : ticket?.ticketNumber}</h1>
           {ticket && <div className="flex items-center gap-2 mt-1">
-            <Badge color={ticket.status}>{t(`repairs.statuses.${ticket.status}`)}</Badge>
-            <Badge color={ticket.priority}>{t(`repairs.priorities.${ticket.priority}`)}</Badge>
+            <StatusBadge kind="ticket" value={ticket.status} />
+            <StatusBadge kind="priority" value={ticket.priority} />
             {ticket.status !== 'DELIVERED' && ticket.status !== 'CANCELLED' && daysSince > 30 && <Badge color="warning" dot>⚠ {t('repairs.tickets.waiting_days', {days: daysSince})}</Badge>}
           </div>}
         </div>

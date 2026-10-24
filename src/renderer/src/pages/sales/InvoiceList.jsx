@@ -9,6 +9,7 @@ import { usePrint } from '../../lib/usePrint'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
 import { useToast } from '../../components/ui/Toast'
@@ -134,10 +135,10 @@ export default function InvoiceList() {
     { key: 'saleNumber', label: t('sales.invoices.col_inv'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
     { key: 'customer', label: t('sales.invoices.col_customer'), render: (v) => v ? <div><p className="font-medium">{v.name}</p><p className="text-xs text-muted-foreground">{v.phone}</p></div> : <span className="text-muted-foreground">{t('sales.invoices.walk_in')}</span> },
     { key: 'total', label: t('sales.invoices.col_total'), render: (v) => <span className="font-medium">{Number(v).toLocaleString()} {cur}</span> },
-    { key: 'paymentMethod', label: t('sales.invoices.col_payment'), render: (v) => <Badge>{v}</Badge> },
+    { key: 'paymentMethod', label: t('sales.invoices.col_payment'), render: (v) => <StatusBadge kind="method" value={v} /> },
     { key: 'status', label: t('sales.invoices.col_status'), render: (v, r) => (
       <div>
-        <Badge color={v === 'COMPLETED' ? 'success' : v === 'CREDIT' ? 'warning' : v === 'REFUNDED' ? 'danger' : 'info'}>{t(`repairs.statuses.${v}`, { defaultValue: v })}</Badge>
+        <StatusBadge kind="sale" value={v} />
         {r.refund && <p className="text-xs text-muted-foreground mt-1">{t('sales.invoices.refunded_on', { date: new Date(r.refund.createdAt).toLocaleDateString() })}</p>}
       </div>
     ) },

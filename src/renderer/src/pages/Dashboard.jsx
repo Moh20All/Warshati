@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import api from '../lib/api'
 import { useCurrency } from '../lib/currency'
 import Badge from '../components/ui/Badge'
+import StatusBadge from '../components/ui/StatusBadge'
 import Button from '../components/ui/Button'
 import { useAuth } from '../lib/auth'
 import { usePrint } from '../lib/usePrint'
@@ -188,8 +189,8 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-mono font-medium text-primary">{t.ticketNumber}</span>
-                    <Badge color={t.status}>{t.status.replace('_', ' ')}</Badge>
-                    <Badge color={t.priority}>{t.priority}</Badge>
+                    <StatusBadge kind="ticket" value={t.status} />
+                    <StatusBadge kind="priority" value={t.priority} />
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{t.customer?.name} · {t.deviceBrand} {t.deviceModel}</p>
                 </div>
@@ -216,7 +217,7 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-mono font-medium text-primary">{s.saleNumber}</span>
-                    <Badge color={s.status === 'COMPLETED' ? 'success' : 'warning'}>{s.status}</Badge>
+                    <StatusBadge kind="sale" value={s.status} />
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{s.customer?.name || 'Walk-in'} · {s.items?.length || 0} items</p>
                 </div>

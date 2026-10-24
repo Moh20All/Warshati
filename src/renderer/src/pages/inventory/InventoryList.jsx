@@ -13,6 +13,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
 
 const emptyForm = { type: 'PART', name: '', sku: '', barcode: '', deviceCategory: 'PHONE', brand: '', model: '', color: '', storage: '', quantity: 0, buyPrice: '', sellPrice: '', lowStockAt: 3, warrantyDays: 0, recordExpense: true }
@@ -119,14 +120,14 @@ export default function InventoryList() {
         </div>
       )
     },
-    { key: 'type', label: t('inventory.columns.type'), render: (v) => <Badge>{v.replace('_', ' ')}</Badge> },
+    { key: 'type', label: t('inventory.columns.type'), render: (v) => <StatusBadge kind="inventoryType" value={v} /> },
     { key: 'sku', label: t('inventory.columns.sku'), render: (v) => v || '—' },
     {
       key: 'quantity', label: t('inventory.columns.stock'),
       render: (v, r) => (
         <div className="flex items-center gap-2">
           <span className={v <= r.lowStockAt ? 'text-destructive font-medium' : ''}>{v}</span>
-          {v <= r.lowStockAt && <Badge color="danger">{t('inventory.labels.low_stock')}</Badge>}
+          {v <= r.lowStockAt && <StatusBadge kind="stock" value="LOW" />}
         </div>
       )
     },

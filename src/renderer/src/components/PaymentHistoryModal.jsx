@@ -4,7 +4,7 @@ import { Undo2, Printer } from 'lucide-react'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 import Input from './ui/Input'
-import Badge from './ui/Badge'
+import StatusBadge from './ui/StatusBadge'
 import { useCurrency } from '../lib/currency'
 
 /**
@@ -54,8 +54,8 @@ export default function PaymentHistoryModal({ open, onClose, title, payments = [
                         {isReversal ? '−' : ''}{money(p.amount)}
                       </td>
                       <td className="py-2 ps-4 text-muted-foreground">
-                        {isReversal && <Badge color="danger" className="me-1">{t('finance.debts.cancelling_entry')}</Badge>}
-                        {isCancelled && <Badge color="warning" className="me-1">{t('finance.debts.cancelled')}</Badge>}
+                        {isReversal && <StatusBadge kind="payment" value="CANCELLING_ENTRY" className="me-1" />}
+                        {isCancelled && <StatusBadge kind="payment" value="CANCELLED" className="me-1" />}
                         {p.notes}
                       </td>
                       <td className="py-2 text-end whitespace-nowrap">

@@ -9,6 +9,7 @@ import { useToast } from '../../components/ui/Toast'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
 
@@ -85,8 +86,8 @@ export default function TicketList() {
     { key: 'ticketNumber', label: t('repairs.tickets.ticket_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
     { key: 'customer', label: t('repairs.tickets.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground">{v?.phone || ''}</p></div> },
     { key: 'deviceBrand', label: t('repairs.tickets.device'), render: (v, r) => `${v} ${r.deviceModel}` },
-    { key: 'status', label: t('repairs.tickets.status'), render: (v) => <Badge color={v}>{t(`repairs.statuses.${v}`)}</Badge> },
-    { key: 'priority', label: t('repairs.tickets.priority'), render: (v) => <Badge color={v}>{t(`repairs.priorities.${v}`)}</Badge> },
+    { key: 'status', label: t('repairs.tickets.status'), render: (v) => <StatusBadge kind="ticket" value={v} /> },
+    { key: 'priority', label: t('repairs.tickets.priority'), render: (v) => <StatusBadge kind="priority" value={v} /> },
     {
       key: 'receivedAt', label: t('repairs.tickets.waiting'),
       render: (v, r) => {

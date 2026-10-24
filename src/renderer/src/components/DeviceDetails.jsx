@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Smartphone, Laptop, Gamepad2 } from 'lucide-react'
 import Modal from './ui/Modal'
 import Badge from './ui/Badge'
+import StatusBadge from './ui/StatusBadge'
 import { catalogImageSrc, specRows, VFM_RATINGS } from '../lib/catalog'
 
 const ICONS = { PHONE: Smartphone, LAPTOP: Laptop, CONSOLE: Gamepad2 }
@@ -13,7 +14,7 @@ export function ValueRating({ specs, compact = false }) {
   if (!rating && specs?.vfmPercentage == null) return null
   return (
     <div className={compact ? 'flex items-center gap-2' : 'space-y-1.5'}>
-      {rating && <Badge color={rating.color}>{t(`catalog.vfm.${specs.vfmLabel}`)}</Badge>}
+      {rating && <StatusBadge kind="vfm" value={specs.vfmLabel} />}
       {specs.vfmPercentage != null && (
         <div className={`flex items-center gap-2 ${compact ? '' : 'w-full'}`}>
           <div className={`h-1.5 rounded bg-muted overflow-hidden ${compact ? 'w-16' : 'flex-1'}`}>

@@ -7,6 +7,7 @@ import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Table from '../../components/ui/Table'
 
 export default function CustomerProfile() {
@@ -85,8 +86,8 @@ function RepairsTab({ tickets, t }) {
   const columns = [
     { key: 'ticketNumber', label: t('customers.columns.ticket_num') },
     { key: 'deviceBrand', label: t('customers.columns.device'), render: (v, r) => `${v} ${r.deviceModel}` },
-    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v}>{v.replace('_', ' ')}</Badge> },
-    { key: 'priority', label: t('customers.columns.priority'), render: (v) => <Badge color={v}>{v}</Badge> },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <StatusBadge kind="ticket" value={v} /> },
+    { key: 'priority', label: t('customers.columns.priority'), render: (v) => <StatusBadge kind="priority" value={v} /> },
     { key: 'finalCost', label: t('customers.columns.cost'), render: (v) => v ? `${Number(v).toLocaleString()} ${cur}` : '—' },
     { key: 'receivedAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
@@ -97,9 +98,9 @@ function SalesTab({ sales, t }) {
   const cur = useCurrency()
   const columns = [
     { key: 'saleNumber', label: t('customers.columns.invoice_num') },
-    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v === 'COMPLETED' ? 'success' : v === 'CREDIT' ? 'warning' : 'danger'}>{v}</Badge> },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <StatusBadge kind="sale" value={v} /> },
     { key: 'total', label: t('customers.columns.total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
-    { key: 'paymentMethod', label: t('customers.columns.payment'), render: (v) => <Badge>{v}</Badge> },
+    { key: 'paymentMethod', label: t('customers.columns.payment'), render: (v) => <StatusBadge kind="method" value={v} /> },
     { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
   return <Table columns={columns} data={sales} emptyTitle={t('customers.empty.sales_title')} emptyDescription={t('customers.empty.sales_desc')} />
@@ -108,11 +109,11 @@ function SalesTab({ sales, t }) {
 function DebtTab({ debts, t }) {
   const cur = useCurrency()
   const columns = [
-    { key: 'type', label: t('customers.columns.type'), render: (v) => <Badge>{v.replace('_', ' ')}</Badge> },
+    { key: 'type', label: t('customers.columns.type'), render: (v) => <StatusBadge kind="debtType" value={v} /> },
     { key: 'totalAmount', label: t('customers.columns.total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'paidAmount', label: t('customers.columns.paid'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'remaining', label: t('customers.columns.remaining'), render: (v) => <span className="font-medium text-destructive">{Number(v).toLocaleString()} {cur}</span> },
-    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v}>{v}</Badge> },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <StatusBadge kind="debt" value={v} /> },
     { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
   return <Table columns={columns} data={debts} emptyTitle={t('customers.empty.debt_title')} emptyDescription={t('customers.empty.debt_desc')} />
@@ -122,9 +123,9 @@ function TradeInsTab({ tradeIns, t }) {
   const cur = useCurrency()
   const columns = [
     { key: 'brand', label: t('customers.columns.device'), render: (v, r) => `${v} ${r.model}` },
-    { key: 'condition', label: t('customers.columns.condition'), render: (v) => v ? <Badge>{v}</Badge> : '—' },
+    { key: 'condition', label: t('customers.columns.condition'), render: (v) => v ? <StatusBadge kind="condition" value={v} /> : '—' },
     { key: 'appraisedValue', label: t('customers.columns.value'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
-    { key: 'status', label: t('customers.columns.status'), render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{v}</Badge> },
+    { key: 'status', label: t('customers.columns.status'), render: (v) => <StatusBadge kind="tradein" value={v} /> },
     { key: 'createdAt', label: t('customers.columns.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
   return <Table columns={columns} data={tradeIns} emptyTitle={t('customers.empty.tradeins_title')} emptyDescription={t('customers.empty.tradeins_desc')} />

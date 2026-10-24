@@ -418,6 +418,13 @@
     }
   },
   "sales": {
+    "payment_methods": {
+      "CASH": "نقداً",
+      "CARD": "بطاقة",
+      "BANK_TRANSFER": "تحويل بنكي",
+      "CREDIT": "كريدي",
+      "SPLIT": "مختلط"
+    },
     "pos": {
       "title": "نقطة البيع",
       "subtitle": "إتمام البيع السريع",
@@ -734,7 +741,15 @@
       "CANCELLED": "ملغى",
       "APPRAISED": "تم التقييم",
       "ACCEPTED": "مقبول",
-      "REJECTED": "مرفوض"
+      "REJECTED": "مرفوض",
+      "OPEN": "مفتوح",
+      "PARTIAL": "جزئي",
+      "SETTLED": "مسدد",
+      "COMPLETED": "مكتملة",
+      "CREDIT": "كريدي",
+      "REFUNDED": "مُستردّة",
+      "UNPAID": "غير مدفوع",
+      "PAID": "مدفوع"
     },
     "conditions": {
       "EXCELLENT": "ممتاز",

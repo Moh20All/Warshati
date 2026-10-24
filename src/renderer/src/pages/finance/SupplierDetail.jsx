@@ -11,6 +11,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 
 export default function SupplierDetail() {
@@ -107,19 +108,19 @@ export default function SupplierDetail() {
   if (!supplier) return <div className="text-center py-12 text-destructive">{t('finance.suppliers.err_not_found')}</div>
 
   const poColumns = [
-    { key: 'orderNumber', label: t('finance.suppliers.col_po_num'), render: (v) => <span className="font-medium text-primary">{v}{v?.startsWith('OB-') && <Badge className="ms-2">{t('finance.suppliers.opening_label')}</Badge>}</span> },
+    { key: 'orderNumber', label: t('finance.suppliers.col_po_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}{v?.startsWith('OB-') && <StatusBadge kind="po" value="OPENING_BALANCE" className="ms-2 font-sans" />}</span> },
     { key: 'totalAmount', label: t('finance.suppliers.col_total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
-    { key: 'paymentStatus', label: t('finance.suppliers.col_status'), render: (v) => <Badge color={v === 'PAID' ? 'success' : v === 'PARTIAL' ? 'warning' : 'danger'}>{t(`repairs.statuses.${v}`, { defaultValue: v })}</Badge> },
+    { key: 'paymentStatus', label: t('finance.suppliers.col_status'), render: (v) => <StatusBadge kind="po" value={v} /> },
     { key: 'items', label: t('finance.suppliers.col_items'), render: (v) => v?.length || 0 },
     { key: 'orderedAt', label: t('finance.suppliers.col_date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
 
   const debtColumns = [
-    { key: 'purchaseOrder', label: t('finance.suppliers.col_po_num'), render: (v) => <span className="font-medium">{v?.orderNumber || '—'}{v?.orderNumber?.startsWith('OB-') && <Badge className="ms-2">{t('finance.suppliers.opening_label')}</Badge>}</span> },
+    { key: 'purchaseOrder', label: t('finance.suppliers.col_po_num'), render: (v) => <span className="font-mono font-medium">{v?.orderNumber || '—'}{v?.orderNumber?.startsWith('OB-') && <StatusBadge kind="po" value="OPENING_BALANCE" className="ms-2 font-sans" />}</span> },
     { key: 'totalAmount', label: t('finance.suppliers.col_total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'paidAmount', label: t('finance.suppliers.col_paid'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'remaining', label: t('finance.suppliers.col_remaining'), render: (v) => <span className="font-medium text-destructive">{Number(v).toLocaleString()} {cur}</span> },
-    { key: 'status', label: t('finance.suppliers.col_status'), render: (v) => <Badge color={v === 'SETTLED' ? 'success' : v === 'PARTIAL' ? 'warning' : 'danger'}>{t(`repairs.statuses.${v}`, { defaultValue: v })}</Badge> },
+    { key: 'status', label: t('finance.suppliers.col_status'), render: (v) => <StatusBadge kind="debt" value={v} /> },
     { key: 'actions', label: '', className: 'text-right', render: (_, r) => (
       <div className="flex items-center justify-end gap-1">
         {r.payments?.length > 0 && (

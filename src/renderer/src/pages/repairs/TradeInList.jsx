@@ -9,6 +9,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
 import { storageText } from '../../lib/catalog'
@@ -64,9 +65,9 @@ export default function TradeInList() {
     { key: 'customer', label: t('repairs.tradeins.customer'), render: (v) => <span className="font-medium">{v?.name}</span> },
     { key: 'brand', label: t('repairs.tradeins.device'), render: (v, r) => `${v} ${r.model}` },
     { key: 'imei', label: t('repairs.tradeins.imei'), render: (v) => v || '—' },
-    { key: 'condition', label: t('repairs.tradeins.condition'), render: (v) => v ? <Badge color={v === 'EXCELLENT' || v === 'GOOD' ? 'success' : v === 'POOR' || v === 'BROKEN' ? 'danger' : 'warning'}>{t(`repairs.conditions.${v}`)}</Badge> : '—' },
+    { key: 'condition', label: t('repairs.tradeins.condition'), render: (v) => v ? <StatusBadge kind="condition" value={v} /> : '—' },
     { key: 'appraisedValue', label: t('repairs.tradeins.value'), render: (v) => <span className="font-medium">{Number(v).toLocaleString()} {cur}</span> },
-    { key: 'status', label: t('repairs.tradeins.status'), render: (v) => <Badge color={v === 'ACCEPTED' ? 'success' : v === 'REJECTED' ? 'danger' : 'info'}>{t(`repairs.statuses.${v}`)}</Badge> },
+    { key: 'status', label: t('repairs.tradeins.status'), render: (v) => <StatusBadge kind="tradein" value={v} /> },
     { key: 'createdAt', label: t('repairs.tradeins.date'), render: (v) => new Date(v).toLocaleDateString() }
   ]
 

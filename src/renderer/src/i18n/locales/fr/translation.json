@@ -418,6 +418,13 @@
     }
   },
   "sales": {
+    "payment_methods": {
+      "CASH": "Espèces",
+      "CARD": "Carte",
+      "BANK_TRANSFER": "Virement",
+      "CREDIT": "Crédit",
+      "SPLIT": "Mixte"
+    },
     "pos": {
       "title": "Point de Vente",
       "subtitle": "Paiement rapide",
@@ -734,7 +741,15 @@
       "CANCELLED": "Annulé",
       "APPRAISED": "Évalué",
       "ACCEPTED": "Accepté",
-      "REJECTED": "Rejeté"
+      "REJECTED": "Rejeté",
+      "OPEN": "Ouvert",
+      "PARTIAL": "Partiel",
+      "SETTLED": "Réglé",
+      "COMPLETED": "Terminée",
+      "CREDIT": "Crédit",
+      "REFUNDED": "Remboursée",
+      "UNPAID": "Impayé",
+      "PAID": "Payé"
     },
     "conditions": {
       "EXCELLENT": "Excellent",

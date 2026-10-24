@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
 
@@ -110,7 +111,7 @@ export default function CheckInList() {
     { key: 'customer', label: t('repairs.checkin.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p>{v?.phone && <p className="text-xs text-muted-foreground">{v.phone}</p>}</div> },
     { key: 'deviceBrand', label: t('repairs.checkin.device'), render: (v, r) => `${v} ${r.deviceModel}` },
     { key: 'issueDesc', label: t('repairs.checkin.issue'), render: (v) => <span className="truncate max-w-[200px] inline-block">{v}</span> },
-    { key: 'convertedAt', label: t('repairs.checkin.status'), render: (v) => v ? <Badge color="success">{t('repairs.checkin.converted')}</Badge> : <Badge color="warning" dot>{t('repairs.checkin.pending')}</Badge> },
+    { key: 'convertedAt', label: t('repairs.checkin.status'), render: (v) => <StatusBadge kind="checkin" value={v ? 'CONVERTED' : 'PENDING'} /> },
     { key: 'createdAt', label: t('repairs.checkin.date'), render: (v) => new Date(v).toLocaleDateString() },
     {
       key: 'actions', label: '', className: 'text-right',

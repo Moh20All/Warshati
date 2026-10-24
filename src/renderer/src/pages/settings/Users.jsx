@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
+import StatusBadge from '../../components/ui/StatusBadge'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
 
 export default function Users() {
@@ -86,9 +87,7 @@ export default function Users() {
             key: 'isActive',
             label: t('users.col_status'),
             render: (val) => (
-                <Badge color={val ? 'success' : 'danger'} dot>
-                    {val ? t('users.active') : t('users.inactive')}
-                </Badge>
+                <StatusBadge kind="user" value={val ? 'ACTIVE' : 'INACTIVE'} />
             )
         },
         {
