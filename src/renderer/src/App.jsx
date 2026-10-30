@@ -7,6 +7,9 @@ import AppShell from './components/layout/AppShell'
 
 // Licensing & Auto-Update Overlays
 import ActivationScreen from './components/ActivationScreen'
+import { MainPcUnreachable } from './components/JoinNetwork'
+import { setPlan } from './lib/plan'
+import NetworkPage from './pages/settings/Network'
 
 // Auth pages
 import Login from './pages/Login'
@@ -57,13 +60,20 @@ export default function App() {
   const [needsSetup, setNeedsSetup] = useState(false)
   const [isActivated, setIsActivated] = useState(false)
   const [deactivationMessage, setDeactivationMessage] = useState(null)
+  const [networkError, setNetworkError] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
     // 1. Hardware Licensing Check (First Layer) — now includes online validation
     window.api.getLocalLicense()
       .then((result) => {
+        if (result?.networkError) {
+          // Connected PC that cannot reach the shop's main PC: nothing else can load
+          setNetworkError({ code: result.networkError, hostName: result.hostName })
+          return null
+        }
         if (result && result.valid) {
+          setPlan(result.plan)
           setIsActivated(true)
         } else if (result && result.deactivationMessage) {
           // License was revoked or machine mismatch — show message
@@ -87,6 +97,8 @@ export default function App() {
   }, [])
 
   if (checking) return <FullPageSpinner />
+
+  if (networkError) return <MainPcUnreachable {...networkError} />
 
   // Security Gate: Hardware License Required
   if (!isActivated) {
@@ -134,6 +146,7 @@ export default function App() {
         <Route path="/settings/store" element={<O><StoreSettings /></O>} />
         <Route path="/settings/backup" element={<O><BackupPage /></O>} />
         <Route path="/settings/catalog" element={<O><DeviceCatalogPage /></O>} />
+        <Route path="/settings/network" element={<O><NetworkPage /></O>} />
         <Route path="/settings/about" element={<P><AboutApp /></P>} />
 
         <Route path="*" element={<Navigate to={needsSetup ? '/setup' : '/dashboard'} replace />} />

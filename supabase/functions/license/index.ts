@@ -5,7 +5,7 @@
 //
 // Deploy:  supabase functions deploy license
 // Request: POST { action: 'validate' | 'activate', key: string, machineId: string, appVersion?: string }
-// Answer:  { status: 'valid' | 'not_found' | 'revoked' | 'other_device' }
+// Answer:  { status: 'valid' | 'not_found' | 'revoked' | 'other_device', plan?: 1 | 2 | 3 }  (plan only when valid)
 import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 const json = (body: unknown, status = 200) =>
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
   const { data: rec, error } = await db
     .from('licenses')
-    .select('id, is_active, machine_id')
+    .select('id, is_active, machine_id, plan')
     .eq('key', key)
     .maybeSingle()
   if (error) return json({ error: 'Lookup failed' }, 500)
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
   if (rec.machine_id) {
     if (rec.machine_id !== machineId) return json({ status: 'other_device' })
     await touch(rec.id)
-    return json({ status: 'valid' })
+    return json({ status: 'valid', plan: rec.plan ?? 1 })
   }
   // Unbound key: a validate means the owner reset the binding; only activate may bind it
   if (action === 'validate') return json({ status: 'other_device' })
@@ -63,5 +63,5 @@ Deno.serve(async (req) => {
 
   const ok = bound && bound.length === 1
   if (ok) await touch(rec.id)
-  return json({ status: ok ? 'valid' : 'other_device' })
+  return json(ok ? { status: 'valid', plan: rec.plan ?? 1 } : { status: 'other_device' })
 })

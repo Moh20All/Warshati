@@ -18,6 +18,7 @@ model LocalLicense {
   machineId   String
   activatedAt DateTime @default(now())
   lastValidatedAt DateTime? // last successful online check; drives the offline grace period
+  plan        Int      @default(1) // 1 lifetime, 2 cloud + mobile, 3 VIP (everything, e.g. shop network)
 }
 
 // ─────────────────────────────────────────

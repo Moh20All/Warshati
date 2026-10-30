@@ -8,6 +8,7 @@ const { machineIdSync } = nodeMachineId
 import { app } from 'electron'
 import log from 'electron-log'
 import prisma from './server/lib/prisma.js'
+import { setPlan } from './network.js'
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || ''
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || ''
@@ -24,6 +25,9 @@ const headers = {
 
 class Unreachable extends Error {}
 
+// Older license services send no plan: those keys are plan 1
+const planOf = (result) => ([1, 2, 3].includes(Number(result.plan)) ? Number(result.plan) : 1)
+
 async function request(url, options = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -39,7 +43,7 @@ async function request(url, options = {}) {
 /**
  * Ask the license service about a key.
  * @param {'validate'|'activate'} action  activate also binds an unbound key to this machine
- * @returns {Promise<{status: 'valid'|'not_found'|'revoked'|'other_device'}>}
+ * @returns {Promise<{status: 'valid'|'not_found'|'revoked'|'other_device', plan?: number}>}
  * @throws {Unreachable} when the service cannot be reached or answers with an error
  */
 async function askLicenseService(action, key, machineId) {
@@ -53,12 +57,12 @@ async function askLicenseService(action, key, machineId) {
   }
 
   // Fallback: Edge Function not deployed yet — use the table directly
-  const res = await request(`${SUPABASE_URL}/rest/v1/licenses?key=eq.${encodeURIComponent(key)}&select=id,is_active,machine_id`)
+  const res = await request(`${SUPABASE_URL}/rest/v1/licenses?key=eq.${encodeURIComponent(key)}&select=id,is_active,machine_id,plan`)
   if (!res.ok) throw new Unreachable(`licenses HTTP ${res.status}`)
   const [rec] = await res.json()
   if (!rec) return { status: 'not_found' }
   if (rec.is_active === false) return { status: 'revoked' }
-  if (rec.machine_id) return { status: rec.machine_id === machineId ? 'valid' : 'other_device' }
+  if (rec.machine_id) return { status: rec.machine_id === machineId ? 'valid' : 'other_device', plan: rec.plan }
   if (action === 'validate') return { status: 'other_device' } // unbound = binding was reset by the owner
 
   // Bind atomically: only succeeds if nobody bound it in the meantime
@@ -69,7 +73,7 @@ async function askLicenseService(action, key, machineId) {
   })
   if (!bind.ok) throw new Unreachable(`bind HTTP ${bind.status}`)
   const bound = await bind.json()
-  return { status: bound.length === 1 ? 'valid' : 'other_device' }
+  return { status: bound.length === 1 ? 'valid' : 'other_device', plan: rec.plan }
 }
 
 const MESSAGES = {
@@ -99,7 +103,8 @@ export async function checkLicense() {
     }
 
     if (result.status === 'valid') {
-      await prisma.localLicense.update({ where: { id: local.id }, data: { lastValidatedAt: new Date() } })
+      local = await prisma.localLicense.update({ where: { id: local.id }, data: { lastValidatedAt: new Date(), plan: planOf(result) } })
+      setPlan(local.plan)
       return { valid: true, license: local, deactivationMessage: null }
     }
 
@@ -118,7 +123,10 @@ function offlineDecision(local, reason) {
   const last = new Date(local.lastValidatedAt || local.activatedAt)
   const days = Math.floor((Date.now() - last.getTime()) / 86400000)
   log.info(`[License] Offline (${reason}); last verified ${days} day(s) ago`)
-  if (days <= OFFLINE_GRACE_DAYS) return { valid: true, license: local, deactivationMessage: null }
+  if (days <= OFFLINE_GRACE_DAYS) {
+    setPlan(local.plan)
+    return { valid: true, license: local, deactivationMessage: null }
+  }
   return {
     valid: false,
     license: null,
@@ -149,8 +157,9 @@ export async function activateLicense(rawKey) {
   try {
     await prisma.$transaction([
       prisma.localLicense.deleteMany({}),
-      prisma.localLicense.create({ data: { key, machineId, lastValidatedAt: new Date() } })
+      prisma.localLicense.create({ data: { key, machineId, lastValidatedAt: new Date(), plan: planOf(result) } })
     ])
+    setPlan(planOf(result))
     return { ok: true }
   } catch (e) {
     log.error('[License] Could not save activation:', e)

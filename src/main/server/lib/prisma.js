@@ -204,6 +204,13 @@ async function applyMigrations(prismaDb) {
       await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairPart_repairTicketId_idx" ON "RepairPart"("repairTicketId")`);
     }
 
+    // v1.7: license plan (1 lifetime, 2 cloud + mobile, 3 VIP)
+    const licenseInfo = await prismaDb.$queryRaw`PRAGMA table_info(LocalLicense)`;
+    if (!licenseInfo.some(col => col.name === 'plan')) {
+      logToDisk('Migrating LocalLicense table: adding plan');
+      await prismaDb.$executeRaw`ALTER TABLE LocalLicense ADD COLUMN plan INTEGER NOT NULL DEFAULT 1`;
+    }
+
     logToDisk('Schema migrations completed.');
   } catch (err) {
     logToDisk(`Migration failed: ${err.message}`);

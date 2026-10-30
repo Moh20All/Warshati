@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ShieldAlert, KeyRound, CheckCircle2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import markTile from '../assets/brand/mark-trace-tile.svg'
+import JoinNetwork from './JoinNetwork'
 
 export default function ActivationScreen({ onActivated, deactivationMessage }) {
   const { t } = useTranslation()
@@ -9,6 +10,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [joining, setJoining] = useState(false)
 
   const handleActivate = async (e) => {
     e.preventDefault()
@@ -72,7 +74,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
             </div>
           )}
 
-          {success ? (
+          {joining ? <JoinNetwork onCancel={() => setJoining(false)} /> : success ? (
             <div className="text-center py-6">
               <CheckCircle2 className="w-16 h-16 text-success mx-auto mb-4" />
               <h2 className="text-xl font-bold text-foreground mb-2">{t('activation.success_title')}</h2>
@@ -107,6 +109,11 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
                 className="w-full bg-flux text-flux-foreground border border-flux-soft-foreground font-semibold py-3 px-4 rounded-sm hover:bg-flux-hover transition-all disabled:opacity-70 flex justify-center items-center gap-2"
               >
                 {loading ? t('activation.btn_validating') : t('activation.btn_activate')}
+              </button>
+
+              {/* VIP shop network: the other PCs use the main PC's license and data */}
+              <button type="button" onClick={() => setJoining(true)} className="w-full text-sm text-primary hover:underline cursor-pointer">
+                {t('network.join_link', 'Shop with several PCs? Connect this PC to the main PC')}
               </button>
             </form>
           )}

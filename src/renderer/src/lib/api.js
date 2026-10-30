@@ -1,11 +1,14 @@
 import axios from 'axios'
 
+// This PC's own API, or the shop's main PC when this PC is connected to it (VIP network).
+// The headers carry the per-launch key (own API) or the shop's pairing code (main PC).
+const target = window.api?.apiTarget || { base: 'http://127.0.0.1:3456/api', headers: {} }
+
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:3456/api',
+    baseURL: target.base,
     headers: {
         'Content-Type': 'application/json',
-        // Per-launch key handed over by the preload; the local API refuses requests without it
-        'X-Warshati-Key': window.api?.apiKey || ''
+        ...target.headers
     }
 })
 

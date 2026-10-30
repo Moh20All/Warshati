@@ -21,18 +21,32 @@ import catalogRoutes from './routes/catalog.js'
 import { syncCatalog } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
+import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, VIP_PLAN } from '../network.js'
+
 const app = express()
-const PORT = 3456
-const HOST = '127.0.0.1' // local only — never expose the API to the shop network
+// Local only, unless this is the main PC of a VIP shop network (see ../network.js)
+const hostAddress = () => (isSharing() ? '0.0.0.0' : '127.0.0.1')
 
 app.use(cors())
 app.use(express.json())
 
-// Only the Warshati window knows this launch's key; any other caller (e.g. a web page) is refused
+// Only the Warshati window knows this launch's key; other PCs need the shop's pairing code.
+// Anything else (e.g. a web page) is refused.
 app.use('/api', (req, res, next) => {
     if (req.path === '/health') return next()
-    if (req.get(SESSION_HEADER) !== SESSION_KEY) return res.status(403).json({ error: 'Forbidden' })
-    next()
+    if (req.get(SESSION_HEADER) === SESSION_KEY) return next()
+    if (isPairedRequest(req)) {
+        markSeen(req)
+        return next()
+    }
+    if (getConfig().mode === 'host' && getPlan() < VIP_PLAN) return res.status(403).json({ error: 'not_vip' })
+    res.status(403).json({ error: 'Forbidden' })
+})
+
+// A connected PC checks the pairing code and learns the shop's name
+app.get('/api/network/hello', async (_req, res) => {
+    const store = await prisma.store.findFirst({ select: { name: true } })
+    res.json({ name: store?.name || 'Warshati' })
 })
 
 // Routes
@@ -99,9 +113,41 @@ export async function startServer() {
         logger.error('Device catalog sync failed', err)
     }
 
+    // The saved plan lets a VIP main PC share right away; the online license check confirms it later
+    try {
+        const local = await prisma.localLicense.findFirst({ select: { plan: true } })
+        if (local) setPlan(local.plan)
+    } catch (err) {
+        logger.error('Could not read the saved plan', err)
+    }
+
+    return listen()
+}
+
+let server = null
+let storeName = ''
+const refreshStoreName = () => prisma.store.findFirst({ select: { name: true } }).then((s) => { storeName = s?.name || '' }).catch(() => {})
+
+/** (Re)open the API on the right address after network sharing was switched on or off */
+export async function applyNetworkMode() {
+    await refreshStoreName()
+    updateDiscovery(() => storeName)
+    if (server && server.address()?.address === hostAddress()) return
+    if (server) {
+        const closing = new Promise((r) => server.close(() => r()))
+        server.closeAllConnections() // keep-alive connections would hold the port open
+        await closing
+    }
+    server = null
+    await listen()
+}
+
+function listen() {
+    const HOST = hostAddress()
     return new Promise((resolve, reject) => {
-        const server = app.listen(PORT, HOST, () => {
+        server = app.listen(PORT, HOST, () => {
             logger.info(`Warshati API running on http://${HOST}:${PORT}`)
+            refreshStoreName().then(() => updateDiscovery(() => storeName))
             resolve(server)
         })
 

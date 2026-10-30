@@ -7,8 +7,9 @@ import {
   CalendarCheck, Store, Users, Database,
   ChevronLeft, ChevronRight, LayoutDashboard,
   Contact, Package, BarChart3, Info,
-  MessageSquarePlus, Smartphone, Keyboard
+  MessageSquarePlus, Smartphone, Keyboard, Network
 } from 'lucide-react'
+import { isConnectedPc } from '../../lib/plan'
 import { useState } from 'react'
 import FeedbackModal from '../FeedbackModal'
 import markTile from '../../assets/brand/mark-trace-tile.svg'
@@ -63,7 +64,9 @@ export default function Sidebar({ onShowShortcuts }) {
       items: [
         { name: t('navigation.store'), path: '/settings/store', icon: Store, ownerOnly: true },
         { name: t('navigation.users'), path: '/settings/users', icon: Users, ownerOnly: true },
-        { name: t('navigation.backup'), path: '/settings/backup', icon: Database, ownerOnly: true },
+        // A connected PC's data (and its backups) live on the main PC
+      ...(isConnectedPc() ? [] : [{ name: t('navigation.backup'), path: '/settings/backup', icon: Database, ownerOnly: true }]),
+      { name: t('navigation.network', 'Shop network'), path: '/settings/network', icon: Network, ownerOnly: true },
         { name: t('navigation.catalog'), path: '/settings/catalog', icon: Smartphone, ownerOnly: true },
         { name: t('navigation.about', 'About App'), path: '/settings/about', icon: Info }
       ]

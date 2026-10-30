@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, Package, AlertTriangle, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, Package, AlertTriangle, Pencil, Trash2, Barcode } from 'lucide-react'
+import LabelsModal from '../../components/LabelsModal'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { useAuth } from '../../lib/auth'
@@ -30,6 +31,7 @@ export default function InventoryList() {
   const [editItem, setEditItem] = useState(null)
   const [deleteItem, setDeleteItem] = useState(null)
   const [form, setForm] = useState({ ...emptyForm })
+  const [labelItems, setLabelItems] = useState(null) // items to print barcode labels for
 
   // Restock states
   const [restockItem, setRestockItem] = useState(null)
@@ -136,13 +138,16 @@ export default function InventoryList() {
     { key: 'sellPrice', label: t('inventory.columns.sell_price'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     {
       key: 'actions', label: '', className: 'text-right',
-      render: (_, r) => isOwner && (
+      render: (_, r) => (
         <div className="flex items-center justify-end gap-1">
+          <button onClick={(e) => { e.stopPropagation(); setLabelItems([{ ...r, copies: 1 }]) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer" title={t('labels.title', 'Print barcode labels')}><Barcode className="h-3.5 w-3.5" /></button>
+          {isOwner && <>
           {!r.imei && (
             <button onClick={(e) => { e.stopPropagation(); setRestockItem(r); setRestockAmount(''); setRestockCost(r.buyPrice); setUpdateBuyPrice(false) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer" title={t('inventory.restock.title', 'Quick Restock')}><Package className="h-3.5 w-3.5" /></button>
           )}
           <button onClick={(e) => { e.stopPropagation(); openEdit(r) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><Pencil className="h-3.5 w-3.5" /></button>
           <button onClick={(e) => { e.stopPropagation(); setDeleteItem(r) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"><Trash2 className="h-3.5 w-3.5" /></button>
+          </>}
         </div>
       )
     }
@@ -169,6 +174,9 @@ export default function InventoryList() {
             ...(isOwner ? [{ header: `${t('inventory.columns.buy_price')} (${cur})`, key: 'buyPrice', type: 'money', width: 16 }] : []),
             { header: `${t('inventory.columns.sell_price')} (${cur})`, key: 'sellPrice', type: 'money', width: 16 }
           ]} />
+          <Button variant="outline" onClick={() => setLabelItems((data || []).map(i => ({ ...i, copies: 0 })))} disabled={!data?.length}>
+            <Barcode className="h-4 w-4" /> {t('labels.button', 'Labels')}
+          </Button>
           {isOwner && (
             <Button onClick={() => { setEditItem(null); setForm({...emptyForm}); setShowForm(true) }}>
               <Plus className="h-4 w-4" /> {t('inventory.add_item')}
@@ -241,6 +249,8 @@ export default function InventoryList() {
 
       <ConfirmModal open={!!deleteItem} onClose={() => setDeleteItem(null)} onConfirm={() => deleteMutation.mutate(deleteItem?.id)}
         title={t('inventory.deactivate.title')} message={t('inventory.deactivate.message', { name: deleteItem?.name })} confirmText={t('inventory.deactivate.confirm')} loading={deleteMutation.isPending} />
+
+      <LabelsModal open={!!labelItems} items={labelItems || []} onClose={() => setLabelItems(null)} />
 
       {/* Restock Modal */}
       <Modal open={!!restockItem} onClose={() => setRestockItem(null)} title={t('inventory.restock.title', 'Quick Restock')}

@@ -7,7 +7,7 @@ import prisma, { dbPath } from './prisma.js'
 import { verifyToken } from './jwt.js'
 
 // Backup/restore are owner-only; the renderer passes its login token
-async function isOwner(token) {
+export async function isOwner(token) {
   try {
     const { userId } = verifyToken(token)
     const user = await prisma.user.findUnique({ where: { id: userId } })

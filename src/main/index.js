@@ -24,14 +24,16 @@ if (require('electron-squirrel-startup')) {
 }
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { startServer } from './server/index.js'
+import { startServer, applyNetworkMode } from './server/index.js'
 
 import { checkLicense, activateLicense } from './license.js'
 import { exportXlsx } from './export.js'
-import { SESSION_KEY } from './server/lib/session-key.js'
+import { SESSION_KEY, SESSION_HEADER } from './server/lib/session-key.js'
+import { isOwner } from './server/lib/backup.js'
+import * as network from './network.js'
 
-// The renderer reads the per-launch API key synchronously while its preload runs
-ipcMain.on('get-api-key', (event) => { event.returnValue = SESSION_KEY })
+// The renderer reads where its data is (this PC or the shop's main PC) synchronously while its preload runs
+ipcMain.on('get-api-target', (event) => { event.returnValue = network.apiTarget(SESSION_KEY, SESSION_HEADER) })
 
 let mainWindow
 
@@ -128,8 +130,58 @@ app.whenReady().then(async () => {
     ipcMain.handle('get-machine-id', () => machineIdSync());
 
     // Validation (with offline grace period) and activation both happen here, not in the renderer
-    ipcMain.handle('get-local-license', () => checkLicense());
-    ipcMain.handle('activate-license', (_e, licenseKey) => activateLicense(licenseKey));
+    ipcMain.handle('get-local-license', async () => {
+        // A connected PC runs on the main PC's VIP license: it only needs to reach it
+        const net = network.getConfig()
+        if (net.mode === 'client') {
+            const r = await network.hello(net.host, net.code)
+            return r.ok
+                ? { valid: true, license: null, plan: network.VIP_PLAN, deactivationMessage: null }
+                : { valid: false, license: null, networkError: r.code, hostName: net.hostName || net.host }
+        }
+        const result = await checkLicense()
+        await applyNetworkMode().catch((e) => log.error('[Network] Could not apply sharing mode:', e))
+        return { ...result, plan: network.getPlan() }
+    });
+    ipcMain.handle('activate-license', async (_e, licenseKey) => {
+        const result = await activateLicense(licenseKey)
+        if (result.ok) await applyNetworkMode().catch(() => {})
+        return result
+    });
+
+    // SHOP NETWORK (VIP): the main PC shares, the other PCs join it
+    ipcMain.handle('network-status', async (_e, token) => {
+        const c = network.getConfig()
+        const base = { mode: c.mode, plan: network.getPlan(), hostName: c.hostName, host: c.host }
+        if (c.mode === 'client' || !(await isOwner(token))) return base
+        return { ...base, code: c.mode === 'host' ? c.code : null, addresses: network.lanAddresses().map((a) => a.address), connected: network.connectedPcs() }
+    })
+    ipcMain.handle('network-share', async (_e, { token, on }) => {
+        if (!(await isOwner(token))) return { ok: false, code: 'not_owner' }
+        if (on && network.getPlan() < network.VIP_PLAN) return { ok: false, code: 'not_vip' }
+        network.setSharing(!!on)
+        await applyNetworkMode()
+        return { ok: true }
+    })
+    ipcMain.handle('network-renew-code', async (_e, token) => {
+        if (!(await isOwner(token))) return { ok: false, code: 'not_owner' }
+        network.renewCode()
+        return { ok: true }
+    })
+    ipcMain.handle('network-discover', () => network.discover())
+    // Joining needs the main PC's pairing code; leaving only stops using it. Both restart the app.
+    ipcMain.handle('network-join', async (_e, { host, code }) => {
+        if (network.getConfig().mode === 'host') return { ok: false, code: 'is_host' }
+        const r = await network.join(host, code)
+        if (r.ok) { app.relaunch(); app.exit(0) }
+        return r
+    })
+    ipcMain.handle('network-leave', () => {
+        if (network.getConfig().mode !== 'client') return { ok: false }
+        network.leave()
+        app.relaunch()
+        app.exit(0)
+    })
     
     // NATIVE THERMAL PRINTING
     ipcMain.handle('get-printers', async () => {

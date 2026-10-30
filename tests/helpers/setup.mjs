@@ -50,7 +50,7 @@ export async function startServer() {
     if (r.status >= 500) console.log(`  server error on ${method} ${url}:`, data)
     return { status: r.status, data }
   }
-  return { call, close: () => server.close() }
+  return { call, base, close: () => server.close() }
 }
 
 /** Creates the store + owner and returns a helper bound to the owner's token. */

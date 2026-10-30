@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import crypto from 'crypto'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
@@ -82,6 +83,33 @@ router.get('/barcode/:code', async (req, res) => {
     })
     res.json({ item: item || null })
   } catch (err) {
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/inventory/assign-barcodes { ids } — labels: items without a barcode get one.
+// 12 digits starting with 20 (the range reserved for in-shop codes, never on a maker's product).
+router.post('/assign-barcodes', async (req, res) => {
+  try {
+    const ids = Array.isArray(req.body.ids) ? req.body.ids.slice(0, 500).map(String) : []
+    const missing = await prisma.inventoryItem.findMany({ where: { id: { in: ids }, barcode: null }, select: { id: true } })
+    const assigned = {}
+    for (const { id } of missing) {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const code = '20' + String(crypto.randomInt(0, 1e10)).padStart(10, '0')
+        try {
+          // count 0: it got a barcode meanwhile (e.g. from another PC)
+          const { count } = await prisma.inventoryItem.updateMany({ where: { id, barcode: null }, data: { barcode: code } })
+          if (count) assigned[id] = code
+          break
+        } catch (err) {
+          if (err.code !== 'P2002') throw err // P2002: code already used, try another
+        }
+      }
+    }
+    res.json({ assigned })
+  } catch (err) {
+    logger.error('Assign barcodes error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

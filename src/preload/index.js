@@ -8,8 +8,16 @@ const api = {
     printReceipt: (data) => ipcRenderer.invoke('print-receipt', data),
     printPage: () => ipcRenderer.invoke('print-page'),
     
-    // Per-launch key the local API requires on every request
-    apiKey: ipcRenderer.sendSync('get-api-key'),
+    // Where the data is: { base, headers, mode, hostName } (this PC, or the shop's main PC)
+    apiTarget: ipcRenderer.sendSync('get-api-target'),
+
+    // Shop network (VIP)
+    networkStatus: (token) => ipcRenderer.invoke('network-status', token),
+    networkShare: (token, on) => ipcRenderer.invoke('network-share', { token, on }),
+    networkRenewCode: (token) => ipcRenderer.invoke('network-renew-code', token),
+    networkDiscover: () => ipcRenderer.invoke('network-discover'),
+    networkJoin: (host, code) => ipcRenderer.invoke('network-join', { host, code }),
+    networkLeave: () => ipcRenderer.invoke('network-leave'),
 
     // License Activation APIs (all checks run in the main process)
     getLocalLicense: () => ipcRenderer.invoke('get-local-license'),

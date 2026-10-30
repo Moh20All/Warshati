@@ -21,7 +21,15 @@ export function sanitiseHtml(html) {
  * Calculate the Electron pageSize object from a human-readable width string.
  * Electron expects microns for custom sizes.
  */
+// Item labels: 'label:40x30' = one 40 × 30 mm label per page
+export function labelSize(width) {
+  const m = /^label:(\d{2,3})x(\d{2,3})$/.exec(String(width || ''))
+  return m ? { w: Number(m[1]), h: Number(m[2]) } : null
+}
+
 export function pageSizeFromWidth(width) {
+  const label = labelSize(width)
+  if (label) return { width: label.w * 1000, height: label.h * 1000 }
   if (width === '58mm') return { width: 58000, height: 500000 }
   if (width === '80mm') return { width: 80000, height: 500000 }
   return 'A4'
@@ -58,6 +66,8 @@ export function wrapForPrint(cleanHtml, width) {
   let pageCss = '@page { margin: 0; }'
   if (width === '80mm') pageCss = '@page { margin: 0; size: 80mm 297mm; }'
   if (width === '58mm') pageCss = '@page { margin: 0; size: 58mm 297mm; }'
+  const label = labelSize(width)
+  if (label) pageCss = `@page { margin: 0; size: ${label.w}mm ${label.h}mm; } body { padding: 0 !important; }`
   const logo = width === '58mm' ? 30 : 40
 
   return `
@@ -171,7 +181,8 @@ export function printHtml({
           : {
               silent: false,
               printBackground: true,
-              ...(width === 'A4' ? { pageSize: 'A4' } : {})
+              ...(width === 'A4' ? { pageSize: 'A4' } : {}),
+              ...(labelSize(width) ? { pageSize: pageSizeFromWidth(width), margins: { marginType: 'none' } } : {})
             }
 
       log.info(`[PRINT] Calling webContents.print()...`)
