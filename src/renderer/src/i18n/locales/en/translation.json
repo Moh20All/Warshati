@@ -978,6 +978,8 @@
     }
   },
   "network": {
+    "join_title": "Connect this PC to a main PC",
+    "join_card_desc": "This PC will use the main PC's data. Its own data and license stay here, unused, until you stop.",
     "title": "Shop network",
     "subtitle": "Several PCs in the shop work on the same data: one main PC keeps it, the others connect to it.",
     "join_link": "Shop with several PCs? Connect this PC to the main PC",
@@ -998,7 +1000,7 @@
     "change": "Connect to another main PC",
     "leave": "Stop using the main PC (this PC alone)",
     "leave_title": "Stop using the main PC?",
-    "leave_msg": "Warshati restarts and this PC goes back to its own data. It will need its own license.",
+    "leave_msg": "Warshati restarts and this PC goes back to its own data (and its own license, if it has one).",
     "leave_confirm": "Stop and restart",
     "connected_to": "Connected to the main PC",
     "client_note": "Sales, repairs, stock and customers are saved on the main PC. Backups are made there too.",

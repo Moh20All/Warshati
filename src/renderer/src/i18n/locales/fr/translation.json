@@ -978,6 +978,8 @@
     }
   },
   "network": {
+    "join_title": "Connecter ce PC à un PC principal",
+    "join_card_desc": "Ce PC utilisera les données du PC principal. Ses propres données et sa licence restent ici, inutilisées, jusqu'à l'arrêt.",
     "title": "Réseau du magasin",
     "subtitle": "Plusieurs PC du magasin travaillent sur les mêmes données : un PC principal les garde, les autres s'y connectent.",
     "join_link": "Plusieurs PC ? Connecter ce PC au PC principal",
@@ -998,7 +1000,7 @@
     "change": "Se connecter à un autre PC principal",
     "leave": "Ne plus utiliser le PC principal (ce PC seul)",
     "leave_title": "Ne plus utiliser le PC principal ?",
-    "leave_msg": "Warshati redémarre et ce PC reprend ses propres données. Il aura besoin de sa propre licence.",
+    "leave_msg": "Warshati redémarre et ce PC reprend ses propres données (et sa licence, s'il en a une).",
     "leave_confirm": "Arrêter et redémarrer",
     "connected_to": "Connecté au PC principal",
     "client_note": "Ventes, réparations, stock et clients sont enregistrés sur le PC principal. Les sauvegardes s'y font aussi.",

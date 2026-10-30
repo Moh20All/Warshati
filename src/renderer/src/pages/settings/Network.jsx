@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Network as NetworkIcon, Lock, Monitor, RefreshCw, Copy } from 'lucide-react'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
-import { ConfirmModal } from '../../components/ui/Modal'
+import Modal, { ConfirmModal } from '../../components/ui/Modal'
+import JoinNetwork from '../../components/JoinNetwork'
 import { useToast } from '../../components/ui/Toast'
 import { useAuth } from '../../lib/auth'
 import { isVip } from '../../lib/plan'
@@ -16,6 +17,7 @@ export default function NetworkPage() {
   const [st, setSt] = useState(null)
   const [busy, setBusy] = useState(false)
   const [confirm, setConfirm] = useState(null) // 'stop' | 'renew' | 'leave'
+  const [joining, setJoining] = useState(false)
 
   const load = () => window.api.networkStatus(token).then(setSt).catch(() => {})
   useEffect(() => {
@@ -70,11 +72,28 @@ export default function NetworkPage() {
           <Button variant="outline" onClick={() => setConfirm('leave')}>{t('network.leave', 'Stop using the main PC (this PC alone)')}</Button>
         </div>
         <ConfirmModal open={confirm === 'leave'} onClose={() => setConfirm(null)} onConfirm={() => window.api.networkLeave()}
-          title={t('network.leave_title', 'Stop using the main PC?')} message={t('network.leave_msg', 'Warshati restarts and this PC goes back to its own data. It will need its own license.')}
+          title={t('network.leave_title', 'Stop using the main PC?')} message={t('network.leave_msg', 'Warshati restarts and this PC goes back to its own data (and its own license, if it has one).')}
           confirmText={t('network.leave_confirm', 'Stop and restart')} />
       </div>
     )
   }
+
+  // Any PC that is not the main PC can join one (the main PC's VIP license is what counts)
+  const joinCard = (
+    <div className="bg-card border border-border rounded-lg p-6 flex items-start gap-4">
+      <Monitor className="w-6 h-6 text-muted-foreground flex-shrink-0" />
+      <div className="flex-1">
+        <p className="font-medium text-foreground">{t('network.join_title', 'Connect this PC to a main PC')}</p>
+        <p className="text-sm text-muted-foreground mt-1">{t('network.join_card_desc', 'This PC will use the main PC\'s data. Its own data and license stay here, unused, until you stop.')}</p>
+      </div>
+      <Button variant="outline" onClick={() => setJoining(true)}>{t('network.connect', 'Connect')}</Button>
+    </div>
+  )
+  const joinModal = (
+    <Modal open={joining} onClose={() => setJoining(false)} title={t('network.join_title', 'Connect this PC to a main PC')}>
+      {joining && <JoinNetwork onCancel={() => setJoining(false)} />}
+    </Modal>
+  )
 
   if (!isVip()) {
     return (
@@ -87,6 +106,8 @@ export default function NetworkPage() {
             <p className="text-sm text-muted-foreground mt-1">{t('network.vip_only_desc', 'Contact Warshati to move to the VIP plan, then restart the app.')}</p>
           </div>
         </div>
+        <div className="mt-4">{joinCard}</div>
+        {joinModal}
       </div>
     )
   }
@@ -144,6 +165,9 @@ export default function NetworkPage() {
           </div>
         </div>
       )}
+
+      {!sharing && joinCard}
+      {joinModal}
 
       <ConfirmModal open={confirm === 'stop'} onClose={() => setConfirm(null)} onConfirm={() => share(false)} loading={busy}
         title={t('network.stop_title', 'Stop sharing?')} message={t('network.stop_msg', 'The other PCs will stop working until sharing is on again.')}
