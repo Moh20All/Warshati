@@ -877,7 +877,7 @@
       "lbl_name": "Customer Name *",
       "ph_name": "e.g. Ahmed",
       "lbl_phone": "Customer Phone",
-      "ph_phone": "e.g. 0671222227",
+      "ph_phone": "e.g. 0555123456",
       "lbl_brand": "Device Brand *",
       "lbl_model": "Device Model *",
       "lbl_imei": "IMEI",
