@@ -71,6 +71,39 @@ router.post('/login', async (req, res) => {
     }
 })
 
+// POST /api/auth/recover — owner forgot email or password: the shop's license key proves it.
+// { key } returns the owner's email; { key, password } also sets a new password.
+router.post('/recover', async (req, res) => {
+    try {
+        const minutes = lockedFor('#recover')
+        if (minutes) {
+            return res.status(429).json({ error: `Too many failed attempts. Try again in ${minutes} minute(s).` })
+        }
+
+        const key = String(req.body.key || '').trim().toUpperCase()
+        const local = key ? await prisma.localLicense.findFirst() : null
+        if (!local || local.key !== key) {
+            recordFailure('#recover')
+            return res.status(401).json({ error: 'wrong_key' })
+        }
+        failures.delete('#recover')
+
+        const owner = await prisma.user.findFirst({ where: { role: 'OWNER', isActive: true }, orderBy: { createdAt: 'asc' } })
+        if (!owner) return res.status(404).json({ error: 'no_owner' })
+
+        const { password } = req.body
+        if (password !== undefined) {
+            if (String(password).length < 6) return res.status(400).json({ error: 'short_password' })
+            await prisma.user.update({ where: { id: owner.id }, data: { passwordHash: await bcrypt.hash(String(password), 10) } })
+            logger.info('Owner password reset with the license key')
+        }
+        res.json({ email: owner.email })
+    } catch (err) {
+        logger.error('Recover error:', err)
+        res.status(500).json({ error: 'Internal server error' })
+    }
+})
+
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req, res) => {
     try {
