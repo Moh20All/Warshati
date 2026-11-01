@@ -1,7 +1,7 @@
 {
     "name": "warshati",
     "productName": "Warshati",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "description": "Warshati — ورشتي: phone repair & store management",
     "author": "Allali Mohamed <allalimohamedbahaeddine@gmail.com>",
     "main": "./out/main/index.js",
@@ -80,7 +80,11 @@
             "menuCategory": "Warshati",
             "deleteAppDataOnUninstall": false,
             "displayLanguageSelector": false,
-            "installerLanguages": ["en_US", "fr_FR", "ar_SA"],
+            "installerLanguages": [
+                "en_US",
+                "fr_FR",
+                "ar_SA"
+            ],
             "include": "build/installer.nsh"
         }
     },

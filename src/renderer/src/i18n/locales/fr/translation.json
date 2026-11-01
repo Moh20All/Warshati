@@ -102,6 +102,10 @@
   },
   "about": {
     "phases": {
+      "v170": {
+        "title": "Nouveau look, réseau du magasin et étiquettes",
+        "desc": "Design final avec le logo Trace, réseau du magasin pour plusieurs PC (VIP), étiquettes code-barres depuis l'inventaire, récupération du mot de passe avec la clé de licence, raccourcis clavier (F1) et le vrai bénéfice net dans la clôture du jour."
+      },
       "v160": {
         "title": "Rakam devient Warshati — ورشتي",
         "desc": "Nouveau nom, nouvelle icône et nouvel installateur. L'installateur ne contient plus que la base de données vide de départ."

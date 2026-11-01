@@ -6,9 +6,15 @@ export default function AboutApp() {
 
   const phases = [
     {
+      version: 'v1.7.0',
+      title: t('about.phases.v170.title'),
+      status: t('about.current', 'Current'),
+      icon: Rocket,
+      desc: t('about.phases.v170.desc')
+    },
+    {
       version: 'v1.6.0',
       title: t('about.phases.v160.title'),
-      status: t('about.current', 'Current'),
       icon: Sparkles,
       desc: t('about.phases.v160.desc')
     },

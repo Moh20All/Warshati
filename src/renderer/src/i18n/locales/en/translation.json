@@ -102,6 +102,10 @@
   },
   "about": {
     "phases": {
+      "v170": {
+        "title": "New Look, Shop Network & Barcode Labels",
+        "desc": "Final design with the Trace logo, shop network for several PCs (VIP), barcode labels from Inventory, password recovery with the license key, keyboard shortcuts (F1) and the real net profit on the Daily Close."
+      },
       "v160": {
         "title": "Rakam Is Now Warshati — ورشتي",
         "desc": "New name, new icon and a new installer. The installer now contains only the empty starting database."

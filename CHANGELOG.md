@@ -2,6 +2,24 @@
 
 All notable changes to Warshati will be documented in this file.
 
+## v1.7.0 — 01/11/2026
+New Look, Shop Network & Barcode Labels
+
+### 🚀 Major Upgrades
+- **New Design:** Warshati has its final look: the green and lime Trace logo, a new Windows icon, IBM Plex fonts (French and Arabic), clearer colours and status labels in your language. Receipts, tickets and reports are redesigned too.
+- **Shop Network (VIP plan):** Several PCs in the shop work on the same data. One main PC shares (Settings → Shop network → Share); the others connect with a pairing code, from the activation screen or from Settings. The main PC is found automatically on the shop's network.
+- **Barcode Labels:** Print small labels with barcode, item name, price and shop name (30×20 to 58×40 mm) from Inventory, for one item or many. Items without a barcode get one automatically, and the POS scanner finds them.
+- **Forgot Email or Password:** The owner can recover their account on the sign-in screen with the shop's license key: Warshati shows the email and lets them choose a new password. Works without internet.
+- **Keyboard Shortcuts:** F2 POS, F3 new ticket, F4 new check-in, F6 tickets, F7 inventory, F8 debts, F9 daily close, F10 complete a sale, Ctrl+S / Ctrl+P on a ticket, and F1 to see them all.
+
+### ✨ Improvements
+- **Daily Close:** The owner now sees the parts cost and the real net profit of the day.
+- **New Installer:** Welcome page and wording in French, Arabic and English.
+- **Plans:** Licenses now carry their plan (Lifetime, Cloud, VIP); features follow the plan.
+
+### ℹ️ Good to Know
+- Updating keeps all your data. The guide at warshatydz.com/guide explains every feature with screenshots.
+
 ## v1.6.0 — 20/10/2026
 Rakam is now Warshati — ورشتي
 
