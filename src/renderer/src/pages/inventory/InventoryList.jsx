@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, Package, AlertTriangle, Pencil, Trash2, Barcode } from 'lucide-react'
+import { Plus, Search, Package, AlertTriangle, Pencil, Trash2, Barcode, Lightbulb } from 'lucide-react'
 import LabelsModal from '../../components/LabelsModal'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { useAuth } from '../../lib/auth'
 import ExportButton from '../../components/ExportButton'
 import DevicePicker from '../../components/DevicePicker'
-import { storageText } from '../../lib/catalog'
+import { storageText, useAccessories, catalogImageSrc } from '../../lib/catalog'
+import Combobox from '../../components/ui/Combobox'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -32,6 +33,7 @@ export default function InventoryList() {
   const [deleteItem, setDeleteItem] = useState(null)
   const [form, setForm] = useState({ ...emptyForm })
   const [labelItems, setLabelItems] = useState(null) // items to print barcode labels for
+  const [suggested, setSuggested] = useState(null) // accessory picked from the catalog (its price is only a suggestion)
 
   // Restock states
   const [restockItem, setRestockItem] = useState(null)
@@ -96,7 +98,18 @@ export default function InventoryList() {
     setShowForm(true)
   }
 
-  const closeForm = () => { setShowForm(false); setEditItem(null); setForm({ ...emptyForm }) }
+  const closeForm = () => { setShowForm(false); setEditItem(null); setForm({ ...emptyForm }); setSuggested(null) }
+
+  // Accessory catalog for the form (loaded once the form is used for an accessory)
+  const { data: accessories = [] } = useAccessories(showForm && form.type === 'ACCESSORY')
+  const accessoryOptions = useMemo(() => accessories.map(a => ({
+    value: a.id,
+    label: a.name,
+    keywords: t(`accessories.categories.${a.category}`),
+    sub: [t(`accessories.categories.${a.category}`), a.price != null ? `${a.price.toLocaleString()} ${cur}` : null].filter(Boolean).join(' · '),
+    image: catalogImageSrc(a.imageFile),
+    accessory: a
+  })), [accessories, t, cur])
 
   const handleSave = (e) => {
     e.preventDefault()
@@ -217,6 +230,12 @@ export default function InventoryList() {
             </div>
             <Input label={t('inventory.modal.name')} value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
           </div>
+          {/* Accessories: pick one from the catalog to fill the name; its market price is only suggested */}
+          {form.type === 'ACCESSORY' && (
+            <Combobox label={t('accessories.pick_label')} value={suggested?.id ?? null} options={accessoryOptions} rankByPosition
+              placeholder={t('accessories.pick_ph')} emptyText={t('catalog.no_results')}
+              onChange={(_, opt) => { setSuggested(opt?.accessory || null); if (opt) setForm({ ...form, name: opt.accessory.name }) }} />
+          )}
           {/* Phones come from the phone catalog; parts/accessories can name the device they fit */}
           <DevicePicker categories={isPhone ? ['PHONE'] : undefined}
             value={{ category: isPhone ? 'PHONE' : form.deviceCategory, brand: form.brand, model: form.model }}
@@ -238,6 +257,20 @@ export default function InventoryList() {
             <Input label={t('inventory.modal.low_stock_at')} type="number" value={form.lowStockAt} onChange={e => setForm({...form, lowStockAt: e.target.value})} />
             <Input label={t('inventory.modal.warranty_days', 'Warranty (Days)')} type="number" value={form.warrantyDays} onChange={e => setForm({...form, warrantyDays: e.target.value})} />
           </div>
+          {form.type === 'ACCESSORY' && suggested?.price != null && (
+            <div className="flex items-center gap-2 flex-wrap rounded-sm bg-info-soft px-3 py-2 text-[13px] text-foreground">
+              <Lightbulb className="h-4 w-4 text-info shrink-0" />
+              <span>
+                {t('accessories.suggested_price', { price: `${suggested.price.toLocaleString()} ${cur}` })}
+                {suggested.oldPrice ? <span className="text-muted-foreground"> · {t('accessories.before_price', { price: `${suggested.oldPrice.toLocaleString()} ${cur}` })}</span> : null}
+              </span>
+              {String(form.sellPrice) !== String(suggested.price) && (
+                <button type="button" onClick={() => setForm({ ...form, sellPrice: suggested.price })} className="ms-auto text-xs font-semibold text-primary hover:underline cursor-pointer">
+                  {t('accessories.use_as_sell')}
+                </button>
+              )}
+            </div>
+          )}
           {!editItem && parseInt(form.quantity) > 0 && (
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={form.recordExpense} onChange={e => setForm({...form, recordExpense: e.target.checked})} className="rounded border-input text-primary focus:ring-primary" />

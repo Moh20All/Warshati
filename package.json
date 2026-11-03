@@ -99,7 +99,7 @@
         "start": "electron-vite preview",
         "test": "node tests/run.mjs",
         "seed:dev": "node --import ./tests/helpers/register.mjs scripts/seed-dev.mjs",
-        "build:catalog": "node scripts/build-catalog.js",
+        "build:catalog": "node scripts/build-catalog.js && node scripts/build-accessories.js",
         "postinstall": "electron-builder install-app-deps",
         "prisma:generate": "prisma generate",
         "prisma:push": "prisma db push",

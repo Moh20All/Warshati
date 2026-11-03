@@ -56,6 +56,46 @@ export async function syncCatalog(db) {
   return { synced: true, version, created: toCreate.length, updated: toUpdate.length, deleted: toDelete.length }
 }
 
+export const ACCESSORY_CATEGORIES = ['PACK', 'CASE', 'SCREEN', 'CHARGER', 'CABLE', 'ADAPTER', 'POWER_BANK', 'AUDIO', 'HOLDER', 'WATCH', 'GAMING', 'STORAGE', 'CAMERA', 'OTHER']
+export const bundledAccessoriesFile = () => path.join(app.getAppPath(), 'assets', 'catalog', 'accessories.json')
+
+/**
+ * Loads the bundled accessory list into the DB if its version is new (same rules as the devices:
+ * add new, update changed (a downloaded photo is kept while its link is unchanged), remove dropped ones).
+ */
+export async function syncAccessories(db) {
+  const file = bundledAccessoriesFile()
+  if (!fs.existsSync(file)) { logger.warn(`[CATALOG] Bundled accessories not found: ${file}`); return { synced: false } }
+  const { version, accessories } = JSON.parse(fs.readFileSync(file, 'utf8'))
+  if ((await getMeta(db, 'accessoriesVersion')) === version) return { synced: false, version }
+
+  const existing = new Map((await db.accessoryCatalog.findMany()).map(a => [a.name.toLowerCase(), a]))
+  const toCreate = []
+  const toUpdate = []
+  const bundledKeys = new Set()
+  for (const a of accessories) {
+    const key = a.name.toLowerCase()
+    if (bundledKeys.has(key)) continue
+    bundledKeys.add(key)
+    const row = { name: a.name, category: a.category, price: a.price ?? null, oldPrice: a.oldPrice ?? null, imageUrl: a.imageUrl || null }
+    const current = existing.get(key)
+    if (!current) toCreate.push(row)
+    else if (Object.keys(row).some(k => current[k] !== row[k])) {
+      toUpdate.push({ id: current.id, data: { ...row, ...(current.imageUrl !== row.imageUrl ? { imageFile: null } : {}) } })
+    }
+  }
+  const toDelete = [...existing.values()].filter(a => !bundledKeys.has(a.name.toLowerCase())).map(a => a.id)
+
+  await db.$transaction([
+    ...(toCreate.length ? [db.accessoryCatalog.createMany({ data: toCreate })] : []),
+    ...toUpdate.map(u => db.accessoryCatalog.update({ where: { id: u.id }, data: u.data })),
+    ...(toDelete.length ? [db.accessoryCatalog.deleteMany({ where: { id: { in: toDelete } } })] : []),
+    db.appMeta.upsert({ where: { key: 'accessoriesVersion' }, create: { key: 'accessoriesVersion', value: version }, update: { value: version } })
+  ])
+  logger.info(`[CATALOG] Accessories version ${version}: +${toCreate.length} ~${toUpdate.length} -${toDelete.length}`)
+  return { synced: true, version, created: toCreate.length, updated: toUpdate.length, deleted: toDelete.length }
+}
+
 /** Remembers a device typed by hand so it shows up in the list next time. Never throws. */
 export async function rememberDevice(db, { category, brand, model }) {
   try {

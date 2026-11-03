@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { CATEGORIES, getMeta, setMeta } from '../lib/catalog.js'
-import { getImageStatus, startImageDownload, deleteImages } from '../lib/catalog-images.js'
+import { getImageStatus, startImageDownload, deleteImages, getAccessoryImageStatus, startAccessoryImageDownload, deleteAccessoryImages } from '../lib/catalog-images.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -68,6 +68,67 @@ router.delete('/images', requireRole('OWNER'), async (_req, res) => {
     res.json({ success: true })
   } catch (err) {
     logger.error('Delete catalog images error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// ── Accessories ──
+
+// GET /api/catalog/accessories — the whole list (the pickers filter locally)
+router.get('/accessories', async (_req, res) => {
+  try {
+    const accessories = await prisma.accessoryCatalog.findMany({
+      orderBy: [{ category: 'asc' }, { name: 'asc' }],
+      select: { id: true, name: true, category: true, price: true, oldPrice: true, imageFile: true }
+    })
+    res.json({ accessories })
+  } catch (err) {
+    logger.error('List accessories error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// GET /api/catalog/accessories/status — list size, photo consent and download progress
+router.get('/accessories/status', async (_req, res) => {
+  try {
+    res.json({
+      count: await prisma.accessoryCatalog.count(),
+      imagesConsent: await getMeta(prisma, 'accessoryImagesConsent'), // null = not asked yet
+      images: await getAccessoryImageStatus(prisma)
+    })
+  } catch (err) {
+    logger.error('Accessory status error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/catalog/accessories/images/download { ids? } — every photo, or only the chosen accessories
+router.post('/accessories/images/download', requireRole('OWNER'), async (req, res) => {
+  try {
+    const ids = req.body?.ids
+    if (ids !== undefined && (!Array.isArray(ids) || ids.length === 0)) return res.status(400).json({ error: 'Choose at least one accessory' })
+    startAccessoryImageDownload(prisma, ids ?? null).catch(err => logger.error('Accessory photo download error:', err))
+    await new Promise(r => setTimeout(r, 50)) // let the run register before answering
+    res.status(202).json({ images: await getAccessoryImageStatus(prisma) })
+  } catch (err) {
+    logger.error('Start accessory photo download error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/catalog/accessories/images/decline — "later": the prompt stops appearing (Settings still offers it)
+router.post('/accessories/images/decline', requireRole('OWNER'), async (_req, res) => {
+  await setMeta(prisma, 'accessoryImagesConsent', 'declined')
+  res.json({ success: true })
+})
+
+// DELETE /api/catalog/accessories/images — free disk space (the list stays)
+router.delete('/accessories/images', requireRole('OWNER'), async (_req, res) => {
+  try {
+    await deleteAccessoryImages(prisma)
+    res.json({ success: true })
+  } catch (err) {
+    logger.error('Delete accessory photos error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

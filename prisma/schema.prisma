@@ -39,6 +39,20 @@ model DeviceCatalog {
   @@index([category, brand])
 }
 
+// Accessory catalog (assets/catalog/accessories.json): picked when adding stock; its price is only a suggestion
+model AccessoryCatalog {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  category  String   // PACK | CASE | SCREEN | CHARGER | CABLE | ADAPTER | POWER_BANK | AUDIO | HOLDER | WATCH | GAMING | STORAGE | CAMERA | OTHER
+  price     Int?     // market price, suggested when adding to inventory
+  oldPrice  Int?
+  imageUrl  String?
+  imageFile String?  // downloaded photo, relative to the catalog images folder
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
 // Small key/value settings (e.g. installed catalog version)
 model AppMeta {
   key   String @id

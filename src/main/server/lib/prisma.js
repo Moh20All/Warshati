@@ -224,6 +224,28 @@ async function applyMigrations(prismaDb) {
       logToDisk(`Warranty default migration failed: ${err.message}`);
     }
 
+    // v1.8: accessory catalog (own try/catch)
+    try {
+      const accessoryTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='AccessoryCatalog'`;
+      if (accessoryTable.length === 0) {
+        logToDisk('Migrating: creating AccessoryCatalog table');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "AccessoryCatalog" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "category" TEXT NOT NULL,
+    "price" INTEGER,
+    "oldPrice" INTEGER,
+    "imageUrl" TEXT,
+    "imageFile" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE UNIQUE INDEX "AccessoryCatalog_name_key" ON "AccessoryCatalog"("name")`);
+        await prismaDb.$executeRawUnsafe(`CREATE INDEX "AccessoryCatalog_category_idx" ON "AccessoryCatalog"("category")`);
+      }
+    } catch (err) {
+      logToDisk(`Accessory catalog migration failed: ${err.message}`);
+    }
+
     logToDisk('Schema migrations completed.');
   } catch (err) {
     logToDisk(`Migration failed: ${err.message}`);

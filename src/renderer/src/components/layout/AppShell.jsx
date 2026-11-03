@@ -6,6 +6,7 @@ import i18n from '../../i18n'
 import { useCurrency } from '../../lib/currency'
 import { useHotkeys, focusPageSearch } from '../../lib/hotkeys'
 import CatalogImagesPrompt from '../CatalogImagesPrompt'
+import AccessoryPhotosPrompt from '../AccessoryPhotos'
 import ShortcutsHelp from '../ShortcutsHelp'
 
 export default function AppShell({ children }) {
@@ -37,6 +38,7 @@ export default function AppShell({ children }) {
                     {children}
                 </main>
                 <CatalogImagesPrompt />
+                <AccessoryPhotosPrompt />
             </div>
             <ShortcutsHelp open={help} onClose={() => setHelp(false)} />
         </div>

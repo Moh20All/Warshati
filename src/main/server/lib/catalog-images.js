@@ -1,4 +1,4 @@
-// Downloads catalog images (from each device's imageUrl) after the owner agrees.
+// Downloads catalog images (from each device's / accessory's imageUrl) after the owner agrees.
 // Runs in the background; progress is read with getImageStatus(). Already downloaded images are skipped.
 import fs from 'fs'
 import path from 'path'
@@ -97,8 +97,63 @@ export async function startImageDownload(db) {
   return run.then(() => state)
 }
 
-/** Deletes all downloaded images (the catalog itself stays). */
+/** Deletes all downloaded device images (the catalog and the accessory photos stay). */
 export async function deleteImages(db) {
-  fs.rmSync(catalogImagesDir(), { recursive: true, force: true })
+  for (const dir of ['phone', 'laptop', 'console']) fs.rmSync(path.join(catalogImagesDir(), dir), { recursive: true, force: true })
   await db.deviceCatalog.updateMany({ data: { imageFile: null } })
+}
+
+// ── Accessory photos: all of them, or only the ones the owner chose ──
+const ACCESSORY_DIR = 'accessories'
+const accessoryState = { running: false, total: 0, done: 0, failed: 0, startedAt: null, finishedAt: null }
+
+export async function getAccessoryImageStatus(db) {
+  const [available, downloaded] = await Promise.all([
+    db.accessoryCatalog.count({ where: { imageUrl: { not: null } } }),
+    db.accessoryCatalog.count({ where: { imageFile: { not: null } } })
+  ])
+  return { ...accessoryState, available, downloaded }
+}
+
+/** ids: only these accessories (null = all). Photos already on disk are skipped. Resolves when the run finishes. */
+export async function startAccessoryImageDownload(db, ids = null) {
+  if (accessoryState.running) return accessoryState
+  await setMeta(db, 'accessoryImagesConsent', 'accepted')
+  const where = { imageUrl: { not: null }, ...(Array.isArray(ids) ? { id: { in: ids.map(String) } } : {}) }
+  const jobs = (await db.accessoryCatalog.findMany({ where }))
+    .filter(a => !a.imageFile || !fs.existsSync(path.join(catalogImagesDir(), a.imageFile)))
+  Object.assign(accessoryState, { running: true, total: jobs.length, done: 0, failed: 0, startedAt: new Date().toISOString(), finishedAt: null })
+  logger.info(`[CATALOG-IMAGES] Downloading ${jobs.length} accessory photos`)
+
+  let next = 0
+  const worker = async () => {
+    while (next < jobs.length) {
+      const a = jobs[next++]
+      try {
+        const { buffer, ext } = await fetchImage(a.imageUrl)
+        const rel = `${ACCESSORY_DIR}/${a.id}${ext}` // the id: names are long and can look alike
+        const dest = path.join(catalogImagesDir(), rel)
+        fs.mkdirSync(path.dirname(dest), { recursive: true })
+        fs.writeFileSync(dest, buffer)
+        await db.accessoryCatalog.update({ where: { id: a.id }, data: { imageFile: rel } })
+      } catch (err) {
+        accessoryState.failed++
+        logger.warn(`[CATALOG-IMAGES] ${a.name}: ${err.message}`)
+      }
+      accessoryState.done++
+    }
+  }
+  const run = Promise.all(Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker))
+    .finally(() => {
+      accessoryState.running = false
+      accessoryState.finishedAt = new Date().toISOString()
+      logger.info(`[CATALOG-IMAGES] Accessories finished: ${accessoryState.done - accessoryState.failed} saved, ${accessoryState.failed} failed`)
+    })
+  return run.then(() => accessoryState)
+}
+
+/** Deletes the downloaded accessory photos (the list stays). */
+export async function deleteAccessoryImages(db) {
+  fs.rmSync(path.join(catalogImagesDir(), ACCESSORY_DIR), { recursive: true, force: true })
+  await db.accessoryCatalog.updateMany({ data: { imageFile: null } })
 }

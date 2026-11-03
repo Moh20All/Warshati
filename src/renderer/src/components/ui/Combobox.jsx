@@ -7,7 +7,7 @@ const normalize = (s) => String(s || '').toLowerCase().normalize('NFD').replace(
  * Searchable dropdown. Click to open the full list, or type to filter it.
  * options: [{ value, label, sub?, image?, keywords? }]
  */
-export default function Combobox({ label, value, options, onChange, placeholder, emptyText, disabled, maxResults = 200, footer }) {
+export default function Combobox({ label, value, options, onChange, placeholder, emptyText, disabled, maxResults = 200, footer, rankByPosition = false }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
@@ -20,8 +20,13 @@ export default function Combobox({ label, value, options, onChange, placeholder,
     const hits = words.length
       ? options.filter(o => { const hay = normalize(`${o.label} ${o.keywords || ''}`); return words.every(w => hay.includes(w)) })
       : options
+    // rankByPosition: labels where the first typed word comes earlier are shown first ("chargeur 20w" -> "Chargeur…" before "Pack … chargeur")
+    if (rankByPosition && words.length) {
+      const at = (o) => { const i = normalize(o.label).indexOf(words[0]); return i < 0 ? Infinity : i }
+      return hits.map((o, i) => [o, at(o), i]).sort((a, b) => a[1] - b[1] || a[2] - b[2]).map(([o]) => o).slice(0, maxResults)
+    }
     return hits.slice(0, maxResults)
-  }, [options, query, maxResults])
+  }, [options, query, maxResults, rankByPosition])
 
   useEffect(() => {
     if (!open) return

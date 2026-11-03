@@ -20,7 +20,7 @@ try {
   for (const [n, deposit] of [[1, 700], [2, 0]]) {
     await old.repairTicket.create({ data: { ticketNumber: `TKT-2026-000${n}`, customerId: cust.id, createdById: user.id, deviceBrand: 'A', deviceModel: 'B', issueDesc: 'C', deposit } })
   }
-  for (const t of ['RepairDeposit', 'Refund', 'RepairPart', 'LocalLicense', 'DeviceCatalog', 'AppMeta']) await old.$executeRawUnsafe(`DROP TABLE "${t}"`)
+  for (const t of ['RepairDeposit', 'Refund', 'RepairPart', 'LocalLicense', 'DeviceCatalog', 'AppMeta', 'AccessoryCatalog']) await old.$executeRawUnsafe(`DROP TABLE "${t}"`)
   for (const [t, c] of [['Sale', 'depositApplied'], ['TradeIn', 'payoutMethod'], ['InventoryItem', 'warrantyDays'], ['SaleItem', 'warrantyDays'], ['DebtPayment', 'reversalOf'], ['SupplierDebtPayment', 'reversalOf']]) {
     await old.$executeRawUnsafe(`ALTER TABLE "${t}" DROP COLUMN "${c}"`)
   }
@@ -40,6 +40,7 @@ try {
   check('Refund table created', (await cols('Refund')).length > 0, true)
   check('DeviceCatalog table created', (await cols('DeviceCatalog')).includes('isCustom'), true)
   check('AppMeta table created', (await cols('AppMeta')).length > 0, true)
+  check('AccessoryCatalog table created', (await cols('AccessoryCatalog')).includes('imageFile'), true)
   check('DebtPayment.reversalOf added', (await cols('DebtPayment')).includes('reversalOf'), true)
   check('SupplierDebtPayment.reversalOf added', (await cols('SupplierDebtPayment')).includes('reversalOf'), true)
   const deposits = await db.repairDeposit.findMany()

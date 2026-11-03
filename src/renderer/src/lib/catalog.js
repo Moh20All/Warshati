@@ -13,6 +13,18 @@ export function useCatalog(category) {
   })
 }
 
+export const ACCESSORY_CATEGORIES = ['PACK', 'CASE', 'SCREEN', 'CHARGER', 'CABLE', 'ADAPTER', 'POWER_BANK', 'AUDIO', 'HOLDER', 'WATCH', 'GAMING', 'STORAGE', 'CAMERA', 'OTHER']
+
+/** The bundled accessory list: [{ id, name, category, price, oldPrice, imageFile }] (price = market price, a suggestion only). */
+export function useAccessories(enabled = true) {
+  return useQuery({
+    queryKey: ['catalog', 'accessories'],
+    queryFn: () => api.get('/catalog/accessories').then(r => r.data.accessories),
+    enabled,
+    staleTime: 10 * 60 * 1000
+  })
+}
+
 /** URL of a downloaded catalog image (served by the main process from the images folder). */
 export const catalogImageSrc = (file) => (file ? `warshati-media://catalog/${file.split('/').map(encodeURIComponent).join('/')}` : null)
 

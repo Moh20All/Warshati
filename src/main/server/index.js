@@ -18,7 +18,7 @@ import tradeInRoutes from './routes/trade-ins.js'
 import dailyCloseRoutes from './routes/daily-close.js'
 import reportRoutes from './routes/reports.js'
 import catalogRoutes from './routes/catalog.js'
-import { syncCatalog } from './lib/catalog.js'
+import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
 import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, VIP_PLAN } from '../network.js'
@@ -111,6 +111,11 @@ export async function startServer() {
         await syncCatalog(prisma)
     } catch (err) {
         logger.error('Device catalog sync failed', err)
+    }
+    try {
+        await syncAccessories(prisma)
+    } catch (err) {
+        logger.error('Accessory catalog sync failed', err)
     }
 
     // The saved plan lets a VIP main PC share right away; the online license check confirms it later
