@@ -2,7 +2,9 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
-import { CATEGORIES, getMeta, setMeta } from '../lib/catalog.js'
+import fs from 'fs'
+import path from 'path'
+import { CATEGORIES, getMeta, setMeta, catalogImagesDir } from '../lib/catalog.js'
 import { getImageStatus, startImageDownload, deleteImages, getAccessoryImageStatus, startAccessoryImageDownload, deleteAccessoryImages } from '../lib/catalog-images.js'
 
 const router = Router()
@@ -98,6 +100,20 @@ router.get('/accessories/status', async (_req, res) => {
     })
   } catch (err) {
     logger.error('Accessory status error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// GET /api/catalog/accessories/:id/image — a downloaded photo (the phone app shows it from the shop PC)
+router.get('/accessories/:id/image', async (req, res) => {
+  try {
+    const a = await prisma.accessoryCatalog.findUnique({ where: { id: req.params.id }, select: { imageFile: true } })
+    const file = a?.imageFile && path.join(catalogImagesDir(), a.imageFile)
+    if (!file || !path.resolve(file).startsWith(path.resolve(catalogImagesDir())) || !fs.existsSync(file)) return res.status(404).json({ error: 'No photo' })
+    res.set('Cache-Control', 'private, max-age=86400')
+    res.sendFile(path.resolve(file))
+  } catch (err) {
+    logger.error('Accessory photo error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

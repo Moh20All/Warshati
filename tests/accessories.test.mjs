@@ -63,6 +63,9 @@ try {
   check('consent recorded', (await o('GET', '/catalog/accessories/status')).data.imagesConsent, 'accepted')
   const one = await prisma.accessoryCatalog.findUnique({ where: { id: chosen[0] } })
   check('photo on disk', fs.existsSync(path.join(catalogImagesDir(), one.imageFile)), true)
+  r = await o('GET', `/catalog/accessories/${chosen[0]}/image`)
+  check('photo served to the phone app', r.status, 200)
+  check('no photo -> 404', (await o('GET', `/catalog/accessories/${list[10].id}/image`)).status, 404)
   check('the others still have none', await prisma.accessoryCatalog.count({ where: { imageFile: { not: null } } }), 3)
 
   // Then all: the chosen ones are not fetched again
