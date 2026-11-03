@@ -14,7 +14,7 @@ const { PrismaClient } = projectRequire('@prisma/client')
 try {
   // 1) Some data, including a ticket with a deposit, then strip everything added since v1.4
   const old = new PrismaClient({ datasources: { db: { url: `file:${oldDb}` } } })
-  await old.store.create({ data: { name: 'Old shop' } })
+  await old.store.create({ data: { name: 'Old shop', warrantyDays: 30 } })
   const user = await old.user.create({ data: { name: 'O', email: 'o@t.local', passwordHash: 'x', role: 'OWNER' } })
   const cust = await old.customer.create({ data: { name: 'C' } })
   for (const [n, deposit] of [[1, 700], [2, 0]]) {
@@ -51,6 +51,7 @@ try {
   await db.repairTicket.findMany({ include: { deposits: true, parts: true } })
   await db.tradeIn.findMany(); await db.localLicense.findMany()
   check('old data kept', (await db.store.findFirst())?.name, 'Old shop')
+  check('old 30-day default warranty becomes 5 days', (await db.store.findFirst())?.warrantyDays, 5)
 
   const log = fs.readFileSync(path.join(dir, 'userData', 'warshati-prisma.log'), 'utf8')
   check('upgrade completed without failures', /Migration failed|migration failed/.test(log), false)

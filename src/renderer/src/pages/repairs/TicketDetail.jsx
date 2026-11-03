@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,9 @@ import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
+import SuggestTextarea from '../../components/ui/SuggestTextarea'
+import { repairPhrases } from '../../lib/repairPhrases'
+import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useHotkeys } from '../../lib/hotkeys'
 
 const statusFlow = {
@@ -47,8 +50,15 @@ export default function TicketDetail() {
     customerName: '', customerPhone: '', customerId: '',
     deviceCategory: 'PHONE', deviceBrand: '', deviceModel: '', imei: '', devicePassword: '',
     color: '', condition: '', issueDesc: '', diagnosis: '', partsUsedNotes: '',
-    finalCost: '', partsCost: '', deposit: '0', priority: 'NORMAL', estimatedDoneAt: '', warrantyDays: 30
+    finalCost: '', partsCost: '', deposit: '0', priority: 'NORMAL', estimatedDoneAt: '', warrantyDays: DEFAULT_WARRANTY_DAYS
   })
+  // A new ticket starts with the store's default warranty (Settings → Store), unless the user already changed it
+  const warrantyTouched = useRef(false)
+  useEffect(() => {
+    if (isNew && store && !warrantyTouched.current) setForm(f => ({ ...f, warrantyDays: store.warrantyDays ?? DEFAULT_WARRANTY_DAYS }))
+  }, [isNew, store])
+  const lang = i18n.resolvedLanguage || i18n.language
+  const comma = lang.startsWith('ar') ? '،' : ','
   const [transitionModal, setTransitionModal] = useState(null)
   const [missingField, setMissingField] = useState(null) // highlights the first empty required field
   const [finalCostInput, setFinalCostInput] = useState('')
@@ -301,16 +311,17 @@ export default function TicketDetail() {
       </div>
       <div className="space-y-1.5 mb-4">
         <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_issue')}{isNew ? ' *' : ''}</label>
-        <textarea value={form.issueDesc} onChange={e => { setForm({...form, issueDesc: e.target.value}); setMissingField(null) }} className={`flex min-h-[60px] w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring ${missingField === 'issue' ? 'border-destructive' : 'border-input'}`} placeholder={t('repairs.details.ph_issue')} />
+        {/* The issue is fixed once the ticket exists (the server keeps the original) */}
+        <SuggestTextarea value={form.issueDesc} onChange={v => { setForm(f => ({...f, issueDesc: v})); setMissingField(null) }} suggestions={repairPhrases('issue', lang)} invalid={missingField === 'issue'} disabled={!isNew} listLabel={t('repairs.details.pick_list')} comma={comma} placeholder={t('repairs.details.ph_issue')} />
         {missingField === 'issue' && <p className="text-xs text-destructive">{t('repairs.details.err_missing_issue')}</p>}
       </div>
       <div className="space-y-1.5 mb-4">
         <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_diag')}</label>
-        <textarea value={form.diagnosis} onChange={e => setForm({...form, diagnosis: e.target.value})} className="flex min-h-[60px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_diag')} />
+        <SuggestTextarea value={form.diagnosis} onChange={v => setForm(f => ({...f, diagnosis: v}))} suggestions={repairPhrases('diagnosis', lang)} listLabel={t('repairs.details.pick_list')} comma={comma} placeholder={t('repairs.details.ph_diag')} />
       </div>
       <div className="space-y-1.5 mb-4">
         <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_parts_notes')}</label>
-        <textarea value={form.partsUsedNotes} onChange={e => setForm({...form, partsUsedNotes: e.target.value})} className="flex min-h-[40px] w-full rounded-sm border border-input bg-popover px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" placeholder={t('repairs.details.ph_parts_notes')} />
+        <SuggestTextarea value={form.partsUsedNotes} onChange={v => setForm(f => ({...f, partsUsedNotes: v}))} suggestions={repairPhrases('parts', lang)} listLabel={t('repairs.details.pick_list')} comma={comma} placeholder={t('repairs.details.ph_parts_notes')} minHeight={40} />
       </div>
       {!isNew && (
         <div className="mb-4 p-4 border border-border rounded-md bg-card space-y-3">
@@ -365,7 +376,7 @@ export default function TicketDetail() {
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input label={t('repairs.details.lbl_est_date')} type="date" value={form.estimatedDoneAt} onChange={e => setForm({...form, estimatedDoneAt: e.target.value})} />
-        <Input label={t('repairs.details.lbl_warranty_days')} type="number" value={form.warrantyDays} onChange={e => setForm({...form, warrantyDays: e.target.value})} />
+        <Input label={t('repairs.details.lbl_warranty_days')} type="number" value={form.warrantyDays} onChange={e => { warrantyTouched.current = true; setForm({...form, warrantyDays: e.target.value}) }} />
       </div>
 
       {/* Transition confirmation */}

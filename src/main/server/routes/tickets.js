@@ -14,6 +14,17 @@ export async function generateTicketNumber(db = prisma) {
   return nextTicketNumber(db)
 }
 
+// Repair warranty when a shop has no setting yet
+export const DEFAULT_WARRANTY_DAYS = 5
+
+/** Warranty days for a new ticket: the typed value (0 allowed), otherwise the store's default */
+export async function warrantyFor(db, typed) {
+  const days = parseInt(typed)
+  if (Number.isFinite(days) && days >= 0) return days
+  const store = await db.store.findFirst({ select: { warrantyDays: true } })
+  return store?.warrantyDays ?? DEFAULT_WARRANTY_DAYS
+}
+
 const validTransitions = {
   DIAGNOSING: ['WAITING_PARTS', 'IN_REPAIR', 'DONE', 'CANCELLED'],
   WAITING_PARTS: ['IN_REPAIR', 'DONE', 'CANCELLED'],
@@ -111,7 +122,7 @@ router.post('/', async (req, res) => {
           finalCost: finalCost || null, partsCost: partsCost || 0, deposit: deposit || 0,
           priority: priority || 'NORMAL',
           estimatedDoneAt: estimatedDoneAt ? new Date(estimatedDoneAt) : null,
-          warrantyDays: warrantyDays || 30
+          warrantyDays: await warrantyFor(tx, warrantyDays)
         },
         include: { customer: true }
       })

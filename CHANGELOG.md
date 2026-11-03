@@ -2,6 +2,16 @@
 
 All notable changes to Warshati will be documented in this file.
 
+## Next version (not released yet)
+
+### ✨ Improvements
+- **Ready-made choices on repair tickets:** Issue description, diagnosis and parts used each offer a list of the most common choices (40 issues, 31 diagnoses, 25 parts) in French, Arabic and English. Click the list button or start typing to filter; pick several, and add your own words anytime.
+- **Default warranty is 5 days:** New tickets now use the shop's default warranty from Settings → Store (it was always 30 before). Shops still on the old 30-day default move to 5 days once; a shop that chose another number keeps it.
+
+### 🛠️ Fixed
+- The issue of an existing ticket looked editable, but changes were not saved. It is now shown as fixed.
+- "Customer name" and "Issue description" showed two asterisks.
+
 ## v1.7.0 — 01/11/2026
 New Look, Shop Network & Barcode Labels
 

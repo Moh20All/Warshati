@@ -4,6 +4,7 @@ import prisma from '../lib/prisma.js'
 import { signToken } from '../lib/jwt.js'
 import { requireAuth } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { DEFAULT_WARRANTY_DAYS } from './tickets.js'
 
 const router = Router()
 
@@ -140,7 +141,7 @@ router.post('/setup', async (req, res) => {
                 phone: storePhone || null,
                 address: storeAddress || null,
                 currency: currency || 'DZD',
-                warrantyDays: warrantyDays ? parseInt(warrantyDays) : 30
+                warrantyDays: Number.isFinite(parseInt(warrantyDays)) ? parseInt(warrantyDays) : DEFAULT_WARRANTY_DAYS
             }
         })
 

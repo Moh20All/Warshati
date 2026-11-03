@@ -2,7 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
-import { generateTicketNumber } from './tickets.js'
+import { generateTicketNumber, warrantyFor } from './tickets.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -88,7 +88,8 @@ router.post('/:id/new-ticket', async (req, res) => {
           issueDesc: claim.issueDesc,
           priority: 'URGENT',
           estimatedCost: claim.isWithinWarranty ? 0 : null,
-          finalCost: claim.isWithinWarranty ? 0 : null
+          finalCost: claim.isWithinWarranty ? 0 : null,
+          warrantyDays: await warrantyFor(tx)
         }
       })
 

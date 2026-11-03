@@ -1,3 +1,4 @@
+import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Store, Save, Printer } from 'lucide-react'
@@ -21,7 +22,7 @@ export default function StoreSettings() {
   const [reportWidth, setReportWidth] = useState(localStorage.getItem('warshati_report_width') || 'A4')
   const [showDialog, setShowDialog] = useState(localStorage.getItem('warshati_show_print_dialog') === 'true')
   const [testingPrint, setTestingPrint] = useState(false)
-  const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: 30 })
+  const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: DEFAULT_WARRANTY_DAYS })
 
   const { data: store } = useQuery({
     queryKey: ['store'],
@@ -33,7 +34,7 @@ export default function StoreSettings() {
       setForm({
         name: store.name || '', phone: store.phone || '',
         address: store.address || '', currency: store.currency || 'DZD',
-        warrantyDays: store.warrantyDays || 30
+        warrantyDays: store.warrantyDays ?? DEFAULT_WARRANTY_DAYS
       })
     }
   }, [store])

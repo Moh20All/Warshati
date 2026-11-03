@@ -1,3 +1,4 @@
+import { DEFAULT_WARRANTY_DAYS } from '../lib/warranty'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -20,7 +21,7 @@ export default function FirstRunWizard() {
         storePhone: '',
         storeAddress: '',
         currency: 'DZD',
-        warrantyDays: 30,
+        warrantyDays: DEFAULT_WARRANTY_DAYS,
         userName: '',
         email: '',
         password: '',
@@ -145,7 +146,7 @@ export default function FirstRunWizard() {
                                         label={t('setup.warranty')}
                                         type="number"
                                         value={form.warrantyDays}
-                                        onChange={(e) => update('warrantyDays', parseInt(e.target.value) || 30)}
+                                        onChange={(e) => update('warrantyDays', Number.isFinite(parseInt(e.target.value)) ? parseInt(e.target.value) : DEFAULT_WARRANTY_DAYS)}
                                     />
                                 </div>
                             </div>

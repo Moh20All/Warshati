@@ -211,6 +211,19 @@ async function applyMigrations(prismaDb) {
       await prismaDb.$executeRaw`ALTER TABLE LocalLicense ADD COLUMN plan INTEGER NOT NULL DEFAULT 1`;
     }
 
+    // v1.8: the default repair warranty is 5 days. Once, a shop still on the old 30-day default moves to 5
+    // (new tickets did not use the setting before, so nobody chose 30 on purpose). Own try/catch.
+    try {
+      const done = await prismaDb.$queryRaw`SELECT value FROM AppMeta WHERE key = 'warranty_default_5'`;
+      if (done.length === 0) {
+        const changed = await prismaDb.$executeRaw`UPDATE Store SET warrantyDays = 5 WHERE warrantyDays = 30`;
+        await prismaDb.$executeRaw`INSERT INTO AppMeta (key, value) VALUES ('warranty_default_5', 'done')`;
+        logToDisk(`Default warranty set to 5 days (${changed} store row(s) changed)`);
+      }
+    } catch (err) {
+      logToDisk(`Warranty default migration failed: ${err.message}`);
+    }
+
     logToDisk('Schema migrations completed.');
   } catch (err) {
     logToDisk(`Migration failed: ${err.message}`);

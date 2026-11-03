@@ -55,7 +55,7 @@ model Store {
   phone        String?
   address      String?
   currency     String   @default("DZD")
-  warrantyDays Int      @default(30)
+  warrantyDays Int      @default(5)
   logoPath     String?
   createdAt    DateTime @default(now())
 }
@@ -353,7 +353,7 @@ model RepairTicket {
   partsCost      Decimal?     @default(0)
   deposit        Decimal?     @default(0)
 
-  warrantyDays   Int          @default(30)
+  warrantyDays   Int          @default(5)
 
   receivedAt     DateTime     @default(now())
   estimatedDoneAt DateTime?
