@@ -20,6 +20,7 @@ import Dashboard from './pages/Dashboard'
 import CustomerList from './pages/customers/CustomerList'
 import CustomerProfile from './pages/customers/CustomerProfile'
 import InventoryList from './pages/inventory/InventoryList'
+import AccessoriesPage from './pages/inventory/Accessories'
 import CheckInList from './pages/repairs/CheckInList'
 import TicketList from './pages/repairs/TicketList'
 import TicketDetail from './pages/repairs/TicketDetail'
@@ -120,6 +121,7 @@ export default function App() {
 
         {/* Inventory */}
         <Route path="/inventory" element={<P><InventoryList /></P>} />
+        <Route path="/inventory/accessories" element={<P><AccessoriesPage /></P>} />
         <Route path="/devices" element={<P><DevicesPage /></P>} />
 
         {/* Repairs */}

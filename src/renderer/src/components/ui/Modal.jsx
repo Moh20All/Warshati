@@ -58,14 +58,15 @@ export default function Modal({
                 if (e.target === overlayRef.current) onClose()
             }}
         >
+            {/* At most the window height: header and footer stay visible, the body scrolls */}
             <div className={`
-        w-full ${sizeClasses[size] || sizeClasses.md}
+        w-full ${sizeClasses[size] || sizeClasses.md} max-h-full flex flex-col
         bg-card text-card-foreground rounded-lg
         shadow-dialog animate-slide-up
         ${className}
       `}>
                 {/* Header */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-border shrink-0">
                     <h2 className="flex-1 text-base leading-6 font-semibold">{title}</h2>
                     <button
                         onClick={onClose}
@@ -76,13 +77,13 @@ export default function Modal({
                 </div>
 
                 {/* Body */}
-                <div className="p-5">
+                <div className="p-5 overflow-y-auto min-h-0">
                     {children}
                 </div>
 
                 {/* Footer */}
                 {footer && (
-                    <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border">
+                    <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border shrink-0">
                         {footer}
                     </div>
                 )}

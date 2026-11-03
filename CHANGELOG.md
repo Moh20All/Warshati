@@ -6,7 +6,11 @@ All notable changes to Warshati will be documented in this file.
 
 ### ✨ Improvements
 - **Ready-made choices on repair tickets:** Issue description, diagnosis and parts used each offer a list of the most common choices (40 issues, 31 diagnoses, 25 parts) in French, Arabic and English. Click the list button or start typing to filter; pick several, and add your own words anytime.
-- **Accessory catalog:** 1,025 accessories (cases, chargers, cables, earphones, packs...) in 14 categories to pick when adding stock. Picking one fills in the name; its market price is only shown as a suggestion — your buy and sell prices stay yours to type. Photos (about 20 MB) are downloaded only after you agree: all of them, or only the accessories you choose (Settings → Device Catalog too).
+- **Accessory catalog:** 1,025 accessories (cases, chargers, cables, earphones, packs...) in 14 categories to pick when adding stock. Picking one fills in the name; its market price is only shown as a suggestion — your buy and sell prices stay yours to type. Photos (about 20 MB) are downloaded only after you agree: all of them, or only the accessories you choose (Settings → Device Catalog too). Browse them all from Inventory → Accessory catalog (search, category, sort by price, "Add to stock").
+
+### 🛠️ Fixed (inventory)
+- Adding an accessory no longer asks for a phone brand and model.
+- Long forms now scroll inside their window: the Save button is always reachable, even on small screens.
 - **Default warranty is 5 days:** New tickets now use the shop's default warranty from Settings → Store (it was always 30 before). Shops still on the old 30-day default move to 5 days once; a shop that chose another number keeps it.
 
 ### 🛠️ Fixed

@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Search, Package, AlertTriangle, Pencil, Trash2, Barcode, Lightbulb } from 'lucide-react'
+import { Plus, Search, Package, AlertTriangle, Pencil, Trash2, Barcode, Lightbulb, Headphones } from 'lucide-react'
 import LabelsModal from '../../components/LabelsModal'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
@@ -26,6 +27,7 @@ export default function InventoryList() {
   const { isOwner } = useAuth()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -98,7 +100,10 @@ export default function InventoryList() {
     setShowForm(true)
   }
 
-  const closeForm = () => { setShowForm(false); setEditItem(null); setForm({ ...emptyForm }); setSuggested(null) }
+  const closeForm = () => {
+    setShowForm(false); setEditItem(null); setForm({ ...emptyForm }); setSuggested(null)
+    if (params.get('accessory')) setParams({}, { replace: true })
+  }
 
   // Accessory catalog for the form (loaded once the form is used for an accessory)
   const { data: accessories = [] } = useAccessories(showForm && form.type === 'ACCESSORY')
@@ -110,6 +115,19 @@ export default function InventoryList() {
     image: catalogImageSrc(a.imageFile),
     accessory: a
   })), [accessories, t, cur])
+
+  // Coming from the accessory catalog (?accessory=<id>): open the form for that accessory, price only suggested
+  const [params, setParams] = useSearchParams()
+  const fromCatalog = params.get('accessory')
+  useEffect(() => {
+    if (!fromCatalog || !isOwner) return
+    if (!showForm) { setEditItem(null); setForm({ ...emptyForm, type: 'ACCESSORY', brand: '', model: '' }); setShowForm(true); return }
+    const a = accessories.find(x => x.id === fromCatalog)
+    if (!a) return // still loading
+    setSuggested(a)
+    setForm(f => ({ ...f, name: a.name }))
+    setParams({}, { replace: true })
+  }, [fromCatalog, showForm, accessories, isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = (e) => {
     e.preventDefault()
@@ -187,6 +205,9 @@ export default function InventoryList() {
             ...(isOwner ? [{ header: `${t('inventory.columns.buy_price')} (${cur})`, key: 'buyPrice', type: 'money', width: 16 }] : []),
             { header: `${t('inventory.columns.sell_price')} (${cur})`, key: 'sellPrice', type: 'money', width: 16 }
           ]} />
+          <Button variant="outline" onClick={() => navigate('/inventory/accessories')}>
+            <Headphones className="h-4 w-4" /> {t('accessories.browse_button')}
+          </Button>
           <Button variant="outline" onClick={() => setLabelItems((data || []).map(i => ({ ...i, copies: 0 })))} disabled={!data?.length}>
             <Barcode className="h-4 w-4" /> {t('labels.button', 'Labels')}
           </Button>
@@ -221,7 +242,7 @@ export default function InventoryList() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-foreground">{t('inventory.modal.type')}</label>
-              <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select value={form.type} onChange={e => setForm({...form, type: e.target.value, ...(e.target.value === 'ACCESSORY' && !editItem ? { brand: '', model: '' } : {})})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="PHONE_NEW">{t('inventory.types.phone_new')}</option>
                 <option value="PHONE_USED">{t('inventory.types.phone_used')}</option>
                 <option value="PART">{t('inventory.types.part')}</option>
@@ -236,14 +257,16 @@ export default function InventoryList() {
               placeholder={t('accessories.pick_ph')} emptyText={t('catalog.no_results')}
               onChange={(_, opt) => { setSuggested(opt?.accessory || null); if (opt) setForm({ ...form, name: opt.accessory.name }) }} />
           )}
-          {/* Phones come from the phone catalog; parts/accessories can name the device they fit */}
-          <DevicePicker categories={isPhone ? ['PHONE'] : undefined}
-            value={{ category: isPhone ? 'PHONE' : form.deviceCategory, brand: form.brand, model: form.model }}
-            onChange={(v, device) => setForm({
-              ...form, deviceCategory: v.category, brand: v.brand, model: v.model,
-              ...(device && !form.name ? { name: `${device.brand} ${device.model}` } : {}),
-              ...(device && isPhone && storageText(device) ? { storage: storageText(device) } : {})
-            })} />
+          {/* Phones come from the phone catalog; parts can name the device they fit (accessories have no device) */}
+          {form.type !== 'ACCESSORY' && (
+            <DevicePicker categories={isPhone ? ['PHONE'] : undefined}
+              value={{ category: isPhone ? 'PHONE' : form.deviceCategory, brand: form.brand, model: form.model }}
+              onChange={(v, device) => setForm({
+                ...form, deviceCategory: v.category, brand: v.brand, model: v.model,
+                ...(device && !form.name ? { name: `${device.brand} ${device.model}` } : {}),
+                ...(device && isPhone && storageText(device) ? { storage: storageText(device) } : {})
+              })} />
+          )}
           <Input label={t('inventory.modal.color')} value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
           <div className="grid grid-cols-2 gap-4">
             <Input label={t('inventory.modal.sku')} value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />

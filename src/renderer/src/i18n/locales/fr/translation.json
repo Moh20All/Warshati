@@ -125,6 +125,16 @@
     }
   },
   "accessories": {
+    "browse_button": "Catalogue d'accessoires",
+    "browse_title": "Catalogue d'accessoires",
+    "browse_subtitle": "Parcourez les accessoires et ajoutez-les à votre stock. Le prix affiché est un prix du marché, seulement indicatif.",
+    "no_photos": "Les photos des accessoires ne sont pas encore téléchargées sur cet ordinateur.",
+    "get_photos": "Télécharger les photos",
+    "sort_cheap": "Trier : moins cher d'abord",
+    "sort_expensive": "Trier : plus cher d'abord",
+    "results": "{{count}} accessoires",
+    "market_price": "Marché :",
+    "add_to_stock": "Ajouter au stock",
     "categories": { "PACK": "Packs promo", "CASE": "Coques & étuis", "SCREEN": "Protection écran & caméra", "CHARGER": "Chargeurs", "CABLE": "Câbles", "ADAPTER": "Adaptateurs & hubs", "POWER_BANK": "Batteries & power banks", "AUDIO": "Audio & micros", "HOLDER": "Supports & anneaux", "WATCH": "Montres & bracelets", "GAMING": "Gaming & refroidisseurs", "STORAGE": "Stockage", "CAMERA": "Photo & vidéo", "OTHER": "Autres" },
     "all": "Tous",
     "pick_label": "Choisir dans le catalogue d'accessoires",

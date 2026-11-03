@@ -125,6 +125,16 @@
     }
   },
   "accessories": {
+    "browse_button": "Accessory catalog",
+    "browse_title": "Accessory catalog",
+    "browse_subtitle": "Browse accessories and add them to your stock. The price shown is a market price, for reference only.",
+    "no_photos": "Accessory photos are not downloaded on this computer yet.",
+    "get_photos": "Download photos",
+    "sort_cheap": "Sort: cheapest first",
+    "sort_expensive": "Sort: most expensive first",
+    "results": "{{count}} accessories",
+    "market_price": "Market:",
+    "add_to_stock": "Add to stock",
     "categories": { "PACK": "Promo packs", "CASE": "Cases & covers", "SCREEN": "Screen & camera protection", "CHARGER": "Chargers", "CABLE": "Cables", "ADAPTER": "Adapters & hubs", "POWER_BANK": "Batteries & power banks", "AUDIO": "Audio & microphones", "HOLDER": "Holders & rings", "WATCH": "Watches & straps", "GAMING": "Gaming & coolers", "STORAGE": "Storage", "CAMERA": "Photo & video", "OTHER": "Other" },
     "all": "All",
     "pick_label": "Pick from the accessory catalog",
