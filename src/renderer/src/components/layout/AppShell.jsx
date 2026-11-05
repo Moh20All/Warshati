@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import api from '../../lib/api'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import i18n from '../../i18n'
@@ -14,12 +16,13 @@ export default function AppShell({ children }) {
     i18n.options.interpolation.defaultVariables.currency = useCurrency()
     const navigate = useNavigate()
     const [help, setHelp] = useState(false)
+    const { data: store } = useQuery({ queryKey: ['store'], queryFn: () => api.get('/store').then(r => r.data.store) })
 
     // App-wide shortcuts (see lib/hotkeys.js SHORTCUTS for the list shown with F1)
     useHotkeys({
         F2: () => navigate('/sales/pos'),
         F3: () => navigate('/repairs/tickets/new'),
-        F4: () => navigate('/repairs/checkins?new=1'),
+        F4: () => { if (store?.featCheckIn !== false) navigate('/repairs/checkins?new=1') }, // off: Check-in is hidden
         F6: () => navigate('/repairs/tickets'),
         F7: () => navigate('/inventory'),
         F8: () => navigate('/finance/debts'),

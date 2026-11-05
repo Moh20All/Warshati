@@ -11,6 +11,8 @@ import {
 } from 'lucide-react'
 import { isConnectedPc } from '../../lib/plan'
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import api from '../../lib/api'
 import FeedbackModal from '../FeedbackModal'
 import markTile from '../../assets/brand/mark-trace-tile.svg'
 import { useAuth } from '../../lib/auth'
@@ -22,6 +24,7 @@ export default function Sidebar({ onShowShortcuts }) {
   const { isOwner } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const { data: store } = useQuery({ queryKey: ['store'], queryFn: () => api.get('/store').then(r => r.data.store) })
 
   const navigation = [
     {
@@ -36,7 +39,8 @@ export default function Sidebar({ onShowShortcuts }) {
     {
       group: t('navigation.groups.repairs'),
       items: [
-        { name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList, kbd: 'F4' },
+        // Check-in can be switched off (Settings → Store → Features)
+        ...(store?.featCheckIn === false ? [] : [{ name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList, kbd: 'F4' }]),
         { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket, kbd: 'F6' },
         { name: t('navigation.warranty'), path: '/repairs/warranty', icon: Shield },
         { name: t('navigation.trade_ins'), path: '/repairs/trade-ins', icon: ArrowLeftRight }

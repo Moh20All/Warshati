@@ -339,6 +339,8 @@
   },
   "settings": {
     "features": {
+      "featCheckIn": "Réception (bon de dépôt)",
+      "featCheckIn_desc": "Une étape rapide au comptoir avant le ticket : client, appareil et problème en 30 secondes, et un bon pour le client. Transformez-la en ticket plus tard en un clic. Désactivé : la page Réception disparaît et vous créez les tickets directement (F3).",
       "title": "Fonctions",
       "featDeliveryReceipt": "Bon de livraison",
       "featDeliveryReceipt_desc": "Quand un appareil réparé est rendu, proposer d'imprimer un bon : ce qui est payé, ce qui reste, la fin de garantie et une ligne pour la signature du client. Un ticket livré a toujours le bouton « Bon de livraison ».",

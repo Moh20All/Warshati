@@ -258,7 +258,7 @@ async function applyMigrations(prismaDb) {
         }
       };
       await addColumns('Store', [
-        ['featDeliveryReceipt', 'BOOLEAN NOT NULL DEFAULT true'], ['featQuickCash', 'BOOLEAN NOT NULL DEFAULT true'],
+        ['featCheckIn', 'BOOLEAN NOT NULL DEFAULT true'], ['featDeliveryReceipt', 'BOOLEAN NOT NULL DEFAULT true'], ['featQuickCash', 'BOOLEAN NOT NULL DEFAULT true'],
         ['featDrawerFloat', 'BOOLEAN NOT NULL DEFAULT false'], ['drawerFloat', 'INTEGER NOT NULL DEFAULT 0'],
         ['featRepairmen', 'BOOLEAN NOT NULL DEFAULT false']
       ]);

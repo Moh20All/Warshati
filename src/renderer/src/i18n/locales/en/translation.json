@@ -339,6 +339,8 @@
   },
   "settings": {
     "features": {
+      "featCheckIn": "Check-in (drop-off slip)",
+      "featCheckIn_desc": "A quick step at the counter before the ticket: client, device and problem in 30 seconds, and a slip for the client. Turn it into a ticket later in one click. Off: the Check-in page disappears and you create tickets directly (F3).",
       "title": "Features",
       "featDeliveryReceipt": "Delivery receipt",
       "featDeliveryReceipt_desc": "When a repaired device is given back, offer to print a receipt: what was paid, what is left, the warranty end date and a line for the client's signature. A delivered ticket always has the \"Delivery receipt\" button.",

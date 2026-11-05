@@ -13,8 +13,8 @@ try {
 
   // ── Store switches ──
   let store = (await o('GET', '/store')).data.store
-  check('defaults: delivery receipt on, quick cash on, drawer float off, repairmen off',
-    JSON.stringify([store.featDeliveryReceipt, store.featQuickCash, store.featDrawerFloat, store.featRepairmen]), '[true,true,false,false]')
+  check('defaults: check-in on, delivery receipt on, quick cash on, drawer float off, repairmen off',
+    JSON.stringify([store.featCheckIn, store.featDeliveryReceipt, store.featQuickCash, store.featDrawerFloat, store.featRepairmen]), '[true,true,true,false,false]')
   store = (await o('PUT', '/store', { featDrawerFloat: true, drawerFloat: 6000, featRepairmen: true })).data.store
   check('switches saved', JSON.stringify([store.featDrawerFloat, store.drawerFloat, store.featRepairmen]), '[true,6000,true]')
   check('staff cannot change them', (await s('PUT', '/store', { featRepairmen: false })).status, 403)

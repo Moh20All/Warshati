@@ -11,7 +11,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import markTile from '../../assets/brand/mark-trace-tile.svg'
 
-const FEATURES = ['featDeliveryReceipt', 'featQuickCash', 'featDrawerFloat', 'featRepairmen']
+const FEATURES = ['featCheckIn', 'featDeliveryReceipt', 'featQuickCash', 'featDrawerFloat', 'featRepairmen']
 
 export default function StoreSettings() {
   const { t, i18n } = useTranslation()

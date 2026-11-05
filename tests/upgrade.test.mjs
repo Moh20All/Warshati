@@ -22,7 +22,7 @@ try {
   }
   for (const t of ['RepairDeposit', 'Refund', 'RepairPart', 'LocalLicense', 'DeviceCatalog', 'AppMeta', 'AccessoryCatalog', 'RepairmanPayment', 'Repairman']) await old.$executeRawUnsafe(`DROP TABLE "${t}"`)
   for (const [t, c] of [['Sale', 'depositApplied'], ['TradeIn', 'payoutMethod'], ['InventoryItem', 'warrantyDays'], ['SaleItem', 'warrantyDays'], ['DebtPayment', 'reversalOf'], ['SupplierDebtPayment', 'reversalOf'],
-    ['Store', 'featDeliveryReceipt'], ['Store', 'featQuickCash'], ['Store', 'featDrawerFloat'], ['Store', 'drawerFloat'], ['Store', 'featRepairmen'], ['DailyClose', 'openingCash'], ['RepairTicket', 'repairmanPay']]) {
+    ['Store', 'featCheckIn'], ['Store', 'featDeliveryReceipt'], ['Store', 'featQuickCash'], ['Store', 'featDrawerFloat'], ['Store', 'drawerFloat'], ['Store', 'featRepairmen'], ['DailyClose', 'openingCash'], ['RepairTicket', 'repairmanPay']]) {
     await old.$executeRawUnsafe(`ALTER TABLE "${t}" DROP COLUMN "${c}"`)
   }
   await old.$disconnect()
@@ -42,7 +42,7 @@ try {
   check('DeviceCatalog table created', (await cols('DeviceCatalog')).includes('isCustom'), true)
   check('AppMeta table created', (await cols('AppMeta')).length > 0, true)
   check('AccessoryCatalog table created', (await cols('AccessoryCatalog')).includes('imageFile'), true)
-  check('Store feature switches added', (await cols('Store')).filter(c => c.startsWith('feat') || c === 'drawerFloat').length, 5)
+  check('Store feature switches added', (await cols('Store')).filter(c => c.startsWith('feat') || c === 'drawerFloat').length, 6)
   check('DailyClose.openingCash added', (await cols('DailyClose')).includes('openingCash'), true)
   check('RepairTicket.repairmanPay added', (await cols('RepairTicket')).includes('repairmanPay'), true)
   check('Repairman tables created', (await cols('Repairman')).includes('payType') && (await cols('RepairmanPayment')).includes('amount'), true)

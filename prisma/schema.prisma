@@ -74,6 +74,7 @@ model Store {
   createdAt    DateTime @default(now())
 
   // Optional features (Settings → Store → Features)
+  featCheckIn         Boolean @default(true)  // the Check-in page (quick drop-off slip before the ticket)
   featDeliveryReceipt Boolean @default(true)  // offer a delivery receipt when a repair is handed back
   featQuickCash       Boolean @default(true)  // POS: bill buttons that fill the amount paid
   featDrawerFloat     Boolean @default(false) // the drawer starts each day with a fixed amount
