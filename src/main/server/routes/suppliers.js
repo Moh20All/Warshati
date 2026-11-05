@@ -22,10 +22,12 @@ router.get('/', async (req, res) => {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: { select: { purchaseOrders: true } }
+        _count: { select: { purchaseOrders: true } },
+        supplierDebts: { where: { status: { not: 'SETTLED' } }, select: { remaining: true } }
       }
     })
-    res.json({ suppliers })
+    // owed = what the store still has to pay this supplier
+    res.json({ suppliers: suppliers.map(({ supplierDebts, ...s }) => ({ ...s, owed: supplierDebts.reduce((t, d) => t + parseFloat(d.remaining), 0) })) })
   } catch (err) {
     logger.error('List suppliers error:', err)
     res.status(500).json({ error: 'Internal server error' })

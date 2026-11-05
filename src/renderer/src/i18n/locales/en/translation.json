@@ -1,4 +1,44 @@
 {
+  "repairmen": {
+    "manage": "Manage repairmen",
+    "title": "Repairmen",
+    "subtitle": "People who repair for the shop and are paid per repair. Click one to see his repairs and pay him.",
+    "btn_add": "Add a repairman",
+    "title_edit": "Edit repairman",
+    "col_name": "Name",
+    "col_rule": "Pay per repair",
+    "col_owed": "The store owes him",
+    "rule_profit": "{{value}}% of the profit",
+    "rule_price": "{{value}}% of the price",
+    "rule_fixed": "{{amount}} per repair",
+    "type_PROFIT_PERCENT": "% of the profit",
+    "type_PROFIT_PERCENT_desc": "Price − parts, then his %. Example: 20000 − 15000 = 5000, at 40% he gets 2000.",
+    "type_PRICE_PERCENT": "% of the price",
+    "type_PRICE_PERCENT_desc": "His % of the repair price. Example: 10% of 20000 = 2000.",
+    "type_FIXED": "Fixed amount",
+    "type_FIXED_desc": "The same amount for every repair.",
+    "lbl_percent": "Percentage (%)",
+    "lbl_amount": "Amount",
+    "manual_hint": "On a ticket, you can always type his share by hand instead.",
+    "active": "Still works with the shop",
+    "saved": "Repairman saved",
+    "paid": "Payment recorded",
+    "earned": "Earned",
+    "paid_total": "Paid",
+    "owed": "Still to pay",
+    "pay_amount": "Amount paid to him ({{currency}})",
+    "btn_pay": "Record payment",
+    "pay_hint": "The money is taken from today's cash (daily close). Only delivered repairs count in what he earned.",
+    "repairs": "His repairs",
+    "no_repairs": "No repair given to him yet.",
+    "payments": "Payments",
+    "empty": "No repairmen yet",
+    "empty_desc": "Add the people who repair for the shop.",
+    "lbl_repairman": "Repairman",
+    "none": "The shop (nobody)",
+    "lbl_share": "His share ({{currency}})",
+    "auto_share": "Auto: {{amount}}"
+  },
   "shortcuts": {
     "title": "Keyboard shortcuts",
     "help": "Show keyboard shortcuts",
@@ -298,6 +338,18 @@
     "btn_deactivate": "Deactivate"
   },
   "settings": {
+    "features": {
+      "title": "Features",
+      "featDeliveryReceipt": "Delivery receipt",
+      "featDeliveryReceipt_desc": "When a repaired device is given back, offer to print a receipt: what was paid, what is left, the warranty end date and a line for the client's signature. A delivered ticket always has the \"Delivery receipt\" button.",
+      "featQuickCash": "Quick cash at the POS",
+      "featQuickCash_desc": "Under \"Amount paid\", buttons with the bills the client probably gives (exact, 4000, 5000…). One click fills the amount and the app shows the change. You can still type the amount.",
+      "featDrawerFloat": "Opening cash in the drawer",
+      "featDrawerFloat_desc": "For shops that empty the drawer each evening and put a fixed amount in it each morning. The daily close then shows how much should be in the drawer (opening cash + today's cash).",
+      "drawer_amount": "Amount each morning ({{currency}})",
+      "featRepairmen": "Repairmen",
+      "featRepairmen_desc": "Give a repair to a repairman paid per repair: a % of the profit (price − parts), a % of the price, or a fixed amount, or typed by hand on the ticket. His share is a cost of the repair; his page shows what the store owes him and you record when you pay him."
+    },
     "language": "Language",
     "english": "English",
     "french": "Français",
@@ -496,6 +548,7 @@
       "SPLIT": "Split"
     },
     "pos": {
+      "exact": "Exact",
       "title": "Point of Sale",
       "subtitle": "Fast checkout",
       "search_ph": "Scan barcode or type to search...",
@@ -580,6 +633,9 @@
   },
   "finance": {
     "daily_close": {
+      "stat_drawer": "Should be in the drawer",
+      "lbl_opening": "Opening cash today ({{currency}})",
+      "opening_hint": "The money put in the drawer this morning. Change it if today was different.",
       "title": "Daily Close",
       "subtitle": "End-of-day summary",
       "btn_close": "Close Today",
@@ -724,6 +780,9 @@
       "OTHER": "Other"
     },
     "suppliers": {
+      "col_owed": "Still to pay",
+      "total_owed": "Total owed to suppliers:",
+      "owed_hint": "Open a supplier, then the \"Debt\" tab: \"Add Existing Debt\", or buy on credit with \"New Purchase Order\".",
       "title": "Suppliers",
       "subtitle": "Manage your suppliers",
       "btn_add": "Add Supplier",
@@ -804,6 +863,23 @@
     }
   },
   "repairs": {
+    "delivery": {
+      "title": "DELIVERY RECEIPT / وصل التسليم",
+      "delivered_on": "Delivered on",
+      "phone": "Phone",
+      "work_done": "Work done",
+      "price": "Repair price",
+      "deposit": "Deposit already paid",
+      "paid_now": "Paid at delivery",
+      "still_owed": "Still owed",
+      "warranty": "Warranty",
+      "warranty_until": "{{days}} days, until {{date}}",
+      "no_warranty": "No warranty",
+      "signature": "Client signature (device received)",
+      "prompt_title": "Print the delivery receipt?",
+      "prompt_desc": "Proof the client took the device back, with what was paid and the warranty. The client signs it.",
+      "btn_print": "Delivery receipt"
+    },
     "statuses": {
       "DIAGNOSING": "Diagnosing",
       "WAITING_PARTS": "Waiting Parts",

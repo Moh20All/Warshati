@@ -5,7 +5,7 @@
 //     invoice created on delivery, never from ticket edits.
 //   - Cash in  = money paid at the sale (minus any deposit already counted earlier)
 //              + repair deposits received + customer debt payments
-//   - Cash out = expenses + payments to suppliers
+//   - Cash out = expenses + payments to suppliers + payments to repairmen
 //   - netCash  = cashSales + totalDebtCollected - totalExpenses
 //
 // Profit rules (what the shop actually earned, independent of when cash moves):
@@ -36,15 +36,16 @@ export function monthRange(month) {
 // Fetch every money movement in [start, end) once
 export async function loadMovements(db, start, end) {
   const range = { gte: start, lt: end }
-  const [sales, deposits, debtPayments, expenses, supplierPayments, refunds] = await Promise.all([
+  const [sales, deposits, debtPayments, expenses, supplierPayments, refunds, repairmanPayments] = await Promise.all([
     db.sale.findMany({ where: { createdAt: range }, include: { items: true } }),
     db.repairDeposit.findMany({ where: { paidAt: range } }),
     db.debtPayment.findMany({ where: { paidAt: range } }),
     db.expense.findMany({ where: { expenseDate: range } }),
     db.supplierDebtPayment.findMany({ where: { paidAt: range } }),
-    db.refund.findMany({ where: { createdAt: range } })
+    db.refund.findMany({ where: { createdAt: range } }),
+    db.repairmanPayment.findMany({ where: { paidAt: range } })
   ])
-  return { sales, deposits, debtPayments, expenses, supplierPayments, refunds }
+  return { sales, deposits, debtPayments, expenses, supplierPayments, refunds, repairmanPayments }
 }
 
 // Totals for the movements that fall in [start, end) (defaults to everything loaded)
@@ -67,7 +68,9 @@ export function summarize(movements, start = null, end = null) {
   const totalDebtCollected = debtPayments.reduce((s, p) => s + num(p.amount), 0)
   const operatingExpenses = expenses.reduce((s, e) => s + num(e.amount), 0)
   const supplierPaid = supplierPayments.reduce((s, p) => s + num(p.amount), 0)
-  const totalExpenses = operatingExpenses + supplierPaid
+  // Paying a repairman is cash out; his share was already a cost of the repair on delivery (cogs)
+  const repairmenPaid = (movements.repairmanPayments || []).filter(p => inRange(p.paidAt)).reduce((s, p) => s + num(p.amount), 0)
+  const totalExpenses = operatingExpenses + supplierPaid + repairmenPaid
   const netCash = cashSales + totalDebtCollected - totalExpenses
 
   // Profit
@@ -85,7 +88,7 @@ export function summarize(movements, start = null, end = null) {
   return {
     totalRevenue, totalCreditSales, cashSales, salesCount: sales.length,
     depositsCollected, refundsPaid, refundsCount: refunds.length, totalDebtCollected,
-    operatingExpenses, supplierPaid, totalExpenses, netCash,
+    operatingExpenses, supplierPaid, repairmenPaid, totalExpenses, netCash,
     cogs, grossProfit, runningCosts, netProfit,
     ticketRevenue, ticketCogs, netTicketProfit: ticketRevenue - ticketCogs
   }

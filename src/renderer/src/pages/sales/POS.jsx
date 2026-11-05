@@ -12,6 +12,12 @@ import Input from '../../components/ui/Input'
 import Modal from '../../components/ui/Modal'
 import { useHotkeys, KBD_CLASS } from '../../lib/hotkeys'
 
+/** Round amounts above the total a customer pays with (next 500, 1000, 2000 and 5000), at most 4. */
+export function billsFor(total) {
+  const up = (step) => Math.ceil(total / step) * step
+  return [...new Set([500, 1000, 2000, 5000].map(up))].filter(v => v > total).sort((a, b) => a - b).slice(0, 4)
+}
+
 export default function POS() {
   const cur = useCurrency()
   const { t, i18n } = useTranslation()
@@ -369,6 +375,17 @@ export default function POS() {
             </div>
             {(paymentMethod === 'CASH' || paymentMethod === 'SPLIT') && (
               <Input label={t('sales.pos.lbl_amount_paid')} type="number" value={amountPaid} onChange={e => setAmountPaid(e.target.value)} placeholder={total.toString()} />
+            )}
+            {/* Quick cash (Settings → Store → Features): the bills the customer probably hands over */}
+            {store?.featQuickCash && paymentMethod === 'CASH' && total > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {[total, ...billsFor(total)].map((v, i) => (
+                  <button key={v} type="button" onClick={() => setAmountPaid(String(v))}
+                    className={`h-8 px-3 rounded-sm border text-sm cursor-pointer ${parseFloat(amountPaid) === v ? 'border-primary bg-primary-soft text-primary font-semibold' : 'border-input hover:bg-accent'}`}>
+                    {i === 0 ? t('sales.pos.exact') : v.toLocaleString()}
+                  </button>
+                ))}
+              </div>
             )}
             {change > 0 && paymentMethod === 'CASH' && (
               <div className="bg-success-soft text-success-soft-foreground p-2 rounded-sm text-center font-bold">{t('sales.pos.change')}: {change.toLocaleString()} {cur}</div>

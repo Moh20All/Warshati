@@ -46,6 +46,10 @@ router.put('/', requireAuth, requireRole('OWNER'), async (req, res) => {
         if (currency !== undefined) data.currency = currency
         if (warrantyDays !== undefined) data.warrantyDays = parseInt(warrantyDays)
         if (logoPath !== undefined) data.logoPath = logoPath
+        for (const k of ['featDeliveryReceipt', 'featQuickCash', 'featDrawerFloat', 'featRepairmen']) {
+            if (req.body[k] !== undefined) data[k] = !!req.body[k]
+        }
+        if (req.body.drawerFloat !== undefined) data.drawerFloat = Math.max(0, parseInt(req.body.drawerFloat) || 0)
 
         const updated = await prisma.store.update({
             where: { id: store.id },

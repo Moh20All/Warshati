@@ -246,6 +246,50 @@ async function applyMigrations(prismaDb) {
       logToDisk(`Accessory catalog migration failed: ${err.message}`);
     }
 
+    // v1.8: optional features, opening cash, repairmen (own try/catch)
+    try {
+      const addColumns = async (table, columns) => {
+        const have = (await prismaDb.$queryRawUnsafe(`PRAGMA table_info("${table}")`)).map(c => c.name);
+        for (const [name, type] of columns) {
+          if (!have.includes(name)) {
+            logToDisk(`Migrating ${table} table: adding ${name}`);
+            await prismaDb.$executeRawUnsafe(`ALTER TABLE "${table}" ADD COLUMN "${name}" ${type}`);
+          }
+        }
+      };
+      await addColumns('Store', [
+        ['featDeliveryReceipt', 'BOOLEAN NOT NULL DEFAULT true'], ['featQuickCash', 'BOOLEAN NOT NULL DEFAULT true'],
+        ['featDrawerFloat', 'BOOLEAN NOT NULL DEFAULT false'], ['drawerFloat', 'INTEGER NOT NULL DEFAULT 0'],
+        ['featRepairmen', 'BOOLEAN NOT NULL DEFAULT false']
+      ]);
+      await addColumns('DailyClose', [['openingCash', 'DECIMAL NOT NULL DEFAULT 0']]);
+      await addColumns('RepairTicket', [['repairmanId', 'TEXT'], ['repairmanPay', 'DECIMAL']]);
+      const repairmanTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='Repairman'`;
+      if (repairmanTable.length === 0) {
+        logToDisk('Migrating: creating Repairman and RepairmanPayment tables');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "Repairman" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "phone" TEXT,
+    "payType" TEXT NOT NULL DEFAULT 'PROFIT_PERCENT',
+    "payValue" DECIMAL NOT NULL DEFAULT 0,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "RepairmanPayment" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "repairmanId" TEXT NOT NULL,
+    "amount" DECIMAL NOT NULL,
+    "notes" TEXT,
+    "paidAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "RepairmanPayment_repairmanId_fkey" FOREIGN KEY ("repairmanId") REFERENCES "Repairman" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairmanPayment_paidAt_idx" ON "RepairmanPayment"("paidAt")`);
+      }
+    } catch (err) {
+      logToDisk(`Features/repairmen migration failed: ${err.message}`);
+    }
+
     logToDisk('Schema migrations completed.');
   } catch (err) {
     logToDisk(`Migration failed: ${err.message}`);

@@ -19,6 +19,9 @@ import SuggestTextarea from '../../components/ui/SuggestTextarea'
 import { repairPhrases } from '../../lib/repairPhrases'
 import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useHotkeys } from '../../lib/hotkeys'
+import { deliveryReceiptHtml } from '../../lib/receipts'
+import { repairmanShare } from '../../lib/repairmen'
+import { useAuth } from '../../lib/auth'
 
 const statusFlow = {
   DIAGNOSING: ['WAITING_PARTS', 'IN_REPAIR', 'DONE', 'CANCELLED'],
@@ -39,6 +42,7 @@ export default function TicketDetail() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const print = usePrint()
+  const { isOwner } = useAuth()
   const isNew = id === 'new'
 
   const { data: store } = useQuery({
@@ -50,7 +54,8 @@ export default function TicketDetail() {
     customerName: '', customerPhone: '', customerId: '',
     deviceCategory: 'PHONE', deviceBrand: '', deviceModel: '', imei: '', devicePassword: '',
     color: '', condition: '', issueDesc: '', diagnosis: '', partsUsedNotes: '',
-    finalCost: '', partsCost: '', deposit: '0', priority: 'NORMAL', estimatedDoneAt: '', warrantyDays: DEFAULT_WARRANTY_DAYS
+    finalCost: '', partsCost: '', deposit: '0', priority: 'NORMAL', estimatedDoneAt: '', warrantyDays: DEFAULT_WARRANTY_DAYS,
+    repairmanId: '', repairmanPay: ''
   })
   // A new ticket starts with the store's default warranty (Settings → Store), unless the user already changed it
   const warrantyTouched = useRef(false)
@@ -60,6 +65,7 @@ export default function TicketDetail() {
   const lang = i18n.resolvedLanguage || i18n.language
   const comma = lang.startsWith('ar') ? '،' : ','
   const [transitionModal, setTransitionModal] = useState(null)
+  const [deliveredTicket, setDeliveredTicket] = useState(null) // just delivered: offer the delivery receipt
   const [missingField, setMissingField] = useState(null) // highlights the first empty required field
   const [finalCostInput, setFinalCostInput] = useState('')
   const [partsCostInput, setPartsCostInput] = useState('')
@@ -140,6 +146,7 @@ export default function TicketDetail() {
       queryClient.invalidateQueries({ queryKey: ['tickets'] })
       setTransitionModal(null)
       toast.success(t('repairs.details.status_changed', { status: t(`repairs.statuses.${res.data.ticket.status}`) }))
+      if (res.data.ticket.status === 'DELIVERED' && store?.featDeliveryReceipt) setDeliveredTicket(res.data.ticket)
     },
     onError: (err) => toast.error(err.response?.data?.error || 'Transition failed')
   })
@@ -216,6 +223,17 @@ export default function TicketDetail() {
     print.print(html, 'ticket')
   }
 
+  // Repairmen: the list for the select; the share his rule gives (shown until the owner types one)
+  const { data: repairmen = [] } = useQuery({
+    queryKey: ['repairmen'],
+    queryFn: () => api.get('/repairmen').then(r => r.data.repairmen),
+    enabled: !!store?.featRepairmen
+  })
+  const picked = repairmen.find(r => r.id === form.repairmanId)
+  const ruleShare = picked?.payType ? repairmanShare(picked, form.finalCost, form.partsCost) : null
+
+  const printDelivery = (x) => print.print(deliveryReceiptHtml({ t, dir: i18n.dir(), store, cur, ticket: x }), 'ticket')
+
   useEffect(() => {
     if (ticket && !isNew) {
       setForm({
@@ -226,7 +244,8 @@ export default function TicketDetail() {
         condition: ticket.condition || '', issueDesc: ticket.issueDesc, diagnosis: ticket.diagnosis || '',
         partsUsedNotes: ticket.partsUsedNotes || '', estimatedCost: ticket.estimatedCost || '',
         finalCost: ticket.finalCost || '', partsCost: ticket.partsCost || '', deposit: ticket.deposit || '0', priority: ticket.priority,
-        estimatedDoneAt: ticket.estimatedDoneAt ? ticket.estimatedDoneAt.split('T')[0] : '', warrantyDays: ticket.warrantyDays
+        estimatedDoneAt: ticket.estimatedDoneAt ? ticket.estimatedDoneAt.split('T')[0] : '', warrantyDays: ticket.warrantyDays,
+        repairmanId: ticket.repairmanId || '', repairmanPay: ticket.repairmanPay ?? ''
       })
     }
   }, [ticket, isNew])
@@ -268,6 +287,9 @@ export default function TicketDetail() {
           )}
           {!isNew && (
             <Button variant="outline" onClick={printTicket}><Printer className="h-4 w-4" /> {t('repairs.tickets.print')}</Button>
+          )}
+          {ticket?.status === 'DELIVERED' && (
+            <Button variant="outline" onClick={() => printDelivery(ticket)}><Printer className="h-4 w-4" /> {t('repairs.delivery.btn_print')}</Button>
           )}
           <Button onClick={handleSave} loading={saveMutation.isPending}><Save className="h-4 w-4" /> {t('repairs.details.save')}</Button>
         </div>
@@ -373,6 +395,21 @@ export default function TicketDetail() {
             <option value="LOW">{t('repairs.priorities.LOW')}</option><option value="NORMAL">{t('repairs.priorities.NORMAL')}</option><option value="URGENT">{t('repairs.priorities.URGENT')}</option>
           </select>
         </div>
+        {/* Repairman (Settings → Store → Features): fixed once the repair is invoiced */}
+        {store?.featRepairmen && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-foreground">{t('repairmen.lbl_repairman')}</label>
+            <select value={form.repairmanId} disabled={!!ticket?.sale} onChange={e => setForm({ ...form, repairmanId: e.target.value })} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted">
+              <option value="">{t('repairmen.none')}</option>
+              {repairmen.filter(r => r.isActive || r.id === form.repairmanId).map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+        )}
+        {store?.featRepairmen && isOwner && form.repairmanId && (
+          <Input label={t('repairmen.lbl_share')} type="number" min="0" value={form.repairmanPay} disabled={!!ticket?.sale}
+            onChange={e => setForm({ ...form, repairmanPay: e.target.value })}
+            placeholder={ruleShare !== null ? t('repairmen.auto_share', { amount: `${ruleShare.toLocaleString()} ${cur}` }) : ''} />
+        )}
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input label={t('repairs.details.lbl_est_date')} type="date" value={form.estimatedDoneAt} onChange={e => setForm({...form, estimatedDoneAt: e.target.value})} />
@@ -422,6 +459,15 @@ export default function TicketDetail() {
              <Button onClick={() => transitionMutation.mutate({ status: 'DELIVERED' })} loading={transitionMutation.isPending}>{t('repairs.details.confirm_delivery')}</Button>
           </div>
         )}
+      </Modal>
+
+      {/* Right after delivery: offer the delivery receipt (Settings → Store → Features) */}
+      <Modal open={!!deliveredTicket} onClose={() => setDeliveredTicket(null)} title={t('repairs.delivery.prompt_title')} size="sm"
+        footer={<>
+          <Button variant="outline" onClick={() => setDeliveredTicket(null)}>{t('finance.debts.btn_no')}</Button>
+          <Button onClick={() => { printDelivery(deliveredTicket); setDeliveredTicket(null) }}><Printer className="h-4 w-4" /> {t('repairs.delivery.btn_print')}</Button>
+        </>}>
+        <p className="text-sm text-muted-foreground">{t('repairs.delivery.prompt_desc')}</p>
       </Modal>
     </div>
   )

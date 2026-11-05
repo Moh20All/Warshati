@@ -11,6 +11,12 @@ All notable changes to Warshati will be documented in this file.
 ### 🛠️ Fixed (inventory)
 - Adding an accessory no longer asks for a phone brand and model.
 - Long forms now scroll inside their window: the Save button is always reachable, even on small screens.
+- **Features you switch on or off:** Settings → Store → Features, each with a short explanation.
+- **Delivery receipt:** When a repaired device is handed back, Warshati offers to print a receipt: what was paid, what is left, the warranty end date and a line for the client's signature. Delivered tickets always have a "Delivery receipt" button.
+- **Repairmen:** Give a repair to a repairman paid per repair — a % of the profit (price − parts), a % of the price, a fixed amount, or typed by hand on the ticket. His share is a cost of the repair (price 20000, parts 15000, repairman 2000 → the shop keeps 3000). His page shows what the shop owes him; recording a payment takes it from the day's cash.
+- **Opening cash:** For shops that put a fixed amount in the drawer every morning; the daily close shows how much should be in the drawer.
+- **Quick cash at the POS:** Buttons with the bills the client probably gives (exact, 3000, 5000…) fill the amount paid and show the change. Typing still works.
+- **Supplier list shows what you owe:** Each supplier's balance and the total owed to all suppliers.
 - **Default warranty is 5 days:** New tickets now use the shop's default warranty from Settings → Store (it was always 30 before). Shops still on the old 30-day default move to 5 days once; a shop that chose another number keeps it.
 
 ### 🛠️ Fixed

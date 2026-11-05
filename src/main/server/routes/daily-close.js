@@ -50,7 +50,8 @@ router.post('/', async (req, res) => {
         totalExpenses: totals.totalExpenses,
         netCash: totals.netCash,
         openTickets, doneNotDelivered, newWarrantyClaims: todayClaims,
-        lowStockCount, notes: req.body.notes || null
+        lowStockCount, notes: req.body.notes || null,
+        openingCash: Math.max(0, parseFloat(req.body.openingCash) || 0)
       }
     })
 

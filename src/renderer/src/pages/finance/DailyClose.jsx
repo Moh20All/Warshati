@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle, Printer, Package } from 'lucide-react'
+import { CalendarCheck, DollarSign, TrendingUp, CreditCard, Receipt, AlertTriangle, Printer, Package, Wallet } from 'lucide-react'
+import Input from '../../components/ui/Input'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
@@ -31,7 +32,7 @@ export default function DailyClosePage() {
   })
 
   const closeMutation = useMutation({
-    mutationFn: () => api.post('/daily-close'),
+    mutationFn: () => api.post('/daily-close', { openingCash: floatOn ? opening : 0 }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['daily-closes'] })
       queryClient.invalidateQueries({ queryKey: ['daily-close-preview'] })
@@ -46,6 +47,11 @@ export default function DailyClosePage() {
     queryKey: ['store'],
     queryFn: () => api.get('/store').then(r => r.data.store)
   })
+
+  // Opening cash: the store's usual amount, changeable for today
+  const floatOn = !!store?.featDrawerFloat
+  const [openingInput, setOpeningInput] = useState(null)
+  const opening = parseFloat(openingInput ?? store?.drawerFloat ?? 0) || 0
 
   const printDailyReport = () => {
     if (!preview) return
@@ -93,6 +99,8 @@ export default function DailyClosePage() {
     { label: t('finance.daily_close.stat_debt_collected'), value: `${(preview?.totalDebtCollected || 0).toLocaleString()} ${cur}`, icon: Receipt, color: 'text-primary' },
     { label: t('finance.daily_close.stat_expenses'), value: `${(preview?.totalExpenses || 0).toLocaleString()} ${cur}`, icon: AlertTriangle, color: 'text-destructive' },
     { label: t('finance.daily_close.stat_net_cash'), value: `${(preview?.netCash || 0).toLocaleString()} ${cur}`, icon: DollarSign, color: preview?.netCash >= 0 ? 'text-success' : 'text-destructive' },
+    // Drawer started the day with a fixed amount (Settings → Store → Features): what should be in it now
+    ...(floatOn ? [{ label: t('finance.daily_close.stat_drawer'), value: `${(opening + (preview?.netCash || 0)).toLocaleString()} ${cur}`, icon: Wallet, color: 'text-primary', key: true }] : []),
     // Owner only (the server leaves these out for staff): what the day really earned
     // = revenue - cost of the parts/items sold - running expenses (stock purchases are not counted twice)
     ...(preview?.netProfit !== undefined ? [
@@ -126,6 +134,13 @@ export default function DailyClosePage() {
           )}
         </div>
       </div>
+
+      {floatOn && !preview?.alreadyClosed && (
+        <div className="flex items-end gap-3 mb-4 flex-wrap">
+          <div className="w-56"><Input label={t('finance.daily_close.lbl_opening')} type="number" min="0" value={openingInput ?? String(store?.drawerFloat ?? 0)} onChange={e => setOpeningInput(e.target.value)} /></div>
+          <p className="text-xs text-muted-foreground pb-2">{t('finance.daily_close.opening_hint')}</p>
+        </div>
+      )}
 
       {/* Today's Preview */}
       <div className={`grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 ${stats.length > 6 ? 'lg:grid-cols-4' : 'lg:grid-cols-6'}`}>

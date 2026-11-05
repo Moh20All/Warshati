@@ -18,6 +18,7 @@ import tradeInRoutes from './routes/trade-ins.js'
 import dailyCloseRoutes from './routes/daily-close.js'
 import reportRoutes from './routes/reports.js'
 import catalogRoutes from './routes/catalog.js'
+import repairmenRoutes from './routes/repairmen.js'
 import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
@@ -68,6 +69,7 @@ app.use('/api/trade-ins', tradeInRoutes)
 app.use('/api/daily-close', dailyCloseRoutes)
 app.use('/api/reports', reportRoutes)
 app.use('/api/catalog', catalogRoutes)
+app.use('/api/repairmen', repairmenRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {

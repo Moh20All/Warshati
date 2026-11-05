@@ -5,6 +5,7 @@ import logger from '../lib/logger.js'
 import { generateSaleNumber } from './sales.js'
 import { nextTicketNumber } from '../lib/numbering.js'
 import { rememberDevice } from '../lib/catalog.js'
+import { repairmanShare } from './repairmen.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -23,6 +24,16 @@ export async function warrantyFor(db, typed) {
   if (Number.isFinite(days) && days >= 0) return days
   const store = await db.store.findFirst({ select: { warrantyDays: true } })
   return store?.warrantyDays ?? DEFAULT_WARRANTY_DAYS
+}
+
+/** repairmanId (anyone) and repairmanPay (owner only; empty = from his rule at delivery) sent with a ticket */
+function repairmanFields(req, body) {
+  const data = {}
+  if (body.repairmanId !== undefined) data.repairmanId = body.repairmanId || null
+  if (body.repairmanPay !== undefined && req.user.role === 'OWNER') {
+    data.repairmanPay = body.repairmanPay === '' || body.repairmanPay === null ? null : Math.max(0, parseFloat(body.repairmanPay) || 0)
+  }
+  return data
 }
 
 const validTransitions = {
@@ -71,10 +82,16 @@ router.get('/:id', async (req, res) => {
         checkIn: true,
         warrantyClaims: true,
         sale: true,
-        debtEntry: { include: { payments: true } }
+        debtEntry: { include: { payments: true } },
+        repairman: true
       }
     })
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' })
+    // The repairman's pay is the owner's business
+    if (req.user.role !== 'OWNER') {
+      delete ticket.repairmanPay
+      if (ticket.repairman) ticket.repairman = { id: ticket.repairman.id, name: ticket.repairman.name }
+    }
     res.json({ ticket })
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' })
@@ -122,7 +139,8 @@ router.post('/', async (req, res) => {
           finalCost: finalCost || null, partsCost: partsCost || 0, deposit: deposit || 0,
           priority: priority || 'NORMAL',
           estimatedDoneAt: estimatedDoneAt ? new Date(estimatedDoneAt) : null,
-          warrantyDays: await warrantyFor(tx, warrantyDays)
+          warrantyDays: await warrantyFor(tx, warrantyDays),
+          ...repairmanFields(req, req.body)
         },
         include: { customer: true }
       })
@@ -166,6 +184,8 @@ router.put('/:id', async (req, res) => {
 
     const current = await prisma.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true } })
     if (!current) return res.status(404).json({ error: 'Ticket not found' })
+    // The repairman and his share are fixed once the repair is invoiced (his share is in its cost)
+    if (!current.sale) Object.assign(data, repairmanFields(req, req.body))
 
     // A deposit change is real cash in (or refunded, if lowered) today
     const depositDelta = deposit !== undefined ? (parseFloat(deposit) || 0) - parseFloat(current.deposit || 0) : 0
@@ -196,7 +216,7 @@ router.put('/:id', async (req, res) => {
 router.post('/:id/transition', async (req, res) => {
   try {
     const { status, finalCost, partsCost, paymentMethod } = req.body
-    const ticket = await prisma.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true } })
+    const ticket = await prisma.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true, repairman: true } })
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' })
 
     const allowed = validTransitions[ticket.status] || []
@@ -221,6 +241,11 @@ router.post('/:id/transition', async (req, res) => {
       return res.status(400).json({ error: 'Payment method (CASH/CREDIT) is required to deliver and create an invoice' })
     }
     if (status === 'DELIVERED') data.deliveredAt = new Date()
+    // The repairman's share (typed, or from his rule) is fixed on delivery
+    if (status === 'DELIVERED' && ticket.repairman) {
+      data.repairmanPay = ticket.repairmanPay != null ? parseFloat(ticket.repairmanPay)
+        : repairmanShare(ticket.repairman, finalCost || ticket.finalCost, partsCost !== undefined ? partsCost : ticket.partsCost)
+    }
 
     // Invoice, debt and status change are saved together or not at all
     const updated = await prisma.$transaction(async (tx) => {
@@ -228,6 +253,7 @@ router.post('/:id/transition', async (req, res) => {
       if (needsInvoice) {
         const costToCustomer = parseFloat(finalCost || ticket.finalCost || 0)
         const costOfParts = parseFloat(partsCost !== undefined ? partsCost : (ticket.partsCost || 0))
+        const repairCost = costOfParts + (data.repairmanPay || 0) // his share is a cost of this repair
         // The deposit was already counted as cash when received; it only reduces what is due now
         const depositApplied = Math.min(parseFloat(ticket.deposit || 0), costToCustomer)
         const amountDue = costToCustomer - depositApplied
@@ -254,7 +280,7 @@ router.post('/:id/transition', async (req, res) => {
               create: [{
                 description: `Repair: ${ticket.deviceBrand} ${ticket.deviceModel}`,
                 quantity: 1,
-                unitCost: costOfParts,
+                unitCost: repairCost,
                 unitPrice: costToCustomer,
                 subtotal: costToCustomer
               }]

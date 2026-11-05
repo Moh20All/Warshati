@@ -40,6 +40,7 @@ import BackupPage from './pages/settings/Backup'
 import AboutApp from './pages/settings/AboutApp'
 import DeviceCatalogPage from './pages/settings/DeviceCatalog'
 import DevicesPage from './pages/catalog/Devices'
+import RepairmenPage from './pages/settings/Repairmen'
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
   if (loading) return <FullPageSpinner />
@@ -148,6 +149,7 @@ export default function App() {
         <Route path="/settings/store" element={<O><StoreSettings /></O>} />
         <Route path="/settings/backup" element={<O><BackupPage /></O>} />
         <Route path="/settings/catalog" element={<O><DeviceCatalogPage /></O>} />
+        <Route path="/settings/repairmen" element={<O><RepairmenPage /></O>} />
         <Route path="/settings/network" element={<O><NetworkPage /></O>} />
         <Route path="/settings/about" element={<P><AboutApp /></P>} />
 

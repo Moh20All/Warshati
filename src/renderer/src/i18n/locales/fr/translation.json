@@ -1,4 +1,44 @@
 {
+  "repairmen": {
+    "manage": "Gérer les réparateurs",
+    "title": "Réparateurs",
+    "subtitle": "Les personnes qui réparent pour la boutique et sont payées par réparation. Cliquez sur l'un d'eux pour voir ses réparations et le payer.",
+    "btn_add": "Ajouter un réparateur",
+    "title_edit": "Modifier le réparateur",
+    "col_name": "Nom",
+    "col_rule": "Paiement par réparation",
+    "col_owed": "La boutique lui doit",
+    "rule_profit": "{{value}} % du bénéfice",
+    "rule_price": "{{value}} % du prix",
+    "rule_fixed": "{{amount}} par réparation",
+    "type_PROFIT_PERCENT": "% du bénéfice",
+    "type_PROFIT_PERCENT_desc": "Prix − pièces, puis son %. Exemple : 20000 − 15000 = 5000, à 40 % il reçoit 2000.",
+    "type_PRICE_PERCENT": "% du prix",
+    "type_PRICE_PERCENT_desc": "Son % du prix de la réparation. Exemple : 10 % de 20000 = 2000.",
+    "type_FIXED": "Montant fixe",
+    "type_FIXED_desc": "Le même montant pour chaque réparation.",
+    "lbl_percent": "Pourcentage (%)",
+    "lbl_amount": "Montant",
+    "manual_hint": "Sur un ticket, vous pouvez toujours saisir sa part à la main à la place.",
+    "active": "Travaille encore avec la boutique",
+    "saved": "Réparateur enregistré",
+    "paid": "Paiement enregistré",
+    "earned": "Gagné",
+    "paid_total": "Payé",
+    "owed": "Reste à payer",
+    "pay_amount": "Montant payé ({{currency}})",
+    "btn_pay": "Enregistrer le paiement",
+    "pay_hint": "L'argent sort de la caisse du jour (clôture du jour). Seules les réparations livrées comptent dans ce qu'il a gagné.",
+    "repairs": "Ses réparations",
+    "no_repairs": "Aucune réparation confiée pour l'instant.",
+    "payments": "Paiements",
+    "empty": "Aucun réparateur",
+    "empty_desc": "Ajoutez les personnes qui réparent pour la boutique.",
+    "lbl_repairman": "Réparateur",
+    "none": "La boutique (personne)",
+    "lbl_share": "Sa part ({{currency}})",
+    "auto_share": "Auto : {{amount}}"
+  },
   "shortcuts": {
     "title": "Raccourcis clavier",
     "help": "Afficher les raccourcis clavier",
@@ -298,6 +338,18 @@
     "btn_deactivate": "Désactiver"
   },
   "settings": {
+    "features": {
+      "title": "Fonctions",
+      "featDeliveryReceipt": "Bon de livraison",
+      "featDeliveryReceipt_desc": "Quand un appareil réparé est rendu, proposer d'imprimer un bon : ce qui est payé, ce qui reste, la fin de garantie et une ligne pour la signature du client. Un ticket livré a toujours le bouton « Bon de livraison ».",
+      "featQuickCash": "Monnaie rapide à la caisse",
+      "featQuickCash_desc": "Sous « Montant payé », des boutons avec les billets que le client donne souvent (exact, 4000, 5000…). Un clic remplit le montant et l'app affiche la monnaie à rendre. Vous pouvez toujours taper le montant.",
+      "featDrawerFloat": "Fond de caisse",
+      "featDrawerFloat_desc": "Pour les boutiques qui vident la caisse le soir et y remettent un montant fixe le matin. La clôture du jour montre alors combien il doit y avoir dans la caisse (fond de caisse + argent du jour).",
+      "drawer_amount": "Montant chaque matin ({{currency}})",
+      "featRepairmen": "Réparateurs",
+      "featRepairmen_desc": "Confier une réparation à un réparateur payé par réparation : un % du bénéfice (prix − pièces), un % du prix, un montant fixe, ou saisi à la main sur le ticket. Sa part est un coût de la réparation ; sa page montre ce que la boutique lui doit et vous notez quand vous le payez."
+    },
     "language": "Langue",
     "english": "English",
     "french": "Français",
@@ -496,6 +548,7 @@
       "SPLIT": "Mixte"
     },
     "pos": {
+      "exact": "Exact",
       "title": "Point de Vente",
       "subtitle": "Paiement rapide",
       "search_ph": "Scanner le code-barres ou rechercher...",
@@ -580,6 +633,9 @@
   },
   "finance": {
     "daily_close": {
+      "stat_drawer": "Doit être dans la caisse",
+      "lbl_opening": "Fond de caisse ce matin ({{currency}})",
+      "opening_hint": "L'argent mis dans la caisse ce matin. Changez-le si aujourd'hui c'était différent.",
       "title": "Clôture Journalière",
       "subtitle": "Bilan de la journée",
       "btn_close": "Clôturer Aujourd'hui",
@@ -724,6 +780,9 @@
       "OTHER": "Autre"
     },
     "suppliers": {
+      "col_owed": "Reste à payer",
+      "total_owed": "Total dû aux fournisseurs :",
+      "owed_hint": "Ouvrez un fournisseur, puis l'onglet « Dettes » : « Ajouter une dette existante », ou achetez à crédit avec « Nouveau bon de commande ».",
       "title": "Fournisseurs",
       "subtitle": "Gérer vos fournisseurs",
       "btn_add": "Ajouter Fournisseur",
@@ -804,6 +863,23 @@
     }
   },
   "repairs": {
+    "delivery": {
+      "title": "BON DE LIVRAISON / وصل التسليم",
+      "delivered_on": "Livré le",
+      "phone": "Téléphone",
+      "work_done": "Travail effectué",
+      "price": "Prix de la réparation",
+      "deposit": "Acompte déjà payé",
+      "paid_now": "Payé à la livraison",
+      "still_owed": "Reste dû",
+      "warranty": "Garantie",
+      "warranty_until": "{{days}} jours, jusqu'au {{date}}",
+      "no_warranty": "Sans garantie",
+      "signature": "Signature du client (appareil reçu)",
+      "prompt_title": "Imprimer le bon de livraison ?",
+      "prompt_desc": "La preuve que le client a récupéré l'appareil, avec ce qui est payé et la garantie. Le client le signe.",
+      "btn_print": "Bon de livraison"
+    },
     "statuses": {
       "DIAGNOSING": "En diagnostic",
       "WAITING_PARTS": "En attente de pièces",

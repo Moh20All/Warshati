@@ -20,8 +20,9 @@ try {
   for (const [n, deposit] of [[1, 700], [2, 0]]) {
     await old.repairTicket.create({ data: { ticketNumber: `TKT-2026-000${n}`, customerId: cust.id, createdById: user.id, deviceBrand: 'A', deviceModel: 'B', issueDesc: 'C', deposit } })
   }
-  for (const t of ['RepairDeposit', 'Refund', 'RepairPart', 'LocalLicense', 'DeviceCatalog', 'AppMeta', 'AccessoryCatalog']) await old.$executeRawUnsafe(`DROP TABLE "${t}"`)
-  for (const [t, c] of [['Sale', 'depositApplied'], ['TradeIn', 'payoutMethod'], ['InventoryItem', 'warrantyDays'], ['SaleItem', 'warrantyDays'], ['DebtPayment', 'reversalOf'], ['SupplierDebtPayment', 'reversalOf']]) {
+  for (const t of ['RepairDeposit', 'Refund', 'RepairPart', 'LocalLicense', 'DeviceCatalog', 'AppMeta', 'AccessoryCatalog', 'RepairmanPayment', 'Repairman']) await old.$executeRawUnsafe(`DROP TABLE "${t}"`)
+  for (const [t, c] of [['Sale', 'depositApplied'], ['TradeIn', 'payoutMethod'], ['InventoryItem', 'warrantyDays'], ['SaleItem', 'warrantyDays'], ['DebtPayment', 'reversalOf'], ['SupplierDebtPayment', 'reversalOf'],
+    ['Store', 'featDeliveryReceipt'], ['Store', 'featQuickCash'], ['Store', 'featDrawerFloat'], ['Store', 'drawerFloat'], ['Store', 'featRepairmen'], ['DailyClose', 'openingCash'], ['RepairTicket', 'repairmanPay']]) {
     await old.$executeRawUnsafe(`ALTER TABLE "${t}" DROP COLUMN "${c}"`)
   }
   await old.$disconnect()
@@ -41,6 +42,11 @@ try {
   check('DeviceCatalog table created', (await cols('DeviceCatalog')).includes('isCustom'), true)
   check('AppMeta table created', (await cols('AppMeta')).length > 0, true)
   check('AccessoryCatalog table created', (await cols('AccessoryCatalog')).includes('imageFile'), true)
+  check('Store feature switches added', (await cols('Store')).filter(c => c.startsWith('feat') || c === 'drawerFloat').length, 5)
+  check('DailyClose.openingCash added', (await cols('DailyClose')).includes('openingCash'), true)
+  check('RepairTicket.repairmanPay added', (await cols('RepairTicket')).includes('repairmanPay'), true)
+  check('Repairman tables created', (await cols('Repairman')).includes('payType') && (await cols('RepairmanPayment')).includes('amount'), true)
+  check('old shop keeps defaults: delivery receipt on, repairmen off', JSON.stringify(await db.store.findFirst({ select: { featDeliveryReceipt: true, featRepairmen: true } })), '{"featDeliveryReceipt":true,"featRepairmen":false}')
   check('DebtPayment.reversalOf added', (await cols('DebtPayment')).includes('reversalOf'), true)
   check('SupplierDebtPayment.reversalOf added', (await cols('SupplierDebtPayment')).includes('reversalOf'), true)
   const deposits = await db.repairDeposit.findMany()

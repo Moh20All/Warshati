@@ -1,7 +1,8 @@
 import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Store, Save, Printer } from 'lucide-react'
+import { Store, Save, Printer, ToggleRight, Wrench } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import { PRINT_LOGO } from '../../lib/printKit'
@@ -9,6 +10,8 @@ import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import markTile from '../../assets/brand/mark-trace-tile.svg'
+
+const FEATURES = ['featDeliveryReceipt', 'featQuickCash', 'featDrawerFloat', 'featRepairmen']
 
 export default function StoreSettings() {
   const { t, i18n } = useTranslation()
@@ -22,7 +25,7 @@ export default function StoreSettings() {
   const [reportWidth, setReportWidth] = useState(localStorage.getItem('warshati_report_width') || 'A4')
   const [showDialog, setShowDialog] = useState(localStorage.getItem('warshati_show_print_dialog') === 'true')
   const [testingPrint, setTestingPrint] = useState(false)
-  const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: DEFAULT_WARRANTY_DAYS })
+  const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: DEFAULT_WARRANTY_DAYS, drawerFloat: 0 })
 
   const { data: store } = useQuery({
     queryKey: ['store'],
@@ -34,7 +37,8 @@ export default function StoreSettings() {
       setForm({
         name: store.name || '', phone: store.phone || '',
         address: store.address || '', currency: store.currency || 'DZD',
-        warrantyDays: store.warrantyDays ?? DEFAULT_WARRANTY_DAYS
+        warrantyDays: store.warrantyDays ?? DEFAULT_WARRANTY_DAYS,
+        ...Object.fromEntries(FEATURES.map(k => [k, store[k]])), drawerFloat: store.drawerFloat ?? 0
       })
     }
   }, [store])
@@ -64,7 +68,8 @@ export default function StoreSettings() {
     localStorage.setItem('warshati_show_print_dialog', showDialog)
     saveMutation.mutate({
       ...form,
-      warrantyDays: parseInt(form.warrantyDays)
+      warrantyDays: parseInt(form.warrantyDays),
+      drawerFloat: parseInt(form.drawerFloat) || 0
     })
   }
 
@@ -152,6 +157,32 @@ export default function StoreSettings() {
             </select>
           </div>
           <Input label={t('settings.warranty_days')} type="number" value={form.warrantyDays} onChange={e => setForm({...form, warrantyDays: e.target.value})} />
+        </div>
+
+        {/* Optional features: each one with a short explanation */}
+        <div className="pt-4 border-t border-border space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <ToggleRight className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold text-foreground">{t('settings.features.title')}</h3>
+          </div>
+          {FEATURES.map(key => (
+            <div key={key} className="flex gap-3 p-3 rounded-md border border-border">
+              <input type="checkbox" id={key} checked={!!form[key]} onChange={e => setForm({ ...form, [key]: e.target.checked })}
+                className="mt-0.5 w-4 h-4 shrink-0 rounded border-input text-primary focus:ring-2 focus:ring-primary cursor-pointer" />
+              <div className="flex-1 min-w-0 space-y-2">
+                <label htmlFor={key} className="block cursor-pointer">
+                  <span className="block text-sm font-medium text-foreground">{t(`settings.features.${key}`)}</span>
+                  <span className="block text-xs text-muted-foreground">{t(`settings.features.${key}_desc`)}</span>
+                </label>
+                {key === 'featDrawerFloat' && form.featDrawerFloat && (
+                  <div className="max-w-[200px]"><Input label={t('settings.features.drawer_amount')} type="number" min="0" value={form.drawerFloat} onChange={e => setForm({ ...form, drawerFloat: e.target.value })} /></div>
+                )}
+                {key === 'featRepairmen' && form.featRepairmen && (
+                  <Link to="/settings/repairmen" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"><Wrench className="h-3.5 w-3.5" /> {t('repairmen.manage')}</Link>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Printer Settings */}

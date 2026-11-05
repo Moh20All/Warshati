@@ -72,6 +72,39 @@ model Store {
   warrantyDays Int      @default(5)
   logoPath     String?
   createdAt    DateTime @default(now())
+
+  // Optional features (Settings → Store → Features)
+  featDeliveryReceipt Boolean @default(true)  // offer a delivery receipt when a repair is handed back
+  featQuickCash       Boolean @default(true)  // POS: bill buttons that fill the amount paid
+  featDrawerFloat     Boolean @default(false) // the drawer starts each day with a fixed amount
+  drawerFloat         Int     @default(0)
+  featRepairmen       Boolean @default(false) // repairs can be given to a repairman paid per repair
+}
+
+// Repairman (engineer) paid per repair: % of the profit (price − parts), % of the price, or a fixed amount
+model Repairman {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  payType   String   @default("PROFIT_PERCENT") // PROFIT_PERCENT | PRICE_PERCENT | FIXED
+  payValue  Decimal  @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tickets   RepairTicket[]
+  payments  RepairmanPayment[]
+}
+
+// Money the owner handed to a repairman (leaves the drawer on that day)
+model RepairmanPayment {
+  id          String    @id @default(cuid())
+  repairmanId String
+  repairman   Repairman @relation(fields: [repairmanId], references: [id])
+  amount      Decimal
+  notes       String?
+  paidAt      DateTime  @default(now())
+
+  @@index([paidAt])
 }
 
 model User {
@@ -369,6 +402,10 @@ model RepairTicket {
 
   warrantyDays   Int          @default(5)
 
+  repairmanId    String?
+  repairman      Repairman?   @relation(fields: [repairmanId], references: [id])
+  repairmanPay   Decimal?     // his share: typed by hand, or computed from his rule when delivered
+
   receivedAt     DateTime     @default(now())
   estimatedDoneAt DateTime?
   deliveredAt    DateTime?
@@ -607,6 +644,7 @@ model DailyClose {
   newWarrantyClaims  Int
 
   lowStockCount      Int
+  openingCash        Decimal  @default(0) // money put in the drawer at the start of the day
   notes              String?
   closedAt           DateTime @default(now())
 }

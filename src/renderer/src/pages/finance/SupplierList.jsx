@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus, Search, Phone } from 'lucide-react'
 import api from '../../lib/api'
+import { useCurrency } from '../../lib/currency'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -12,6 +13,7 @@ import Modal from '../../components/ui/Modal'
 
 export default function SupplierList() {
   const { t } = useTranslation()
+  const cur = useCurrency()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -34,8 +36,10 @@ export default function SupplierList() {
     { key: 'name', label: t('finance.suppliers.col_name'), sortable: true, render: (v) => <span className="font-medium">{v}</span> },
     { key: 'phone', label: t('finance.suppliers.col_phone'), render: (v) => v || '—' },
     { key: 'address', label: t('finance.suppliers.col_address'), render: (v) => v || '—' },
-    { key: '_count', label: t('finance.suppliers.col_pos'), render: (v) => v?.purchaseOrders || 0 }
+    { key: '_count', label: t('finance.suppliers.col_pos'), render: (v) => v?.purchaseOrders || 0 },
+    { key: 'owed', label: t('finance.suppliers.col_owed'), sortable: true, render: (v) => v > 0 ? <span className="font-semibold text-destructive">{v.toLocaleString()} {cur}</span> : <span className="text-muted-foreground">—</span> }
   ]
+  const totalOwed = (data || []).reduce((s, x) => s + (x.owed || 0), 0)
 
   return (
     <div className="animate-fade-in">
@@ -43,7 +47,11 @@ export default function SupplierList() {
         <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.suppliers.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.suppliers.subtitle')}</p></div>
         <Button onClick={() => setShowAdd(true)}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_add')}</Button>
       </div>
-      <div className="mb-4 max-w-sm"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
+      <div className="mb-4 flex items-center gap-4 flex-wrap">
+        <div className="max-w-sm flex-1"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
+        {totalOwed > 0 && <p className="text-sm">{t('finance.suppliers.total_owed')} <span className="font-semibold text-destructive">{totalOwed.toLocaleString()} {cur}</span></p>}
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">{t('finance.suppliers.owed_hint')}</p>
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
         : <Table columns={columns} data={data || []} emptyTitle={t('finance.suppliers.empty_title')} emptyDescription={t('finance.suppliers.empty_desc')} onRowClick={r => navigate(`/finance/suppliers/${r.id}`)} />}
 
