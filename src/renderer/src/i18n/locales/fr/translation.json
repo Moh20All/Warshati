@@ -1,5 +1,9 @@
 {
   "repairmen": {
+    "btn_cancel_pay": "Annuler ce paiement",
+    "cancel_msg": "Annuler le paiement de {{amount}} ? Rien n'est supprimé : une écriture d'annulation est notée aujourd'hui, l'argent revient dans la caisse du jour et la boutique le lui doit à nouveau.",
+    "cancelled": "Paiement annulé",
+    "cancel_entry": "annulation",
     "manage": "Gérer les réparateurs",
     "title": "Réparateurs",
     "subtitle": "Les personnes qui réparent pour la boutique et sont payées par réparation. Cliquez sur l'un d'eux pour voir ses réparations et le payer.",

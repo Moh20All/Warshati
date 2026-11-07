@@ -108,4 +108,23 @@ router.post('/:id/payments', requireRole('OWNER'), async (req, res) => {
   }
 })
 
+// POST /api/repairmen/:id/payments/:paymentId/cancel — cancel a wrong payment. A cancelling entry is recorded
+// today (the money comes back into today's cash); nothing is deleted.
+router.post('/:id/payments/:paymentId/cancel', requireRole('OWNER'), async (req, res) => {
+  try {
+    const payments = await prisma.repairmanPayment.findMany({ where: { repairmanId: req.params.id } })
+    const payment = payments.find(p => p.id === req.params.paymentId)
+    if (!payment) return res.status(404).json({ error: 'Payment not found' })
+    if (payment.reversalOf || num(payment.amount) < 0) return res.status(400).json({ error: 'A cancelling entry cannot be cancelled' })
+    if (payments.some(p => p.reversalOf === payment.id)) return res.status(400).json({ error: 'This payment is already cancelled' })
+    await prisma.repairmanPayment.create({
+      data: { repairmanId: payment.repairmanId, amount: -num(payment.amount), reversalOf: payment.id, notes: `Cancelled: ${req.body?.reason || 'wrong payment'}` }
+    })
+    res.json(await balance(prisma, payment.repairmanId))
+  } catch (err) {
+    logger.error('Cancel repairman payment error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Pencil, ArrowLeft, Wallet } from 'lucide-react'
+import { Plus, Pencil, ArrowLeft, Wallet, Undo2 } from 'lucide-react'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { PAY_TYPES } from '../../lib/repairmen'
@@ -10,7 +10,7 @@ import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
-import Modal from '../../components/ui/Modal'
+import Modal, { ConfirmModal } from '../../components/ui/Modal'
 import StatusBadge from '../../components/ui/StatusBadge'
 
 const emptyForm = { name: '', phone: '', payType: 'PROFIT_PERCENT', payValue: '', isActive: true }
@@ -42,6 +42,13 @@ export default function Repairmen() {
   const pay = useMutation({
     mutationFn: () => api.post(`/repairmen/${openId}/payments`, { amount: payValue }),
     onSuccess: () => { refresh(); setPayAmount(''); toast.success(t('repairmen.paid')) },
+    onError: (err) => toast.error(err.response?.data?.error || 'Failed')
+  })
+
+  const [cancelPay, setCancelPay] = useState(null) // wrong payment to cancel
+  const cancel = useMutation({
+    mutationFn: (paymentId) => api.post(`/repairmen/${openId}/payments/${paymentId}/cancel`),
+    onSuccess: () => { refresh(); setCancelPay(null); toast.success(t('repairmen.cancelled')) },
     onError: (err) => toast.error(err.response?.data?.error || 'Failed')
   })
 
@@ -135,15 +142,27 @@ export default function Repairmen() {
               <div>
                 <h3 className="text-sm font-semibold mb-2">{t('repairmen.payments')}</h3>
                 <ul className="divide-y divide-border text-sm max-h-40 overflow-auto">
-                  {page.payments.map(p => (
-                    <li key={p.id} className="flex justify-between py-1.5"><span className="text-muted-foreground">{new Date(p.paidAt).toLocaleString()}</span><span>{money(p.amount)}</span></li>
-                  ))}
+                  {page.payments.map(p => {
+                    const cancelled = page.payments.some(x => x.reversalOf === p.id)
+                    return (
+                      <li key={p.id} className="flex items-center gap-3 py-1.5">
+                        <span className="flex-1 text-muted-foreground">{new Date(p.paidAt).toLocaleString()}{p.reversalOf ? ` · ${t('repairmen.cancel_entry')}` : ''}</span>
+                        <span className={cancelled ? 'line-through text-muted-foreground' : ''}>{money(p.amount)}</span>
+                        {!p.reversalOf && !cancelled && Number(p.amount) > 0 && (
+                          <button onClick={() => setCancelPay(p)} className="p-1 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer" title={t('repairmen.btn_cancel_pay')}><Undo2 className="h-3.5 w-3.5" /></button>
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             )}
           </div>
         )}
       </Modal>
+
+      <ConfirmModal open={!!cancelPay} onClose={() => setCancelPay(null)} onConfirm={() => cancel.mutate(cancelPay.id)} loading={cancel.isPending}
+        title={t('repairmen.btn_cancel_pay')} message={t('repairmen.cancel_msg', { amount: money(cancelPay?.amount) })} confirmText={t('repairmen.btn_cancel_pay')} />
     </div>
   )
 }

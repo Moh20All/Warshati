@@ -286,6 +286,7 @@ async function applyMigrations(prismaDb) {
 )`);
         await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairmanPayment_paidAt_idx" ON "RepairmanPayment"("paidAt")`);
       }
+      await addColumns('RepairmanPayment', [['reversalOf', 'TEXT']]);
     } catch (err) {
       logToDisk(`Features/repairmen migration failed: ${err.message}`);
     }

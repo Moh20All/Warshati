@@ -101,8 +101,9 @@ model RepairmanPayment {
   id          String    @id @default(cuid())
   repairmanId String
   repairman   Repairman @relation(fields: [repairmanId], references: [id])
-  amount      Decimal
+  amount      Decimal   // negative for a cancelling entry
   notes       String?
+  reversalOf  String?   // id of the payment this entry cancels
   paidAt      DateTime  @default(now())
 
   @@index([paidAt])

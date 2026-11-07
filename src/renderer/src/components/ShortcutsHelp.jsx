@@ -3,7 +3,7 @@ import Modal from './ui/Modal'
 import { SHORTCUTS, KBD_CLASS } from '../lib/hotkeys'
 
 /** F1 window: every keyboard shortcut, grouped. */
-export default function ShortcutsHelp({ open, onClose }) {
+export default function ShortcutsHelp({ open, onClose, hide = [] }) {
   const { t } = useTranslation()
   return (
     <Modal open={open} onClose={onClose} title={t('shortcuts.title', 'Keyboard shortcuts')} size="lg">
@@ -13,7 +13,7 @@ export default function ShortcutsHelp({ open, onClose }) {
           <section key={group} className={i === 0 ? 'md:row-span-2' : ''}>
             <h3 className="text-xs font-semibold uppercase tracking-[.04em] text-muted-foreground rtl:normal-case rtl:tracking-normal mb-2">{t(group)}</h3>
             <ul className="divide-y divide-border">
-              {rows.map(([keys, label, fallback]) => (
+              {rows.filter(([keys]) => !hide.includes(keys)).map(([keys, label, fallback]) => (
                 <li key={keys + label} className="flex items-center justify-between gap-4 py-1.5 text-[13px]">
                   <span>{t(label, fallback)}</span>
                   <span className="flex gap-1 shrink-0" dir="ltr">

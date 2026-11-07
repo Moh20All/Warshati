@@ -67,6 +67,16 @@ try {
   check('shown in the daily close', after.repairmenPaid, 4000)
   check('paying him does not change the profit again', after.netProfit, before.netProfit)
 
+  // A wrong payment is cancelled: nothing deleted, the money comes back into today's cash
+  const wrong = paid.payment
+  check('staff cannot cancel a payment', (await s('POST', `/repairmen/${ali.id}/payments/${wrong.id}/cancel`)).status, 403)
+  check('cancelling gives the balance back', (await o('POST', `/repairmen/${ali.id}/payments/${wrong.id}/cancel`, { reason: 'typo' })).data.owed, 6500)
+  check('cash back in today\'s figures', (await o('GET', '/daily-close/preview')).data.netCash, before.netCash)
+  check('cannot cancel twice', (await o('POST', `/repairmen/${ali.id}/payments/${wrong.id}/cancel`)).status, 400)
+  const reversal = (await o('GET', `/repairmen/${ali.id}`)).data.repairman.payments.find(p => p.reversalOf === wrong.id)
+  check('a cancelling entry cannot be cancelled', (await o('POST', `/repairmen/${ali.id}/payments/${reversal.id}/cancel`)).status, 400)
+  check('payment of another repairman not found', (await o('POST', `/repairmen/${sami.id}/payments/${wrong.id}/cancel`)).status, 404)
+
   // ── Opening cash is saved with the daily close ──
   const close = (await o('POST', '/daily-close', { openingCash: 6000 })).data.close
   check('opening cash saved', Number(close.openingCash), 6000)

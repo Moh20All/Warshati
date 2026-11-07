@@ -1,5 +1,9 @@
 {
   "repairmen": {
+    "btn_cancel_pay": "Cancel this payment",
+    "cancel_msg": "Cancel the payment of {{amount}}? Nothing is deleted: a cancelling entry is recorded today, the money comes back into today's cash and he is owed it again.",
+    "cancelled": "Payment cancelled",
+    "cancel_entry": "cancelling entry",
     "manage": "Manage repairmen",
     "title": "Repairmen",
     "subtitle": "People who repair for the shop and are paid per repair. Click one to see his repairs and pay him.",

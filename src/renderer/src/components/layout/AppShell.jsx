@@ -43,7 +43,7 @@ export default function AppShell({ children }) {
                 <CatalogImagesPrompt />
                 <AccessoryPhotosPrompt />
             </div>
-            <ShortcutsHelp open={help} onClose={() => setHelp(false)} />
+            <ShortcutsHelp open={help} onClose={() => setHelp(false)} hide={store?.featCheckIn === false ? ['F4'] : []} />
         </div>
     )
 }
