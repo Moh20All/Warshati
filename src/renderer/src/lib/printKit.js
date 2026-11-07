@@ -18,7 +18,7 @@ export function printHeader(store) {
   const info = `<div style="min-width:0;">`
     + `<div style="font-size:15px; font-weight:700; text-transform:uppercase; line-height:1.2;">${esc(store?.name || 'Warshati — ورشتي')}</div>`
     + (store?.address ? `<div style="font-size:10px;">${esc(store.address)}</div>` : '')
-    + (store?.phone ? `<div style="font-size:10px;"><bdi>${esc(store.phone)}</bdi></div>` : '')
+    + (store?.phone ? `<div style="font-size:10px;"><bdi dir="ltr">${esc(store.phone)}</bdi></div>` : '')
     + '</div>'
   const logo = printLogo(store).replace('style="object-fit:contain"', 'style="object-fit:contain; margin:0; flex-shrink:0;"')
   return logo

@@ -128,7 +128,7 @@ export default function InvoiceList() {
 
   const columns = [
     { key: 'saleNumber', label: t('sales.invoices.col_inv'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
-    { key: 'customer', label: t('sales.invoices.col_customer'), render: (v) => v ? <div><p className="font-medium">{v.name}</p><p className="text-xs text-muted-foreground">{v.phone}</p></div> : <span className="text-muted-foreground">{t('sales.invoices.walk_in')}</span> },
+    { key: 'customer', label: t('sales.invoices.col_customer'), render: (v) => v ? <div><p className="font-medium">{v.name}</p><p className="text-xs text-muted-foreground"><bdi dir="ltr">{v.phone}</bdi></p></div> : <span className="text-muted-foreground">{t('sales.invoices.walk_in')}</span> },
     { key: 'total', label: t('sales.invoices.col_total'), render: (v) => <span className="font-medium">{Number(v).toLocaleString()} {cur}</span> },
     { key: 'paymentMethod', label: t('sales.invoices.col_payment'), render: (v) => <StatusBadge kind="method" value={v} /> },
     { key: 'status', label: t('sales.invoices.col_status'), render: (v, r) => (

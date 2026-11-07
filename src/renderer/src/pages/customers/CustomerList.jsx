@@ -48,7 +48,7 @@ export default function Customers() {
       render: (val, row) => (
         <div>
           <p className="font-medium text-foreground">{val}</p>
-          <p className="text-xs text-muted-foreground">{row.phone}</p>
+          <p className="text-xs text-muted-foreground"><bdi dir="ltr">{row.phone}</bdi></p>
         </div>
       )
     },

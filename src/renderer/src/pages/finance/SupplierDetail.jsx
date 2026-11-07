@@ -138,7 +138,7 @@ export default function SupplierDetail() {
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => navigate('/finance/suppliers')} className="p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><ArrowLeft className="h-5 w-5" /></button>
         <div className="flex-1"><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{supplier.name}</h1>
-          <p className="text-sm text-muted-foreground">{[supplier.phone, supplier.address].filter(Boolean).join(' · ') || t('finance.suppliers.no_contact')}</p>
+          <p className="text-sm text-muted-foreground">{supplier.phone || supplier.address ? <>{supplier.phone && <bdi dir="ltr">{supplier.phone}</bdi>}{supplier.phone && supplier.address ? ' · ' : ''}{supplier.address}</> : t('finance.suppliers.no_contact')}</p>
         </div>
         <Button variant="outline" onClick={() => setOpening({ amount: '', date: today(), notes: '' })}><BookPlus className="h-4 w-4" /> {t('finance.suppliers.btn_opening')}</Button>
         <Button onClick={openPO}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_new_po')}</Button>

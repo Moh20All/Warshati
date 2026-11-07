@@ -11,7 +11,7 @@ export function repairLabelHtml(ticket, { size, shop, showShop, showPhone, showI
     showShop && h >= 25 && `<div class="rl-shop">${esc(shop)}</div>`,
     `<div class="rl-top"><span class="p-mono rl-num">${esc(ticket.ticketNumber)}</span>${w >= 40 ? `<span>${new Date(ticket.receivedAt || Date.now()).toLocaleDateString()}</span>` : ''}</div>`,
     'BARCODE',
-    `<div class="rl-line" dir="auto"><b>${esc(ticket.customer?.name)}</b>${showPhone && ticket.customer?.phone ? ` · <bdi>${esc(ticket.customer.phone)}</bdi>` : ''}</div>`,
+    `<div class="rl-line" dir="auto"><b>${esc(ticket.customer?.name)}</b>${showPhone && ticket.customer?.phone ? ` · <bdi dir="ltr">${esc(ticket.customer.phone)}</bdi>` : ''}</div>`,
     `<div class="rl-line" dir="auto">${esc(`${ticket.deviceBrand} ${ticket.deviceModel}`)}</div>`,
     showIssue && h >= 30 && `<div class="rl-line" dir="auto">${esc(ticket.issueDesc)}</div>`
   ].filter(Boolean)

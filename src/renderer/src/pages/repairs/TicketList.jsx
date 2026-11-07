@@ -84,7 +84,7 @@ export default function TicketList() {
 
   const columns = [
     { key: 'ticketNumber', label: t('repairs.tickets.ticket_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
-    { key: 'customer', label: t('repairs.tickets.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground">{v?.phone || ''}</p></div> },
+    { key: 'customer', label: t('repairs.tickets.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground"><bdi dir="ltr">{v?.phone || ''}</bdi></p></div> },
     { key: 'deviceBrand', label: t('repairs.tickets.device'), render: (v, r) => `${v} ${r.deviceModel}` },
     { key: 'status', label: t('repairs.tickets.status'), render: (v) => <StatusBadge kind="ticket" value={v} /> },
     { key: 'priority', label: t('repairs.tickets.priority'), render: (v) => <StatusBadge kind="priority" value={v} /> },

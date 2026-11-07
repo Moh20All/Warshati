@@ -37,7 +37,7 @@ export function deliveryReceiptHtml({ t, dir, store, cur, ticket }) {
     <div style="font-size:11px;">
       ${row(t('repairs.delivery.delivered_on'), esc(delivered.toLocaleString()))}
       ${row(t('sales.receipt.customer'), esc(ticket.customer?.name))}
-      ${ticket.customer?.phone ? row(t('repairs.delivery.phone'), esc(ticket.customer.phone)) : ''}
+      ${ticket.customer?.phone ? row(t('repairs.delivery.phone'), `<bdi dir="ltr">${esc(ticket.customer.phone)}</bdi>`) : ''}
       ${row(t('repairs.tickets.device'), esc(`${ticket.deviceBrand} ${ticket.deviceModel}`))}
       ${ticket.imei ? row('IMEI', `<span class="p-mono">${esc(ticket.imei)}</span>`) : ''}
       ${work ? `<div style="margin:6px 0;"><div>${esc(t('repairs.delivery.work_done'))}:</div><div>${work}</div></div>` : ''}

@@ -83,7 +83,7 @@ export default function CheckInList() {
       <div style="border-top:1px dashed #000; margin:8px 0;"></div>
       <div style="font-size: 11px;">
         <div style="display:flex; justify-content:space-between; margin:3px 0;"><span>${t('repairs.checkin.customer')}:</span><span>${checkin.customer.name}</span></div>
-        ${checkin.customer.phone ? `<div style="display:flex; justify-content:space-between; margin:3px 0;"><span>${t('repairs.checkin.phone')}:</span><span>${checkin.customer.phone}</span></div>` : ''}
+        ${checkin.customer.phone ? `<div style="display:flex; justify-content:space-between; margin:3px 0;"><span>${t('repairs.checkin.phone')}:</span><bdi dir="ltr">${checkin.customer.phone}</bdi></div>` : ''}
       </div>
       
       <div style="border-top:1px dashed #000; margin:8px 0;"></div>
@@ -108,7 +108,7 @@ export default function CheckInList() {
 
   const columns = [
     { key: 'checkInNumber', label: t('repairs.checkin.ci_num'), render: (v) => <span className="font-mono font-medium text-primary">{v}</span> },
-    { key: 'customer', label: t('repairs.checkin.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p>{v?.phone && <p className="text-xs text-muted-foreground">{v.phone}</p>}</div> },
+    { key: 'customer', label: t('repairs.checkin.customer'), render: (v) => <div><p className="font-medium">{v?.name}</p>{v?.phone && <p className="text-xs text-muted-foreground"><bdi dir="ltr">{v.phone}</bdi></p>}</div> },
     { key: 'deviceBrand', label: t('repairs.checkin.device'), render: (v, r) => `${v} ${r.deviceModel}` },
     { key: 'issueDesc', label: t('repairs.checkin.issue'), render: (v) => <span className="truncate max-w-[200px] inline-block">{v}</span> },
     { key: 'convertedAt', label: t('repairs.checkin.status'), render: (v) => <StatusBadge kind="checkin" value={v ? 'CONVERTED' : 'PENDING'} /> },

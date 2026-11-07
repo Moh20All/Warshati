@@ -103,7 +103,7 @@ export default function DebtLedger() {
   const daysSince = (d) => Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
 
   const columns = [
-    { key: 'customer', label: t('finance.debts.col_customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground">{v?.phone}</p></div> },
+    { key: 'customer', label: t('finance.debts.col_customer'), render: (v) => <div><p className="font-medium">{v?.name}</p><p className="text-xs text-muted-foreground"><bdi dir="ltr">{v?.phone}</bdi></p></div> },
     { key: 'type', label: t('finance.debts.col_type'), render: (v) => <StatusBadge kind="debtType" value={v} /> },
     { key: 'totalAmount', label: t('finance.debts.col_total'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     { key: 'paidAmount', label: t('finance.debts.col_paid'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },

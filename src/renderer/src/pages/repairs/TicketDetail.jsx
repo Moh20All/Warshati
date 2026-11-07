@@ -187,7 +187,7 @@ export default function TicketDetail() {
 
         <div style="font-size: 12px; margin-bottom: 8px; border: 1px solid #000; padding: 6px; border-radius: 4px;">
           <div style="display:flex; justify-content:space-between; margin-bottom:2px;"><span>${t('repairs.details.lbl_name')}:</span><strong>${ticket.customer?.name}</strong></div>
-          <div style="display:flex; justify-content:space-between;"><span>${t('repairs.details.lbl_phone')}:</span><span>${ticket.customer?.phone}</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>${t('repairs.details.lbl_phone')}:</span><bdi dir="ltr">${ticket.customer?.phone || ''}</bdi></div>
         </div>
 
         <div style="font-size: 12px; margin-bottom: 8px;">
@@ -317,7 +317,7 @@ export default function TicketDetail() {
         </div>
       ) : ticket?.customer && (
         <div className="mb-4 p-3 bg-muted rounded-md text-sm">
-          <span className="font-medium">{ticket.customer.name}</span> · {ticket.customer.phone}
+          <span className="font-medium">{ticket.customer.name}</span> · <bdi dir="ltr">{ticket.customer.phone}</bdi>
         </div>
       )}
 
