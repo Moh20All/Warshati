@@ -156,6 +156,14 @@
     "err_unexpected": "An unexpected activation error occurred."
   },
   "about": {
+    "tagline": "Management software for repair shops",
+    "support": "WhatsApp support",
+    "support_desc": "a question, a problem, an idea",
+    "demos": "Demos and tutorials",
+    "demos_desc": "YouTube playlist: every feature explained step by step",
+    "follow": "Follow Warshati",
+    "made": "Made in Algeria for phone repair shops.",
+    "links": { "website": "Website", "facebook": "Facebook", "instagram": "Instagram", "tiktok": "TikTok", "linktree": "All our links" },
     "phases": {
       "v170": {
         "title": "New Look, Shop Network & Barcode Labels",

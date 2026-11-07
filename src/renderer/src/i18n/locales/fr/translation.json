@@ -156,6 +156,14 @@
     "err_unexpected": "Une erreur d'activation inattendue s'est produite."
   },
   "about": {
+    "tagline": "Logiciel de gestion pour ateliers de réparation",
+    "support": "Support WhatsApp",
+    "support_desc": "une question, un problème, une idée",
+    "demos": "Démos et tutoriels",
+    "demos_desc": "Playlist YouTube : chaque fonction expliquée pas à pas",
+    "follow": "Suivez Warshati",
+    "made": "Fait en Algérie pour les ateliers de réparation.",
+    "links": { "website": "Site web", "facebook": "Facebook", "instagram": "Instagram", "tiktok": "TikTok", "linktree": "Tous nos liens" },
     "phases": {
       "v170": {
         "title": "Nouveau look, réseau du magasin et étiquettes",

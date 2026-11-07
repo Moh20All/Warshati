@@ -1,141 +1,75 @@
 import { useTranslation } from 'react-i18next'
-import { Info, Sparkles, Rocket, ShieldCheck, Cpu, Printer, Zap, Globe, Lock, History } from 'lucide-react'
+import { MessageCircle, Youtube, Globe, Facebook, Instagram, Music2, Link as LinkIcon, ExternalLink } from 'lucide-react'
+import cover from '../../assets/brand/about-cover.png'
+import avatar from '../../assets/brand/about-avatar.png'
+import avatarDark from '../../assets/brand/about-avatar-dark.png'
 
+// Warshati's own channels (links open in the browser: see setWindowOpenHandler in src/main/index.js)
+const SUPPORT_WHATSAPP = 'https://wa.me/213541677893'
+const DEMOS = 'https://www.youtube.com/watch?v=DLGKHmDPQqA&list=PLRAnHAwYeiX8'
+const LINKS = [
+  { key: 'website', url: 'https://warshatidz.com', icon: Globe, label: 'warshatidz.com' },
+  { key: 'facebook', url: 'https://facebook.com/share/1KvSNXZkMV/', icon: Facebook, label: 'Facebook' },
+  { key: 'instagram', url: 'https://www.instagram.com/warshati_dz', icon: Instagram, label: '@warshati_dz' },
+  { key: 'tiktok', url: 'https://www.tiktok.com/@warshati_dz16', icon: Music2, label: '@warshati_dz16' },
+  { key: 'linktree', url: 'https://linktr.ee/Warshatidz', icon: LinkIcon, label: 'linktr.ee/Warshatidz' }
+]
+
+/** About Warshati: a profile card with support, demos and every link (no long changelog). */
 export default function AboutApp() {
   const { t } = useTranslation()
 
-  const phases = [
-    {
-      version: 'v1.7.0',
-      title: t('about.phases.v170.title'),
-      status: t('about.current', 'Current'),
-      icon: Rocket,
-      desc: t('about.phases.v170.desc')
-    },
-    {
-      version: 'v1.6.0',
-      title: t('about.phases.v160.title'),
-      icon: Sparkles,
-      desc: t('about.phases.v160.desc')
-    },
-    {
-      version: 'v1.5.2',
-      title: t('about.phases.v152.title'),
-      icon: Sparkles,
-      desc: t('about.phases.v152.desc')
-    },
-    {
-      version: 'v1.5.1',
-      title: t('about.phases.v151.title'),
-      icon: Cpu,
-      desc: t('about.phases.v151.desc')
-    },
-    {
-      version: 'v1.5.0',
-      title: t('about.phases.v150.title'),
-      icon: ShieldCheck,
-      desc: t('about.phases.v150.desc')
-    },
-    {
-      version: 'v1.4.2',
-      title: t('about.phases.v142.title', 'Printing & Stability Engine'),
-      icon: Printer,
-      desc: t('about.phases.v142.desc', 'Major improvements to thermal printing accuracy, resolved OS dialog hangs, and introduced the seamless Feedback & Crash recovery systems.')
-    },
-    {
-      version: 'v1.4.1',
-      title: t('about.phases.v141.title', 'Initial Regression Patch'),
-      icon: Zap,
-      desc: t('about.phases.v141.desc', 'Fixed critical database column crashes, corrected inventory warranty saving, and eliminated duplicate data in Trade-In management.')
-    },
-    {
-      version: 'v1.4.0',
-      title: t('about.phases.v140.title', 'Advanced Logistics'),
-      icon: Rocket,
-      desc: t('about.phases.v140.desc', 'Introduced the automated Trade-In workflow with inventory auto-creation and multi-size thermal receipt (58mm/80mm) toggles.')
-    },
-    {
-      version: 'v1.3.0',
-      title: t('about.phases.v130.title', 'Security & RTL Architecture'),
-      icon: Lock,
-      desc: t('about.phases.v130.desc', 'Locked down production DevTools, added the in-app History view, and perfected the Arabic Right-to-Left (RTL) mirroring engine.')
-    },
-    {
-      version: 'v1.2.2',
-      title: t('about.phases.v122.title', 'Desktop Polish'),
-      icon: Sparkles,
-      desc: t('about.phases.v122.desc', 'Polished the native Electron environment, improved app security, and integrated the first version of the internal reference timeline.')
-    },
-    {
-      version: 'v1.2.1',
-      title: t('about.phases.v121.title', 'Multilingual Reports'),
-      icon: Globe,
-      desc: t('about.phases.v121.desc', 'Initial rollout of English, French, and Arabic translation support alongside the Monthly Summary analytical charts page.')
-    },
-    {
-      version: 'v1.0.3',
-      title: t('about.phases.v103.title', 'Foundation & Activation'),
-      icon: ShieldCheck,
-      desc: t('about.phases.v103.desc', 'Established core licensing with hardware binding, self-healing database initialization, and the background auto-updater.')
-    }
-  ]
-
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
-      
-      {/* Header */}
-      <div className="text-center space-y-2 mb-10 pt-4">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center justify-center gap-3">
-          <Info className="h-8 w-8 text-primary" />
-          {t('about.title', 'About Warshati')}
-        </h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          {t('about.subtitle', 'From a concept to a robust production engine, see how Warshati evolved to manage your shop flawlessly.')}
-        </p>
-      </div>
+    <div className="animate-fade-in max-w-3xl mx-auto pb-10">
+      {/* Profile: cover, logo, name, version */}
+      <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <img src={cover} alt="" className="w-full aspect-[1640/624] object-cover" />
+        <div className="px-6 pb-6">
+          {/* Only the logo overlaps the cover; the name sits under it */}
+          <div className="flex items-end justify-between -mt-10">
+            <img src={avatar} alt="Warshati" className="h-20 w-20 rounded-xl border-4 border-card shadow-sm dark:hidden" />
+            <img src={avatarDark} alt="Warshati" className="h-20 w-20 rounded-xl border-4 border-card shadow-sm hidden dark:block" />
+            <span className="mb-1 px-2.5 py-1 rounded-full bg-primary-soft text-primary text-xs font-semibold p-mono" dir="ltr">v{__APP_VERSION__}</span>
+          </div>
+          <h1 className="mt-3 text-[22px] leading-[30px] font-semibold text-foreground">Warshati — ورشتي</h1>
+          <p className="text-sm text-muted-foreground">{t('about.tagline')}</p>
 
-      {/* Changelog Timeline */}
-      <div className="bg-card border border-border rounded-xl shadow-sm p-4 md:p-8">
-        <h2 className="text-xl font-bold mb-8 flex items-center justify-between px-2">
-          {t('about.changelog', 'Release History')}
-          <span className="text-xs font-semibold tracking-wide text-muted-foreground px-2 py-1 bg-secondary rounded-md">Electron • React • Prisma</span>
-        </h2>
-        
-        <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-          
-          {phases.map((phase, i) => (
-            <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-              
-              {/* Icon / Marker */}
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-card bg-primary/20 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors group-hover:text-primary-hover">
-                <phase.icon className="h-4 w-4" />
-              </div>
-              
-              {/* Content Card */}
-              <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-xl border border-border bg-background shadow-sm group-hover:border-primary/50 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-bold text-foreground flex items-center gap-2">
-                    {phase.version}
-                    {phase.status && <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-primary/20 text-primary">{phase.status}</span>}
-                  </div>
-                </div>
-                <h3 className="font-semibold text-foreground/90 mb-1">{phase.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {phase.desc}
-                </p>
-              </div>
+          {/* The two things users come here for */}
+          <div className="grid sm:grid-cols-2 gap-3 mt-6">
+            <a href={SUPPORT_WHATSAPP} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-md border border-border hover:border-success hover:bg-success-soft transition-colors">
+              <MessageCircle className="h-6 w-6 text-success shrink-0" />
+              <span className="min-w-0">
+                <span className="block font-semibold text-foreground">{t('about.support')}</span>
+                <span className="block text-xs text-muted-foreground"><bdi>+213 541 67 78 93</bdi> · {t('about.support_desc')}</span>
+              </span>
+            </a>
+            <a href={DEMOS} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-4 rounded-md border border-border hover:border-destructive hover:bg-destructive/5 transition-colors">
+              <Youtube className="h-6 w-6 text-destructive shrink-0" />
+              <span className="min-w-0">
+                <span className="block font-semibold text-foreground">{t('about.demos')}</span>
+                <span className="block text-xs text-muted-foreground">{t('about.demos_desc')}</span>
+              </span>
+            </a>
+          </div>
 
-            </div>
-          ))}
-
+          {/* Everywhere else */}
+          <h2 className="text-xs font-semibold uppercase tracking-[.04em] text-muted-foreground rtl:normal-case rtl:tracking-normal mt-6 mb-2">{t('about.follow')}</h2>
+          <ul className="divide-y divide-border border border-border rounded-md">
+            {LINKS.map(({ key, url, icon: Icon, label }) => (
+              <li key={key}>
+                <a href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors">
+                  <Icon className="h-4 w-4 text-primary shrink-0" />
+                  <span className="flex-1 text-sm text-foreground">{t(`about.links.${key}`)}</span>
+                  <span className="text-xs text-muted-foreground" dir="ltr">{label}</span>
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      <div className="text-center text-xs text-muted-foreground mt-8">
-        &copy; 2026 Warshati — ورشتي. All rights reserved.<br/>
-        Made with dedication for phone repair artisans.
-      </div>
-      
+      <p className="text-center text-xs text-muted-foreground mt-6">© 2026 Warshati — ورشتي · {t('about.made')}</p>
     </div>
   )
 }
