@@ -22,29 +22,7 @@ function logToDisk(msg) {
 
 const sourceDbPath = path.join(process.resourcesPath, 'app', 'assets', 'db', 'template.db');
 
-export async function initPrisma() {
-  logToDisk(`Starting Prisma initialization in ${isDev ? 'DEV' : 'PROD'}`);
-  logToDisk(`Target DB path: ${dbPath}`);
-
-  let prisma = new PrismaClient({
-    datasources: { db: { url: `file:${dbPath}` } }
-  });
-
-  // Dev: bring the developer's own database up to date too (same idempotent steps as an installed app)
-  if (isDev && fs.existsSync(dbPath)) await applyMigrations(prisma);
-
-  if (!isDev) {
-    let needsCopy = false;
-
-    if (!fs.existsSync(dbPath)) {
-      logToDisk(`DB file completely missing. Will copy template.`);
-      needsCopy = true;
-    } else {
-      // Validate schema on the existing file
-      try {
-        logToDisk(`DB file exists. Validating schema...`);
-        const tables = await prisma.$queryRaw`SELECT count(*) as count FROM sqlite_schema WHERE type='table' AND name='Store'`;
-        
+// Idempotent startup upgrade: adds what newer versions need to an existing database
 async function applyMigrations(prismaDb) {
   try {
     logToDisk('Checking schema for missing columns...');
@@ -299,6 +277,29 @@ async function applyMigrations(prismaDb) {
     logToDisk(`Migration failed: ${err.message}`);
   }
 }
+
+export async function initPrisma() {
+  logToDisk(`Starting Prisma initialization in ${isDev ? 'DEV' : 'PROD'}`);
+  logToDisk(`Target DB path: ${dbPath}`);
+
+  let prisma = new PrismaClient({
+    datasources: { db: { url: `file:${dbPath}` } }
+  });
+
+  // Dev: bring the developer's own database up to date too (same idempotent steps as an installed app)
+  if (isDev && fs.existsSync(dbPath)) await applyMigrations(prisma);
+
+  if (!isDev) {
+    let needsCopy = false;
+
+    if (!fs.existsSync(dbPath)) {
+      logToDisk(`DB file completely missing. Will copy template.`);
+      needsCopy = true;
+    } else {
+      // Validate schema on the existing file
+      try {
+        logToDisk(`DB file exists. Validating schema...`);
+        const tables = await prisma.$queryRaw`SELECT count(*) as count FROM sqlite_schema WHERE type='table' AND name='Store'`;
 
         // Prisma $queryRaw returns BigInts sometimes, or standard numbers. 
         // We just check if the array has a result and if it's > 0
