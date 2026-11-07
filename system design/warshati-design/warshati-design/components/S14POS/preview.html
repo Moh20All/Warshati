@@ -1,0 +1,37 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="14 · Point of Sale (POS.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S14POS — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var stock=[['Verre trempé A54','Samsung · Galaxy A54',800,48,10],['Coque silicone A54','Samsung · Galaxy A54',1200,12,3],['Chargeur Samsung 25W','Samsung',4500,2,3],['Écouteurs JBL Tune 110','JBL',3500,7,2],['Samsung Galaxy A15 128GB','Samsung · Galaxy A15',38500,3,1]];
+var cart=[['Verre trempé A54',1,800],['Coque silicone A54',1,1200],['Chargeur Samsung 25W',1,4500],['Galaxy A15 128GB',1,38500]];
+mount(shell({active:'pos',crumbs:['Sales','POS'],user:'Yacine',role:'staff',pageStyle:{paddingBottom:12}},[
+  h(W.PageHeader,{key:1,title:'Point of Sale',subtitle:'Fast checkout'}),
+  h('div',{key:2,style:{display:'grid',gridTemplateColumns:'4fr 5fr 3fr',gap:14,flex:1,minHeight:0}},
+    h('div',{className:'w-card',style:{display:'flex',flexDirection:'column',overflow:'hidden'}},h('div',{style:{padding:10}},h(W.Input,{leftIcon:'search',placeholder:'Scan barcode or type to search...',autoFocus:true})),
+      stock.map((s,i)=>h('div',{key:i,style:{padding:'8px 12px',borderTop:'1px solid var(--color-border)',display:'flex',justifyContent:'space-between',gap:8,cursor:'pointer'}},h('div',null,h('b',{style:{fontSize:13}},s[0]),h('span',{className:'w-sub'},s[1])),h('div',{style:{textAlign:'end'}},h('b',{style:{fontSize:13}},M(s[2])),h('span',{className:'w-sub',style:s[3]<=s[4]?{color:'var(--color-destructive)'}:null},s[3]+' in stock'))))),
+    h('div',{className:'w-card',style:{display:'flex',flexDirection:'column',overflow:'hidden'}},h('div',{style:{flex:1}},h(W.Table,{columns:[{label:'Item'},{label:'Qty'},{label:'Price'},{label:''}],rows:cart.map(c=>[c[0],h('input',{className:'w-input w-input-sm',style:{width:56},defaultValue:c[1]}),h('input',{className:'w-input w-input-sm',style:{width:96},defaultValue:W.formatAmount(c[2])}),h(W.Button,{variant:'ghost',size:'sm',iconOnly:true,icon:'trash',label:'Remove'})])})),
+      h('div',{className:'w-totline is-big',style:{padding:'10px 14px',borderTop:'1px solid var(--color-border)'}},h('span',null,'Total:'),M(45000))),
+    h('div',{className:'w-col w-compact',style:{gap:8,overflow:'hidden'}},
+      h(W.Card,{title:'Customer (optional)'},h('div',{className:'w-row',style:{justifyContent:'space-between'}},h('span',{style:{color:'var(--color-success)',fontWeight:600}},'✓ Mourad Kacemi'),h('a',{href:'#',className:'w-cap',style:{color:'var(--color-primary)'}},'Change'))),
+      h('div',{className:'w-compact'},h(W.PosPayment,{total:45000,subtotal:45000,method:'split',paid:40000,customer:'Mourad Kacemi'}))))]));
+</script>
+</body>
+</html>

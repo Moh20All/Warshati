@@ -1,0 +1,69 @@
+<!-- @dsCard group="Website" height=2190 width=1280 subtitle="warshatydz.com — landing page" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>Landing — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}
+.lp{width:1280px;background:var(--color-background);}
+.lp-wrap{width:1120px;margin:0 auto;}
+.lp-nav{height:72px;display:flex;align-items:center;gap:24px;}
+.lp-nav a{color:var(--color-foreground);text-decoration:none;font-size:14px;font-weight:500;}
+.lp-hero{background:var(--color-inverse);color:var(--color-inverse-foreground);border-radius:var(--radius-xl);position:relative;overflow:hidden;padding:56px;display:grid;grid-template-columns:480px 1fr;gap:32px;min-height:560px;}
+.lp-hero h1{font-size:44px;line-height:54px;margin:0;font-family:var(--font-arabic);font-weight:700;}
+.lp-hero .fr{font-size:20px;line-height:30px;margin:16px 0 0;font-weight:500;}
+.lp-sec{padding:var(--space-12) 0;}
+.lp-h2{font-size:32px;line-height:40px;font-weight:700;margin:0 0 8px;}
+.lp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px;}
+.lp-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:20px;display:flex;flex-direction:column;gap:10px;}
+.lp-card h3{margin:0;font-size:16px;line-height:24px;}
+.lp-card p{margin:0;color:var(--color-muted-foreground);font-size:14px;line-height:22px;}
+.lp-ico{width:40px;height:40px;border-radius:var(--radius-sm);background:var(--color-primary-soft);color:var(--color-primary);display:grid;place-items:center;flex:none;}
+.lp-band{background:var(--color-muted);border-radius:var(--radius-xl);padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;}
+.lp-cta{background:var(--color-flux);color:var(--color-flux-foreground);border-radius:var(--radius-xl);padding:48px;display:flex;justify-content:space-between;align-items:center;gap:24px;}
+.lp-foot{display:flex;justify-content:space-between;align-items:center;padding:32px 0 40px;color:var(--color-muted-foreground);font-size:13px;}
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var LOCK='../../assets/lockup-trace.svg', LOCKB='../../assets/lockup-trace-black.svg';
+function feat(i,t,p){return h('div',{className:'lp-card',key:t},h('span',{className:'lp-ico'},I(i,22)),h('h3',null,t),h('p',null,p));}
+var shot=h('div',{style:{position:'absolute',insetInlineStart:0,top:0,width:1366*0.62,height:768*0.62,borderRadius:12,overflow:'hidden',boxShadow:'var(--shadow-dialog)',border:'6px solid var(--color-inverse-raised)'}},h('div',{style:{transform:'scale(.62)',transformOrigin:'top left'}},
+  h(W.AppShell,{logo:MARK,active:'tickets',crumbs:['Repairs','Tickets'],user:'Karim'},h(W.PageHeader,{title:'Repair Tickets',subtitle:'Track all repairs',actions:h(W.Button,{icon:'plus'},'New Ticket')}),h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,{columns:[{label:'Ticket #'},{label:'Customer'},{label:'Device'},{label:'Status'},{label:'Cost',end:true}],rows:[[code('TKT-2026-0187'),'Amina Haddad','Samsung Galaxy A54',C('ticket','in-repair'),M(12500)],[code('TKT-2026-0186'),'Karim Bensalem','Apple iPhone 12',C('ticket','waiting-parts'),M(14000)],[code('TKT-2026-0184'),'Nour El Houda','HP ProBook 450',C('ticket','done'),M(6000)],[code('TKT-2026-0181'),'Ilyes Amrani','Redmi Note 12',C('ticket','delivered'),M(4500)]]})))));
+mount(h('div',{className:'w-root lp',lang:'fr'},h('div',{className:'lp-wrap'},
+  h('nav',{className:'lp-nav'},h('img',{src:LOCK,height:44}),h('div',{style:{flex:1}}),h('a',{href:'#'},'Fonctions'),h('a',{href:'#'},'Tarif'),h('a',{href:'#'},'Support'),h(W.SegmentedSwitch,{options:[{value:'fr',label:'FR'},{value:'ar',label:'ع'},{value:'en',label:'EN'}]}),h(W.WhatsAppButton,null,'Essai gratuit')),
+  h('section',{className:'lp-hero'},
+    h('svg',{width:1120,height:560,style:{position:'absolute',inset:0,pointerEvents:'none'}},h('circle',{cx:1060,cy:-30,r:170,style:{fill:'var(--color-flux)'}}),h('rect',{x:-30,y:470,width:420,height:28,rx:14,style:{fill:'var(--color-inverse-raised)'}}),h('rect',{x:80,y:514,width:520,height:28,rx:14,style:{fill:'var(--color-inverse-raised)'}})),
+    h('div',{style:{position:'relative',display:'flex',flexDirection:'column',gap:20,justifyContent:'center'}},
+      h('h1',{dir:'rtl'},'تحكم في أرقامك. امتلك يومك.'),
+      h('p',{className:'fr'},'Réception, réparations, caisse, dettes et clôture du jour pour les ateliers de téléphones, PC et consoles. En français, en arabe et en anglais.'),
+      h('div',{className:'w-row',style:{gap:12}},h(W.Button,{variant:'flux',size:'lg',icon:'download'},'Essai gratuit'),h(W.WhatsAppButton,{size:'lg'},'0541 67 78 93')),
+      h('div',{style:{fontSize:13,opacity:.85}},'Windows · base de données sur votre PC · achat unique, mises à jour gratuites')),
+    h('div',{style:{position:'relative'}},shot)),
+  h('section',{className:'lp-sec'},h('h2',{className:'lp-h2'},'Tout l’atelier dans un seul logiciel'),h('p',{className:'w-muted',style:{margin:0,fontSize:16}},'Ce que fait Warshati aujourd’hui, sans promesse en l’air.'),
+    h('div',{className:'lp-grid'},
+      feat('inbox','Réception rapide','Nom, téléphone, appareil, panne : le reçu de réception s’imprime, puis la réception devient un ticket en un clic.'),
+      feat('wrench','Tickets de réparation','Diagnostic, attente de pièces, réparation, terminé, livré. Les pièces sortent du stock et le coût se calcule tout seul.'),
+      feat('whatsapp','Client prévenu sur WhatsApp','Quand la réparation est terminée, le message « votre appareil est prêt » part avec le montant à payer.'),
+      feat('cart','Caisse rapide','Code-barres, remise, crédit de reprise, paiement en espèces, à crédit ou mixte. Il manque de l’argent ? Warshati le dit.'),
+      feat('wallet','Dettes sans erreurs','Chaque paiement a son reçu. Un paiement saisi par erreur s’annule avec un motif : rien n’est effacé.'),
+      feat('receipt','Clôture du jour','Caisse nette, ventes à crédit, dettes encaissées, dépenses. Le propriétaire voit aussi le bénéfice net.'),
+      feat('swap','Reprises et garantie','Rachetez un téléphone d’occasion avec son état et son IMEI ; suivez les retours sous garantie.'),
+      feat('truck','Stock et fournisseurs','Stock bas, réapprovisionnement, bons de commande et dettes fournisseurs.'),
+      feat('devices','Catalogue d’appareils','Téléphones, PC et consoles avec leurs caractéristiques et une note qualité-prix.'))),
+  h('section',{className:'lp-band'},h('div',null,h('h2',{className:'lp-h2'},'« C’est comme les autres logiciels ? »'),h('p',{className:'w-muted',style:{fontSize:16,lineHeight:'26px'}},'Trois choses font la différence :'),
+      h('div',{className:'w-col',style:{gap:12,marginTop:16}},[['shield','Un support qui corrige','Vous signalez un problème depuis le logiciel (Send Feedback) ; la correction arrive dans la mise à jour.'],['tag','Achat unique','Le logiciel est à vous. Le cloud est un petit abonnement optionnel.'],['refresh','Mises à jour gratuites','Le logiciel se met à jour tout seul.']].map(x=>h('div',{key:x[1],className:'w-row',style:{alignItems:'flex-start',gap:12,flexWrap:'nowrap'}},h('span',{className:'lp-ico'},I(x[0],20)),h('div',null,h('b',null,x[1]),h('div',{className:'w-muted'},x[2])))))),
+    h('div',{style:{display:'flex',gap:16,justifyContent:'center',alignItems:'flex-start'}},
+      h(W.Receipt,{paper:80},h('img',{className:'p-logo',src:LOCKB}),h('div',{className:'p-shop'},'Atelier Ennour'),h('div',{className:'p-rule-solid'}),h('div',{className:'p-title'},'REPAIR TICKET / تذكرة إصلاح'),h('div',{className:'p-big'},'TKT-2026-0187'),h('div',{className:'p-rule'}),h('div',{className:'p-row'},h('span',null,'Cost / التكلفة'),h('b',null,'12 500 DZD')),h('div',{className:'p-row'},h('span',null,'Deposit / العربون'),h('span',null,'-3 000 DZD'))),
+      h('div',{style:{transform:'rotate(3deg)',marginTop:24}},h(W.Receipt,{paper:58},h('div',{className:'p-shop'},'Atelier Ennour'),h('div',{className:'p-title'},'Payment Receipt'),h('div',{className:'p-row p-total'},h('span',null,'Amount paid'),h('span',null,'3 000 DZD')))))),
+  h('section',{className:'lp-sec'},h('div',{className:'lp-cta'},h('div',null,h('h2',{className:'lp-h2',style:{color:'var(--color-flux-foreground)'}},'Essayez Warshati gratuitement'),h('div',{style:{fontSize:16}},'On l’installe avec vous à distance. Écrivez-nous sur WhatsApp.')),h('div',{className:'w-row'},h(W.Button,{size:'lg',icon:'download'},'Télécharger'),h(W.WhatsAppButton,{size:'lg'},'0541 67 78 93')))),
+  h('footer',{className:'lp-foot'},h('span',null,'© 2026 Warshati · ورشتي · warshatydz.com'),h('span',null,'Instagram · Facebook · TikTok — @warshatydz')))));
+</script>
+</body>
+</html>

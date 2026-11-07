@@ -1,0 +1,36 @@
+<!-- @dsCard group="Print templates" height=600 subtitle="5.2 Repair ticket (ticket size) — 80 / 58 mm" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>PrintRepairTicket — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var MARKB='../../assets/mark-trace-black.svg';
+var fa=W.formatAmount;
+function N(x){return typeof x==='string'&&/^[0-9 :\/.,TKINVCPOB-]+$/.test(x)?h('span',{className:'w-num'},x):x;}
+function R(a,b,cls){return h('div',{className:'p-row'+(cls?' '+cls:'')},h('span',null,N(a)),h('span',null,N(b)));}
+function A(v){return fa(v)+' DZD';}
+function head(){return h(F,null,h('img',{className:'p-logo',src:MARKB,alt:''}),h('div',{className:'p-shop'},'Atelier Ennour'),h('div',{className:'p-center p-small'},'Cité 500 Logts, Batna'),h('div',{className:'p-center p-small'},'0541 67 78 93'),h('div',{className:'p-rule-solid'}));}
+function pair(a,b,note){mount(h('div',{className:'w-root pv',style:{background:'var(--color-muted)'}},h('div',{style:{display:'flex',gap:32,alignItems:'flex-start'}},a,b),note&&h('div',{className:'w-hint',style:{maxWidth:820}},note)));}
+
+function t(paper){return h(W.Receipt,{paper:paper},head(),
+  h('div',{className:'p-title'},'REPAIR TICKET / تذكرة إصلاح'),h('div',{className:'p-big'},'TKT-2026-0187'),
+  h('div',{className:'p-box'},R('Customer Name:','Amina Haddad'),R('Customer Phone:','0661 23 45 67')),
+  h('div',{className:'p-head'},'DEVICE INFO / الجهاز:'),R('Device:','Samsung Galaxy A54'),R('IMEI:','356938035643809'),
+  h('div',{className:'p-head'},'PROBLEM / المشكلة:'),h('div',null,'Screen cracked, battery drains fast'),
+  h('div',{className:'p-head'},'DIAGNOSIS / التشخيص:'),h('div',null,'OLED screen broken, board OK'),
+  h('div',{className:'p-rule'}),R('Cost / التكلفة:',h('b',null,A(12500))),R('Deposit / العربون:','-'+A(3000)),
+  h('div',{className:'p-rule'}),h('div',{className:'p-center p-small'},'Thank you for choosing Warshati!'));}
+pair(t(80),t(58),'Same lines as today. Small fix while restyling: the label prints "Customer Name *" with the form\'s asterisk — print it without the asterisk.');
+</script>
+</body>
+</html>

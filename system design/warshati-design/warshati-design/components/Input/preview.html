@@ -1,0 +1,28 @@
+<!-- @dsCard group="Inputs" height=280 -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>Input — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+mount(h('div',{className:'w-root pv'},h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3, 1fr)',gap:16}},
+  h(W.Input,{label:'Customer Name',required:true,value:'Amina Haddad',autoFocus:true}),
+  h(W.Input,{label:'Customer Phone',placeholder:'e.g. 0555123456'}),
+  h(W.Input,{label:'Email',leftIcon:'mail',placeholder:'admin@warshati.app'}),
+  h(W.Input,{label:'License Key',mono:true,center:true,placeholder:'WARSHATI-XXXX-XXXX-XXXX-XXXX'}),
+  h(W.Input,{label:'Issue Description',required:true,error:'Describe the problem'}),
+  h(W.Input,{label:'Low Stock At',value:'3',help:'Shown in red when quantity is at or below this.'}),
+  h('div',{dir:'rtl',style:{gridColumn:'1 / -1',display:'grid',gridTemplateColumns:'repeat(3, 1fr)',gap:16}},
+    h(W.Input,{label:'الإسم',required:true,value:'أمينة حداد'}),h(W.Input,{label:'رقم الهاتف',value:'0661 23 45 67',dir:'ltr'}),h(W.Input,{label:'ملاحظة',multiline:true,rows:1,placeholder:'ملاحظات اختيارية...'})))));
+</script>
+</body>
+</html>

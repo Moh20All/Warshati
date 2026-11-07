@@ -1,0 +1,32 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="08 · Devices catalog (Devices.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S08Devices — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var d=[['Samsung','Galaxy A54','8 GB / 256 GB · 5000 mAh · 6.4" · 5G','value-king',84],['Xiaomi','Poco X6 Pro','12 GB / 512 GB · 5000 mAh · 6.67" · 5G','performance-beast',93],['Apple','iPhone 15','6 GB / 128 GB · 3349 mAh · 6.1" · 5G','overpriced',38],['Xiaomi','Redmi Note 13','8 GB / 256 GB · 5000 mAh · 6.67"','value-king',81],['Oppo','A58','6 GB / 128 GB · 5000 mAh · 6.72"','average',55],['Samsung','Galaxy S24 Ultra','12 GB / 256 GB · 5000 mAh · 6.8" · 5G','performance-beast',90],['Realme','C55','6 GB / 128 GB · 5000 mAh · 6.72"','average',58],['Infinix','Hot 40i','8 GB / 256 GB · 5000 mAh · 6.56"','value-king',79]];
+mount(shell({active:'devices',crumbs:['devices']},[
+  h(W.PageHeader,{key:1,title:'Devices',subtitle:'Browse phones, laptops and consoles'}),
+  h('div',{key:2,className:'w-row',style:{flexWrap:'nowrap'}},h(W.SegmentedSwitch,{options:[{value:'p',label:'Phone',icon:'phone'},{value:'l',label:'Laptop',icon:'laptop'},{value:'c',label:'Console',icon:'gamepad'}]}),h('div',{style:{flex:1}},h(W.Input,{leftIcon:'search',placeholder:'Search model or processor...'})),h('div',{style:{width:150}},h(W.Select,{value:'All brands',options:['All brands']})),h('div',{style:{width:150}},h(W.Select,{value:'All ratings',options:['All ratings']})),h('div',{style:{width:190}},h(W.Select,{value:'Sort: best value first',options:['Sort: name','Sort: best value first']}))),
+  h('div',{key:3,className:'w-cap w-muted'},'1 284 devices'),
+  h(F,{key:4},grid(4,d.map((x,i)=>h('div',{key:i,className:'w-card',style:{padding:14,display:'flex',gap:12}},h('span',{style:{width:64,height:64,borderRadius:8,background:'var(--color-muted)',display:'grid',placeItems:'center',color:'var(--color-muted-foreground)',flex:'none'}},I('phone',28)),h('div',{style:{minWidth:0,display:'flex',flexDirection:'column',gap:4}},h('span',{className:'w-cap w-muted'},x[0]),h('b',null,x[1]),h('span',{className:'w-sub'},x[2]),h(W.VfmBadge,{value:x[3],score:x[4]})))),{gap:12})),
+  h('div',{key:5,style:{textAlign:'center'}},h(W.Button,{variant:'outline'},'Show more (1 276 left)'))]));
+</script>
+</body>
+</html>

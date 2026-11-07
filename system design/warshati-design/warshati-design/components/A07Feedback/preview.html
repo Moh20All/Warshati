@@ -1,0 +1,37 @@
+<!-- @dsCard group="Admin portal" height=768 width=1366 subtitle="Admin · Feedback" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>A07Feedback — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var CNT={feedback:3,crashes:2};
+function adm(o,kids){return h(W.AdminShell,Object.assign({logo:MARK,counts:CNT},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:14},st||{})},kids);}
+function L(k,v){return h('span',{className:'w-badge',style:{background:'var(--color-'+k+'-'+v+'-bg)',color:'var(--color-'+k+'-'+v+'-fg)'}},h(W.Icon,{name:W.STATUS[k][v][1]}),W.STATUS[k][v][2]);}
+function who(n,p){return h('div',{className:'w-row',style:{gap:10,flexWrap:'nowrap'}},h(W.Initials,{name:n}),h('div',null,h('b',null,n),h('span',{className:'w-sub'},p)));}
+function lic(a,b){return {a:a,b:b};}
+var KEYS=[['Atelier Ennour','0541 67 78 93','WARSHATI-K9Q2-7HXM-PL4R-2WZ8','activated','5 h ago · v1.6.0',15000],['Phone Clinic Sétif','0661 45 22 10','WARSHATI-3MDA-91KX-ZQ7P-LL04','activated','2 d ago · v1.6.0',15000],['Repair Center El Eulma','0770 12 98 34','WARSHATI-PX55-T2RA-8VNE-0QC1','quiet','20 d ago · v1.5.1',12000],['Mobile Fix Biskra','0550 31 76 09','WARSHATI-ZW8D-4KJ2-MM3T-9AYH','waiting','—',15000],['GSM Khenchela','0698 02 44 51','WARSHATI-71HC-QE0L-5RRB-K2DS','revoked','64 d ago · v1.4.2',10000]];
+
+var rows=[['bug','Receipt prints the discount as 0 even when I gave a discount','v1.6.0','3 h ago','new'],['suggestion','Print receipt in Arabic','v1.6.0','5 h ago','new'],['other','Thank you, the debt page saves me a lot of time','v1.5.1','1 d ago','seen'],['bug','The app is slow when I search a customer with 3000 customers','v1.6.0','2 d ago','done']];
+function row(r,i,open){return h('div',{key:i,style:{borderBottom:'1px solid var(--color-border)'}},
+  h('div',{className:'w-row',style:{padding:'12px 16px',flexWrap:'nowrap',gap:12,cursor:'pointer',background:open?'var(--color-accent)':null}},h('span',{className:'a-feed-ico',style:{background:'var(--color-fbtype-'+r[0]+'-bg)',color:'var(--color-fbtype-'+r[0]+'-fg)'}},h(W.Icon,{name:W.STATUS.fbtype[r[0]][1],size:16})),
+    h('div',{style:{flex:1,minWidth:0}},h('div',{style:{fontWeight:r[4]==='new'?700:400,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},r[1]),h('span',{className:'w-sub'},W.STATUS.fbtype[r[0]][2]+' · '+r[2]+' · '+r[3])),L('feedback',open?'seen':r[4])),
+  open&&h('div',{className:'w-col',style:{padding:'4px 16px 16px 58px',gap:10}},h('div',{style:{fontSize:14}},r[1]+'. I checked twice with 500 DA discount on a screen protector.'),h('div',{className:'w-sub'},'24/10/2026 14:22 · Windows 10 Pro 22H2 · Atelier Ennour'),h(W.Input,{label:'Private note',placeholder:'Only you see this',value:'Bug confirmed: template reads discount, sale saves discountAmount.'}),
+    h('div',{className:'w-row'},h(W.Button,{size:'sm',icon:'check'},'Mark done'),h(W.Button,{size:'sm',variant:'outline',icon:'copy'},'Copy'),h(W.Button,{size:'sm',variant:'ghost',iconOnly:true,icon:'trash',label:'Delete',className:'w-btn-dangertext'}))));}
+mount(adm({active:'feedback'},[
+  h(W.PageHeader,{key:1,title:'Feedback'}),
+  h('div',{key:2,className:'w-row',style:{justifyContent:'space-between'}},h(W.FilterChips,{items:[{value:'n',label:'New',count:3},{value:'s',label:'Seen',count:6},{value:'d',label:'Done',count:21},{value:'a',label:'All',count:30}]}),h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{width:260}},h(W.Input,{leftIcon:'search',placeholder:'Search'})),h('div',{style:{width:140}},h(W.Select,{value:'All types',options:['All types','Bug','Suggestion','Other']})),h('div',{style:{width:140}},h(W.Select,{value:'All versions',options:['All versions','v1.6.0','v1.5.1']})))),
+  h('div',{key:3,className:'w-card',style:{overflow:'hidden'}},rows.map((r,i)=>row(r,i,i===0)))]));
+</script>
+</body>
+</html>

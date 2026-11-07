@@ -1,0 +1,33 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="02 · First-run wizard, step 1 (FirstRunWizard.jsx)" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S02Setup — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var steps=['Bienvenue','Infos Boutique','Compte Gérant','Terminé'];
+mount(h('div',{className:'w-root',lang:'fr',style:{width:1366,height:768,background:'var(--color-background)',display:'grid',placeItems:'center'}},h('div',{style:{width:520}},
+  h('div',{className:'w-row',style:{justifyContent:'center',gap:6,marginBottom:20}},steps.map((s,i)=>h(F,{key:s},h('span',{className:'w-row',style:{gap:6,fontSize:12,fontWeight:i===1?600:500,color:i<=1?'var(--color-primary)':'var(--color-muted-foreground)'}},h('span',{style:{width:10,height:10,borderRadius:'50%',background:i<=1?'var(--color-primary)':'var(--color-input)'}}),s),i<3&&h('span',{style:{width:28,height:1,background:'var(--color-border)'}})))),
+  h(W.Card,{title:'Informations de la boutique',icon:'store'},h('div',{className:'w-col'},
+    h(W.Input,{label:'Nom de la boutique',required:true,value:'Atelier Ennour',placeholder:'My Repair Shop'}),
+    h('div',{className:'w-grid2'},h(W.Input,{label:'Numéro de téléphone',placeholder:'+213 555 1234',value:'0541 67 78 93'}),h(W.Input,{label:'Adresse',placeholder:'Algiers',value:'Batna'})),
+    h('div',{className:'w-grid2'},h(W.Select,{label:'Devise',value:'DZD (Algerian Dinar)',options:['DZD (Algerian Dinar)','USD (US Dollar)','EUR (Euro)','SAR (Saudi Riyal)','MAD (Moroccan Dirham)','TND (Tunisian Dinar)']}),h(W.Input,{label:'Garantie par défaut (jours)',value:'30'})),
+    h('div',{className:'w-row',style:{justifyContent:'space-between'}},h(W.Button,{variant:'outline'},'Retour'),h(W.Button,null,'Suivant')))))));
+</script>
+</body>
+</html>

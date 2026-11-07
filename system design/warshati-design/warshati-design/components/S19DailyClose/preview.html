@@ -1,0 +1,29 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="19 · Daily Close (DailyClose.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S19DailyClose — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+mount(shell({active:'close',crumbs:['Finance','Daily Close']},[
+  h(W.PageHeader,{key:1,title:'Daily Close',subtitle:'End-of-day summary',actions:h(F,null,h(W.Button,{variant:'outline',icon:'print'},'Print Report'),h(W.Button,{icon:'lock'},'Close Today'))}),
+  h(F,{key:2},grid(3,[h(W.StatCard,{key:1,icon:'chart',label:'Total Revenue',value:M(86500)}),h(W.StatCard,{key:2,icon:'cash',label:'Cash Sales',value:M(61000)}),h(W.StatCard,{key:3,icon:'wallet',label:'Credit Sales',value:M(8500)}),h(W.StatCard,{key:4,icon:'undo',label:'Debt Collected',value:M(8000)}),h(W.StatCard,{key:5,icon:'receipt',label:'Expenses',value:M(17200)}),h(W.StatCard,{key:6,tone:'key',icon:'store',label:'Net Cash',value:M(51800)})],{gap:12})),
+  h(W.Card,{key:3,title:'Close History',flush:true,actions:h(W.Button,{size:'sm',variant:'outline',icon:'download'},'Export to Excel')},h(W.Table,{columns:[{label:'Date'},{label:'Revenue',end:true},{label:'Expenses',end:true},{label:'Debt Collected',end:true},{label:'Net Cash',end:true},{label:'Open Tickets',end:true},{label:'Low Stock',end:true}],rows:[['23/10/2026',M(74200),M(9800),M(12000),M(58400),15,6],['22/10/2026',M(52800),M(3500),M(0),M(41300),14,6],['21/10/2026',M(61500),M(40200),M(5000),h('span',{style:{color:'var(--color-destructive)'}},M(-2100)),16,7]]}))]));
+</script>
+</body>
+</html>

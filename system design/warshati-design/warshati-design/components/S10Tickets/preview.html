@@ -1,0 +1,33 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="10 · Repair Tickets + Mark as Done (TicketList.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S10Tickets — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var rows=[['TKT-2026-0187','Amina Haddad','0661 23 45 67','Samsung Galaxy A54','in-repair','urgent','Waiting 2 days',12500,['Mark Done']],['TKT-2026-0186','Karim Bensalem','0550 11 22 33','Apple iPhone 12','waiting-parts','normal','!34',14000,['Start Repair']],['TKT-2026-0185','Sofiane Meziane','0698 77 66 55','Sony PS4 Slim','diagnosing','urgent','Waiting 0 days',null,['Start Repair','Wait Parts']],['TKT-2026-0184','Nour El Houda','0770 99 88 77','HP ProBook 450','done','low','Waiting 1 days',6000,['Delivered']],['TKT-2026-0181','Ilyes Amrani','0555 31 42 53','Xiaomi Redmi Note 12','delivered','normal','—',4500,[]],['TKT-2026-0179','Samia Ouali','0770 12 34 56','Lenovo IdeaPad 3','cancelled','normal','—',null,[]]];
+var dlg=h(W.Modal,{size:'md',title:'Mark as Done',footer:h(F,null,h(W.Button,{variant:'outline'},'Cancel'),h(W.Button,null,'Mark Done'))},
+  h('div',{className:'w-card',style:{padding:12,background:'var(--color-muted)',fontSize:13}},h('div',null,h('b',null,'TKT-2026-0187')),h('div',null,'Amina Haddad'),h('div',{className:'w-muted'},'Samsung Galaxy A54')),
+  h(W.MoneyInput,{label:'Final Cost to Customer (DZD)',required:true,value:12500}),h(W.MoneyInput,{label:'Our Cost for Parts (DZD)',value:7200}));
+mount(shell({active:'tickets',crumbs:['Repairs','Tickets'],overlay:dlg},[
+  h(W.PageHeader,{key:1,title:'Repair Tickets',subtitle:'Track all repairs',actions:h(W.Button,{icon:'plus'},'New Ticket')}),
+  h(F,{key:2},search('Search ticket #, IMEI, customer...',h('div',{style:{width:200}},h(W.Select,{value:'All Statuses',options:['All Statuses']})))),
+  h(F,{key:3},tbl([{label:'Ticket #'},{label:'Customer'},{label:'Device'},{label:'Status'},{label:'Priority'},{label:'Waiting'},{label:'Cost',end:true},{label:'Quick Actions',end:true}],rows.map(r=>[code(r[0]),sub(r[1],r[2]),r[3],C('ticket',r[4]),C('priority',r[5]),r[6][0]==='!'?h(W.Badge,{variant:'warning'},'⚠ Waiting '+r[6].slice(1)+' days'):r[6],r[7]?M(r[7]):'—',h('span',{className:'w-row',style:{gap:4,justifyContent:'flex-end'}},r[8].map(a=>h(W.Button,{key:a,size:'sm',variant:'outline'},a)))])))]));
+</script>
+</body>
+</html>

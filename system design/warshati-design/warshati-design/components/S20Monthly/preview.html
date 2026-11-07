@@ -1,0 +1,33 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="20 · Monthly Summary (MonthlySummary.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S20Monthly — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var days=[42,55,38,61,70,48,86,52,64,58,73,49,66,80,44,57,62,71,39,68,75,53,87,74];
+mount(shell({active:'monthly',crumbs:['Finance','monthly-summary']},[
+  h(W.PageHeader,{key:1,title:'Monthly Summary',subtitle:'Financial performance for 2026-10',actions:h(F,null,h('div',{className:'w-row',style:{gap:4}},h(W.Button,{variant:'outline',size:'sm',iconOnly:true,icon:'collapse',label:'Previous'}),h('div',{style:{width:130}},h(W.Input,{value:'2026-10',center:true})),h(W.Button,{variant:'outline',size:'sm',iconOnly:true,icon:'chev-end',label:'Next'})),h(W.Button,{variant:'outline',icon:'print'},'Print Summary'))}),
+  h(F,{key:2},grid(5,[h(W.StatCard,{key:1,label:'Total Revenue',value:M(1486000)}),h(W.StatCard,{key:2,label:'Total Expenses',value:M(312400)}),h(W.StatCard,{key:3,tone:'key',label:'Net Profit',value:M(512300)}),h(W.StatCard,{key:4,label:'Debt Collected',value:M(96000)}),h(W.StatCard,{key:5,label:'Net Cash (drawer)',value:M(1104500)})],{gap:12})),
+  h('div',{key:3,style:{display:'grid',gridTemplateColumns:'2fr 1fr',gap:16,flex:1,minHeight:0}},
+    h(W.Card,{title:'Daily Revenue & Net Cash'},h('svg',{viewBox:'0 0 620 230',width:'100%',height:250},[0,1,2,3].map(i=>h('line',{key:'g'+i,x1:0,x2:620,y1:10+i*60,y2:10+i*60,style:{stroke:'var(--color-border)'}})),days.map((d,i)=>h('rect',{key:i,x:6+i*25.5,y:190-d*2,width:17,height:d*2,rx:3,style:{fill:i===days.length-1?'var(--color-flux)':'var(--color-primary)'}})),[['1st',0],['15th',14],['24th',23]].map(x=>h('text',{key:x[0],x:6+x[1]*25.5,y:212,style:{fill:'var(--color-muted-foreground)',fontSize:11}},x[0])))),
+    h('div',{className:'w-col',style:{gap:12}},h(W.Card,{title:'Repairs'},h('div',{className:'w-col',style:{gap:6}},h('div',{className:'w-totline'},h('span',null,'Tickets Received'),h('b',null,'158')),h('div',{className:'w-totline'},h('span',null,'Tickets Delivered'),h('b',null,'143')))),
+      h(W.Card,{title:'Top Items Sold'},h('div',{className:'w-col',style:{gap:6}},[['Verre trempé universel',64],['Coque silicone A54',21],['Chargeur Samsung 25W',13],['Batterie iPhone 12',9]].map(x=>h('div',{key:x[0],className:'w-totline'},h('span',null,x[0]),h('b',null,'x'+x[1])))))))]));
+</script>
+</body>
+</html>

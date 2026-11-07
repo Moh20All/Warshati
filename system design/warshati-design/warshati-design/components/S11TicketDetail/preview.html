@@ -1,0 +1,40 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="11 · Ticket detail (TicketDetail.jsx)" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S11TicketDetail — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+mount(shell({lang:'fr',active:'tickets',crumbs:['Repairs','Tickets','TKT-2026-0187'],toast:h(W.Toast,{tone:'success'},'Part taken from stock')},[
+  h(W.PageHeader,{key:1,back:true,title:'TKT-2026-0187',badges:h(F,null,C('ticket','in-repair','fr'),C('priority','urgent','fr')),actions:h(F,null,h(W.Button,{variant:'outline',icon:'print'},'Print Ticket'),h(W.Button,{icon:'check'},'Enregistrer'))}),
+  h('div',{key:2,className:'w-row',style:{gap:6}},h('span',{className:'w-label'},'Move to:'),h(W.Button,{size:'sm',variant:'outline'},'En attente de pièces'),h(W.Button,{size:'sm',variant:'outline'},'Terminé'),h(W.Button,{size:'sm',variant:'outline',className:'w-btn-dangertext'},'Annulé')),
+  h('div',{key:3,style:{display:'grid',gridTemplateColumns:'1.25fr 1fr',gap:16,minHeight:0}},
+    h('div',{className:'w-col',style:{gap:12}},
+      h(W.Card,null,h('div',{className:'w-col',style:{gap:12}},h('div',{className:'w-muted',style:{fontSize:13,background:'var(--color-muted)',padding:'6px 10px',borderRadius:6}},'Amina Haddad · 0661 23 45 67'),
+        h('div',{className:'w-grid2'},h(W.Input,{label:'Appareil',value:'Samsung Galaxy A54',readOnly:true}),h(W.Input,{label:'IMEI',mono:true,value:'356938035643809'})),
+        h(W.Input,{label:'Diagnostic',multiline:true,rows:2,value:'Écran OLED cassé, carte mère OK.'}),
+        h(W.Input,{label:'Notes pièces utilisées',placeholder:'LCD screen replacement, new battery...'}))),
+      h(W.Card,{title:'Parts from stock',icon:'box'},h('div',{className:'w-col',style:{gap:10}},
+        h('div',{className:'w-row',style:{justifyContent:'space-between'}},h('span',null,'1 × Écran Samsung A54 (OLED)'),h('span',{className:'w-row'},M(7200),h(W.Button,{variant:'ghost',size:'sm',iconOnly:true,icon:'trash',label:'Return'}))),
+        h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1}},h(W.Select,{value:'Choose a part...',options:['Choose a part...','Batterie iPhone 12 (iPhone 12) — 6 in stock']})),h('div',{style:{width:70}},h(W.Input,{value:'1'})),h(W.Button,{variant:'secondary'},'Use part'))))),
+    h('div',{className:'w-col',style:{gap:12}},
+      h(W.Card,{title:'Montant'},h('div',{className:'w-col',style:{gap:10}},h(W.MoneyInput,{label:'Final Cost to Customer (DZD)',value:12500}),h('div',{className:'w-grid2'},h(W.MoneyInput,{label:'Parts Cost (DZD)',value:7200}),h(W.MoneyInput,{label:'Deposit / Advance (DZD)',value:3000})))),
+      h(W.Card,{title:'Planification'},h('div',{className:'w-col',style:{gap:10}},h('div',{className:'w-grid2'},h(W.Select,{label:'Priorité',value:'Urgente',options:['Basse','Normale','Urgente']}),h(W.Input,{label:'Est. Completion Date',value:'26/10/2026'})),h(W.Input,{label:'Warranty (days)',value:'30'})))))]));
+</script>
+</body>
+</html>

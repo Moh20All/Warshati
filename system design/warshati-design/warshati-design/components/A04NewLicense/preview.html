@@ -1,0 +1,34 @@
+<!-- @dsCard group="Admin portal" height=768 width=1366 subtitle="Admin · New license" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>A04NewLicense — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var CNT={feedback:3,crashes:2};
+function adm(o,kids){return h(W.AdminShell,Object.assign({logo:MARK,counts:CNT},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:14},st||{})},kids);}
+function L(k,v){return h('span',{className:'w-badge',style:{background:'var(--color-'+k+'-'+v+'-bg)',color:'var(--color-'+k+'-'+v+'-fg)'}},h(W.Icon,{name:W.STATUS[k][v][1]}),W.STATUS[k][v][2]);}
+function who(n,p){return h('div',{className:'w-row',style:{gap:10,flexWrap:'nowrap'}},h(W.Initials,{name:n}),h('div',null,h('b',null,n),h('span',{className:'w-sub'},p)));}
+function lic(a,b){return {a:a,b:b};}
+var KEYS=[['Atelier Ennour','0541 67 78 93','WARSHATI-K9Q2-7HXM-PL4R-2WZ8','activated','5 h ago · v1.6.0',15000],['Phone Clinic Sétif','0661 45 22 10','WARSHATI-3MDA-91KX-ZQ7P-LL04','activated','2 d ago · v1.6.0',15000],['Repair Center El Eulma','0770 12 98 34','WARSHATI-PX55-T2RA-8VNE-0QC1','quiet','20 d ago · v1.5.1',12000],['Mobile Fix Biskra','0550 31 76 09','WARSHATI-ZW8D-4KJ2-MM3T-9AYH','waiting','—',15000],['GSM Khenchela','0698 02 44 51','WARSHATI-71HC-QE0L-5RRB-K2DS','revoked','64 d ago · v1.4.2',10000]];
+
+mount(adm({active:'licenses'},[
+  h(W.PageHeader,{key:1,back:true,title:'New license'}),
+  h('div',{key:2,style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,maxWidth:980}},
+    h(W.Card,{title:'Shop',icon:'store'},h('div',{className:'w-col',style:{gap:12}},h(W.Input,{label:'Name',required:true,value:'Mobile Fix Biskra'}),h(W.Input,{label:'Phone (WhatsApp)',value:'0550 31 76 09',leftIcon:'whatsapp'}),h(W.Input,{label:'City / address',value:'Biskra, Rue Hakim Saadane'}),h(W.Input,{label:'Private notes',multiline:true,rows:3,placeholder:'Only you see this'}))),
+    h(W.Card,{title:'License',icon:'key'},h('div',{className:'w-col',style:{gap:14}},h(W.Field,{label:'Number of PCs',help:'One key per PC'},h(W.Stepper,{value:2})),h(W.MoneyInput,{label:'Price paid per key (DA)',value:15000}),h(W.Input,{label:'Key note',placeholder:'e.g. counter PC'}),
+      h('div',{className:'w-totline is-big'},h('span',null,'Total'),M(30000))))),
+  h('div',{key:3,className:'w-row',style:{maxWidth:980,justifyContent:'flex-end'}},h(W.Button,{variant:'outline'},'Cancel'),h(W.Button,{variant:'flux',icon:'key'},'Create key'))]));
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- @dsCard group="Actions" height=180 -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>Button — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+mount(h('div',{className:'w-root pv'},
+  h('div',{className:'w-row'},h(W.Button,{icon:'plus'},'New Ticket'),h(W.Button,{variant:'secondary'},'Export to Excel'),h(W.Button,{variant:'outline',icon:'print'},'Print Ticket'),h(W.Button,{variant:'ghost',icon:'edit'},'Edit'),h(W.Button,{variant:'danger'},'Confirm Refund'),h(W.Button,{loading:true},'Save'),h(W.Button,{disabled:true},'Create Check-In')),
+  h('div',{className:'w-row'},h(W.Button,{size:'sm'},'sm · h-8'),h(W.Button,{size:'md'},'md · h-9'),h(W.Button,{size:'lg'},'lg · h-10'),h(W.Button,{variant:'flux',size:'lg',icon:'check'},'Complete Sale'),h(W.Button,{variant:'ghost',size:'sm',iconOnly:true,icon:'trash',label:'Deactivate'})),
+  h('div',{className:'w-row',dir:'rtl'},h(W.Button,{icon:'plus'},'تذكرة جديدة'),h(W.Button,{variant:'outline'},'إلغاء'),h(W.Button,{variant:'flux',size:'lg',icon:'check'},'إتمام البيع'))));
+</script>
+</body>
+</html>

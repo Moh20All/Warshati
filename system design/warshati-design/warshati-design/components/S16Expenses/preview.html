@@ -1,0 +1,31 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="16 · Expenses (ExpenseList.jsx)" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S16Expenses — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var rows=[['Supplier Restock','Restock: 5x Batterie iPhone 12',16000,'Phone Parts Sétif','24/10','Karim'],['Petty Cash','Café + transport',1200,'—','24/10','Yacine'],['Utilities','Électricité octobre',5800,'Sonelgaz','20/10','Karim'],['Rent','Loyer novembre',35000,'Propriétaire','01/10','Karim']];
+mount(shell({lang:'fr',active:'expenses',crumbs:['Finance','Expenses']},[
+  h(W.PageHeader,{key:1,title:'Dépenses',subtitle:'Track shop expenses',actions:h(F,null,h(W.Button,{variant:'outline',icon:'download'},'Export to Excel'),h(W.Button,{icon:'plus'},'Add Expense'))}),
+  h('div',{key:2,className:'w-card',style:{padding:'12px 16px',background:'var(--color-muted)',display:'flex',justifyContent:'space-between',alignItems:'center'}},h('span',{className:'w-label'},'Total expenses this month'),h('b',{className:'stat-value'},M(58000,'fr'))),
+  h('div',{key:3,className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{width:220}},h(W.Select,{value:'All Categories',options:['All Categories']})),h('div',{style:{width:160}},h(W.Input,{value:'01/10/2026'})),h('span',{className:'w-muted'},'to'),h('div',{style:{width:160}},h(W.Input,{value:'31/10/2026'}))),
+  h(F,{key:4},tbl([{label:'Category'},{label:'Description'},{label:'Amount',end:true},{label:'Paid To'},{label:'Date'},{label:'By'},{label:'',end:true}],rows.map(r=>[h(W.Badge,null,r[0]),r[1],M(r[2],'fr'),r[3],r[4],r[5],act([['edit','Edit'],['trash','Delete']])])))]));
+</script>
+</body>
+</html>

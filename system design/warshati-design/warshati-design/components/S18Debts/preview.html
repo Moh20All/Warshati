@@ -1,0 +1,33 @@
+<!-- @dsCard group="Screens" height=768 width=1366 subtitle="18 · Debt Ledger → Payments → Cancel payment (DebtLedger.jsx)" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>S18Debts — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+function shell(o,kids){return h(W.AppShell,Object.assign({logo:MARK,user:'Karim'},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:16},st||{})},kids);}
+function search(ph,extra){return h('div',{className:'w-row',style:{flexWrap:'nowrap'}},h('div',{style:{flex:1,maxWidth:420}},h(W.Input,{leftIcon:'search',placeholder:ph})),extra);}
+function tbl(cols,rows,o){return h('div',{className:'w-card',style:{overflow:'hidden'}},h(W.Table,Object.assign({columns:cols,rows:rows,clickable:true},o||{})));}
+function act(icons){return h('span',{className:'w-row',style:{gap:2,justifyContent:'flex-end',flexWrap:'nowrap'}},icons.map((x,i)=>h(W.Button,{key:i,variant:'ghost',size:'sm',iconOnly:!x[2],icon:x[0],label:x[1],className:x[3]},x[2]?x[1]:null)));}
+
+var rows=[['Mourad Kacemi','0770 45 12 98','SALE_CREDIT',14000,8000,6000,'partial','45d',1],['Amina Haddad','0661 23 45 67','REPAIR_CREDIT',9500,0,9500,'open','2d',0],['Sofiane Meziane','0698 77 66 55','OPENING_BALANCE',6000,0,6000,'open','12d',0],['Nour El Houda','0770 99 88 77','SALE_CREDIT',3500,3500,0,'settled','20d',0]];
+var tl={SALE_CREDIT:'Sale on credit',REPAIR_CREDIT:'Repair on credit',OPENING_BALANCE:'Opening balance'};
+var behind=shell({active:'debts',crumbs:['Finance','Debt Ledger']},[
+  h(W.PageHeader,{key:1,title:'Debt Ledger',subtitle:'Track and collect outstanding debts',actions:h(F,null,h(W.Button,{icon:'plus'},'Add Debt'),h(W.Button,{variant:'outline',icon:'download'},'Export to Excel'))}),
+  h(F,{key:2},tbl([{label:'Customer'},{label:'Type'},{label:'Total',end:true},{label:'Paid',end:true},{label:'Remaining',end:true},{label:'Status'},{label:'Age'},{label:''}],rows.map(r=>[sub(r[0],r[1]),h(W.Badge,null,tl[r[2]]),M(r[3]),M(r[4]),h('b',{style:{color:'var(--color-destructive)'}},M(r[5])),C('debt',r[6]),r[7]==='45d'?h(W.Badge,{variant:'danger'},'45d overdue'):r[7],h('span',{className:'w-row',style:{gap:4}},r[6]!=='settled'&&h(W.WhatsAppButton,{size:'sm',iconOnly:true,label:'WhatsApp'}),r[8]?h(W.Button,{size:'sm',variant:'ghost'},'Payments'):null,r[6]!=='settled'&&h(W.Button,{size:'sm'},'Pay'))])))]);
+mount(h('div',{className:'w-root',style:{position:'relative',width:1366,height:768}},behind,h('div',{style:{position:'absolute',inset:0}},h(W.ModalStack,{height:768},
+  h(W.Modal,{size:'lg',title:'Payments — Mourad Kacemi'},h(W.PaymentHistory,{owner:true,payments:[{date:'24/10 10:05',amount:3000,note:''},{date:'20/10 17:12',amount:3000,cancelling:true,note:'Cancelled: typed twice'},{date:'20/10 17:10',amount:3000,cancelled:true,note:''},{date:'02/05 16:40',amount:5000,note:''}]}),h('div',{style:{height:30}})),
+  h(W.Modal,{size:'sm',title:'Cancel this payment?',footer:h(F,null,h(W.Button,{variant:'outline'},'Keep'),h(W.Button,{variant:'danger'},'Cancel Payment'))},h('p',{style:{margin:0}},'Cancel the payment of 3 000 DZD from 24/10? Today\'s cash goes down by this amount.'),h(W.Input,{label:'Reason',placeholder:'e.g. typed 5000 instead of 500'}))))));
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!-- @dsCard group="Admin portal" height=768 width=1366 subtitle="Admin · Customer" page -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>A06Customer — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var CNT={feedback:3,crashes:2};
+function adm(o,kids){return h(W.AdminShell,Object.assign({logo:MARK,counts:CNT},o),kids);}
+function grid(n,kids,st){return h('div',{style:Object.assign({display:'grid',gridTemplateColumns:'repeat('+n+', minmax(0, 1fr))',gap:14},st||{})},kids);}
+function L(k,v){return h('span',{className:'w-badge',style:{background:'var(--color-'+k+'-'+v+'-bg)',color:'var(--color-'+k+'-'+v+'-fg)'}},h(W.Icon,{name:W.STATUS[k][v][1]}),W.STATUS[k][v][2]);}
+function who(n,p){return h('div',{className:'w-row',style:{gap:10,flexWrap:'nowrap'}},h(W.Initials,{name:n}),h('div',null,h('b',null,n),h('span',{className:'w-sub'},p)));}
+function lic(a,b){return {a:a,b:b};}
+var KEYS=[['Atelier Ennour','0541 67 78 93','WARSHATI-K9Q2-7HXM-PL4R-2WZ8','activated','5 h ago · v1.6.0',15000],['Phone Clinic Sétif','0661 45 22 10','WARSHATI-3MDA-91KX-ZQ7P-LL04','activated','2 d ago · v1.6.0',15000],['Repair Center El Eulma','0770 12 98 34','WARSHATI-PX55-T2RA-8VNE-0QC1','quiet','20 d ago · v1.5.1',12000],['Mobile Fix Biskra','0550 31 76 09','WARSHATI-ZW8D-4KJ2-MM3T-9AYH','waiting','—',15000],['GSM Khenchela','0698 02 44 51','WARSHATI-71HC-QE0L-5RRB-K2DS','revoked','64 d ago · v1.4.2',10000]];
+
+function keycard(k,st,c,a,l,pc,note){return h(W.Card,{key:k},h('div',{className:'w-col',style:{gap:10}},
+  h('div',{className:'w-row',style:{justifyContent:'space-between'}},h('span',{className:'w-row'},h(W.KeyField,{value:k,revoked:st==='revoked'}),h(W.WhatsAppButton,{size:'sm',iconOnly:true,label:'Send on WhatsApp'})),L('license',st)),
+  h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4, 1fr)',gap:8,fontSize:12}},[['Created',c],['Activated',a],['Last seen',l],['PC',pc]].map(x=>h('div',{key:x[0]},h('span',{className:'w-sub'},x[0]),h('span',{className:x[0]==='PC'?'w-code':null},x[1])))),
+  h('div',{className:'w-row',style:{justifyContent:'space-between'}},h('span',{className:'w-muted',style:{fontSize:13}},note,' ',h(W.Icon,{name:'edit',size:14})),h('span',{className:'w-row',style:{gap:4}},h(W.Button,{size:'sm',variant:'outline',icon:st==='revoked'?'refresh':'slash'},st==='revoked'?'Reactivate':'Revoke'),h(W.Button,{size:'sm',variant:'outline',icon:'unlink'},'Unlink PC'),h(W.Button,{size:'sm',variant:'ghost',iconOnly:true,icon:'trash',label:'Delete',className:'w-btn-dangertext'})))));}
+mount(adm({active:'licenses'},[
+  h('div',{key:1,className:'w-row',style:{gap:14,flexWrap:'nowrap'}},h(W.Button,{variant:'ghost',size:'sm',iconOnly:true,icon:'collapse',label:'Back'}),h(W.Initials,{name:'Atelier Ennour',size:48}),h('div',{style:{flex:1}},h('div',{style:{fontSize:22,lineHeight:'30px',fontWeight:600}},'Atelier Ennour'),h('div',{className:'w-muted',style:{fontSize:13}},'0541 67 78 93 · Batna · Customer since March 2026')),h(W.WhatsAppButton,null,'Send keys'),h(W.Button,{variant:'outline',icon:'phonecall'},'Call')),
+  h(F,{key:2},grid(4,[h(W.StatCard,{key:1,label:'Keys',value:'2'}),h(W.StatCard,{key:2,label:'Activated',value:'2'}),h(W.StatCard,{key:3,label:'Paid',value:M(30000)}),h(W.StatCard,{key:4,label:'Last seen',value:'5 h ago',sub:'v1.6.0'})],{gap:12})),
+  h('div',{key:3,style:{display:'grid',gridTemplateColumns:'1.5fr 1fr',gap:16,minHeight:0}},
+    h('div',{className:'w-col',style:{gap:12}},h('div',{className:'w-row',style:{justifyContent:'space-between'}},h('b',null,'Keys'),h(W.Button,{size:'sm',variant:'outline',icon:'plus'},'Add a key')),
+      keycard('WARSHATI-K9Q2-7HXM-PL4R-2WZ8','activated','12/03/2026','12/03/2026','5 h ago · v1.6.0','7F3A91C2','Counter PC · 15 000 DA'),
+      keycard('WARSHATI-H2LM-8QZX-4PWD-61RA','activated','02/06/2026','03/06/2026','1 d ago · v1.6.0','B81E04D7','Workshop PC · 15 000 DA')),
+    h(W.Card,{title:'Details'},h('div',{className:'w-col',style:{gap:12}},h(W.Input,{label:'Name',value:'Atelier Ennour'}),h(W.Input,{label:'Phone',value:'0541 67 78 93'}),h(W.Input,{label:'Address',value:'Cité 500 Logts, Batna'}),h(W.Input,{label:'Notes',multiline:true,rows:2,value:'Owner: Karim. Pays cash.'}),
+      h(W.Button,{variant:'secondary',icon:'check'},'Saved'),h('div',{style:{borderTop:'1px solid var(--color-border)',paddingTop:12}},h(W.Button,{variant:'ghost',icon:'trash',className:'w-btn-dangertext'},'Delete customer')))))]));
+</script>
+</body>
+</html>

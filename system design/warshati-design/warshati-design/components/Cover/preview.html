@@ -1,0 +1,49 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script>
+<meta charset="utf-8">
+<title>Warshati</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--color-background); color:var(--color-foreground); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .slab { fill:var(--color-inverse); }
+  .flux { fill:var(--color-flux); }
+  .tint { fill:var(--color-primary-soft); }
+  .board { fill:var(--color-primary); }
+  .blk { rx:var(--radius-md); }
+  .pill { fill:var(--color-primary); rx:12px; }
+  .pad { fill:var(--color-flux); }
+  .words { position:absolute; left:var(--space-6); bottom:var(--space-6); max-width:440px; }
+  .name { margin:0; font-size:88px; line-height:.92; font-weight:700; letter-spacing:-.02em; color:var(--color-foreground); }
+  .tag { margin:var(--space-2) 0 0 4px; font-size:14px; line-height:20px; color:var(--color-muted-foreground); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      color-inverse 176x320 graphite slab bled off top and bottom (largest, neutral) · color-flux disc r=96 bleeding off the top · color-primary-soft 144x112 tint · color-primary 128x168 green block bleeding off the right (green as signal, not wall) — about 40% of 960x288
+  arrangement one tall slab with satellites; satellite bottoms on one line space-6 above the edge, gutters space-4
+  pattern     solder pads (precise, technical, a circuit board — the Trace logo): 38 color-flux pads at a space-6 pitch cut into the graphite slab, one color-primary pill trace across the tint
+  scales      sides in space-4 multiples; gutters space-4; pitch space-6; corners radius-md; pill rx 12 (half its 24 height); pads r = space-1
+-->
+<rect class="slab blk" x="16" y="-16" width="176" height="320" rx="8"/>
+<circle class="flux" cx="352" cy="8" r="96"/>
+<rect class="tint blk" x="208" y="152" width="144" height="112" rx="8"/>
+<rect class="pill" x="224" y="216" width="112" height="24" rx="12"/>
+<rect class="board blk" x="368" y="96" width="128" height="168" rx="8"/>
+<circle class="pad" cx="40" cy="80" r="4"/><circle class="pad" cx="40" cy="104" r="4"/><circle class="pad" cx="40" cy="128" r="4"/><circle class="pad" cx="40" cy="152" r="4"/><circle class="pad" cx="40" cy="176" r="4"/><circle class="pad" cx="64" cy="56" r="4"/><circle class="pad" cx="64" cy="80" r="4"/><circle class="pad" cx="64" cy="104" r="4"/><circle class="pad" cx="64" cy="128" r="4"/><circle class="pad" cx="64" cy="152" r="4"/><circle class="pad" cx="64" cy="176" r="4"/><circle class="pad" cx="64" cy="200" r="4"/><circle class="pad" cx="88" cy="56" r="4"/><circle class="pad" cx="88" cy="80" r="4"/><circle class="pad" cx="88" cy="104" r="4"/><circle class="pad" cx="88" cy="128" r="4"/><circle class="pad" cx="88" cy="152" r="4"/><circle class="pad" cx="88" cy="176" r="4"/><circle class="pad" cx="88" cy="200" r="4"/><circle class="pad" cx="112" cy="56" r="4"/><circle class="pad" cx="112" cy="80" r="4"/><circle class="pad" cx="112" cy="104" r="4"/><circle class="pad" cx="112" cy="128" r="4"/><circle class="pad" cx="112" cy="152" r="4"/><circle class="pad" cx="112" cy="176" r="4"/><circle class="pad" cx="112" cy="200" r="4"/><circle class="pad" cx="136" cy="56" r="4"/><circle class="pad" cx="136" cy="80" r="4"/><circle class="pad" cx="136" cy="104" r="4"/><circle class="pad" cx="136" cy="128" r="4"/><circle class="pad" cx="136" cy="152" r="4"/><circle class="pad" cx="136" cy="176" r="4"/><circle class="pad" cx="136" cy="200" r="4"/><circle class="pad" cx="160" cy="80" r="4"/><circle class="pad" cx="160" cy="104" r="4"/><circle class="pad" cx="160" cy="128" r="4"/><circle class="pad" cx="160" cy="152" r="4"/><circle class="pad" cx="160" cy="176" r="4"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Warshati</h1>
+<p class="tag">ورشتي — know your numbers, own your day. Repair-shop software in three languages.</p>
+</div>
+</div>
+</body>
+</html>

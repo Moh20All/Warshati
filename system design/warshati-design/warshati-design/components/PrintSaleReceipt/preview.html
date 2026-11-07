@@ -1,0 +1,35 @@
+<!-- @dsCard group="Print templates" height=640 subtitle="5.3 Sales receipt (receipt size) — 80 / 58 mm" page -->
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script src="../lib/react.production.min.js"></script><script src="../lib/react-dom.production.min.js"></script><script src="../bundle.js"></script><meta charset="utf-8"><title>PrintSaleReceipt — preview</title>
+<style>html,body{margin:0;background:var(--color-background);color:var(--color-foreground);} .pv{padding:16px;display:flex;flex-direction:column;gap:12px;}</style></head>
+<body>
+<div id="root"></div>
+<script>
+var W=window.Warshati,h=React.createElement,F=React.Fragment;
+var MARK='../../assets/mark-trace-tile.svg';
+function mount(x){ReactDOM.createRoot(document.getElementById('root')).render(x);}
+function M(v,l){return h(W.Money,{value:v,lang:l||'en'});}
+function C(k,v,l){return h(W.StatusBadge,{kind:k,value:v,lang:l||'en'});}
+function sub(a,b){return h('div',null,a,h('span',{className:'w-sub'},b));}
+function I(n,s){return h(W.Icon,{name:n,size:s});}
+function code(x){return h('span',{className:'w-code'},x);}
+var MARKB='../../assets/mark-trace-black.svg';
+var fa=W.formatAmount;
+function N(x){return typeof x==='string'&&/^[0-9 :\/.,TKINVCPOB-]+$/.test(x)?h('span',{className:'w-num'},x):x;}
+function R(a,b,cls){return h('div',{className:'p-row'+(cls?' '+cls:'')},h('span',null,N(a)),h('span',null,N(b)));}
+function A(v){return fa(v)+' DZD';}
+function head(){return h(F,null,h('img',{className:'p-logo',src:MARKB,alt:''}),h('div',{className:'p-shop'},'Atelier Ennour'),h('div',{className:'p-center p-small'},'Cité 500 Logts, Batna'),h('div',{className:'p-center p-small'},'0541 67 78 93'),h('div',{className:'p-rule-solid'}));}
+function pair(a,b,note){mount(h('div',{className:'w-root pv',style:{background:'var(--color-muted)'}},h('div',{style:{display:'flex',gap:32,alignItems:'flex-start'}},a,b),note&&h('div',{className:'w-hint',style:{maxWidth:820}},note)));}
+
+var L=[['Verre trempé A54',1,800],['Coque silicone A54',1,1200],['Chargeur Samsung 25W',1,4500],['Galaxy A15 128GB',1,38500]];
+function t(paper){return h(W.Receipt,{paper:paper},head(),
+  h('div',{className:'p-title'},'Sales Receipt / فاتورة'),R('INV#:','INV-2026-0412'),R('Date:','24/10/2026 14:05'),R('Customer:','Mourad Kacemi'),
+  h('table',{style:{marginTop:6}},h('thead',null,h('tr',null,h('th',null,'ITEM'),h('th',{className:'p-end'},'QTY'),h('th',{className:'p-end'},'PRICE'),h('th',{className:'p-end'},'TOTAL'))),h('tbody',null,L.map((l,i)=>h('tr',{key:i},h('td',null,l[0]),h('td',{className:'p-end'},l[1]),h('td',{className:'p-end'},fa(l[2])),h('td',{className:'p-end'},fa(l[1]*l[2])))))),
+  h('div',{className:'p-rule'}),R('Subtotal',A(45000)),R('Total',A(45000),'p-total'),R('Paid',A(40000)),R('Method','SPLIT'),
+  h('div',{className:'p-rule-solid'}),h('div',{className:'p-head'},'✓ Warranty / الضمان:'),h('div',{className:'p-small'},'• Galaxy A15 128GB: 365 days (Until 24/10/2027)'),
+  h('div',{className:'p-rule'}),h('div',{className:'p-center p-small'},'Thank you for choosing Warshati!'));}
+pair(t(80),t(58),'Same lines as today. Not added: the Discount line (it never prints because the template reads `discount` while the sale saves `discountAmount` — a bug to fix separately), trade-in credit, translated method.');
+</script>
+</body>
+</html>
