@@ -1,4 +1,15 @@
 {
+  "repair_label": {
+    "btn": "Étiquette",
+    "title": "Étiquette du téléphone (étiquette de réparation)",
+    "desc": "Une petite étiquette autocollante collée sur le téléphone : numéro du ticket, code-barres, client et appareil. Scannez-la dans la page Réparations pour ouvrir le ticket.",
+    "showShop": "Nom de la boutique",
+    "showPhone": "Téléphone du client",
+    "showIssue": "Problème (30 mm de haut ou plus)",
+    "custom": "Autre taille…",
+    "copies": "Exemplaires",
+    "hint": "Utilise la même imprimante d'étiquettes que les étiquettes du stock. La plupart des boutiques utilisent 40 × 30 ou 50 × 25."
+  },
   "repairmen": {
     "btn_cancel_pay": "Annuler ce paiement",
     "cancel_msg": "Annuler le paiement de {{amount}} ? Rien n'est supprimé : une écriture d'annulation est notée aujourd'hui, l'argent revient dans la caisse du jour et la boutique le lui doit à nouveau.",
@@ -342,6 +353,11 @@
     "btn_deactivate": "Désactiver"
   },
   "settings": {
+    "logo": "Logo de la boutique",
+    "logo_choose": "Choisir une image",
+    "logo_remove": "Retirer",
+    "logo_hint": "Imprimé en haut des reçus et des tickets à la place du logo Warshati. Le noir et blanc s'imprime le mieux.",
+    "logo_bad": "Ce fichier n'est pas une image lisible.",
     "features": {
       "featCheckIn": "Réception (bon de dépôt)",
       "featCheckIn_desc": "Une étape rapide au comptoir avant le ticket : client, appareil et problème en 30 secondes, et un bon pour le client. Transformez-la en ticket plus tard en un clic. Désactivé : la page Réception disparaît et vous créez les tickets directement (F3).",

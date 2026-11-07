@@ -1,4 +1,15 @@
 {
+  "repair_label": {
+    "btn": "Sticker",
+    "title": "Device sticker (repair label)",
+    "desc": "A small adhesive label stuck on the phone: ticket number, barcode, client and device. Scan it on the Repairs page to open the ticket.",
+    "showShop": "Shop name",
+    "showPhone": "Client phone",
+    "showIssue": "Problem (30 mm high or more)",
+    "custom": "Other size…",
+    "copies": "Copies",
+    "hint": "Uses the same label printer as the stock labels. Most shops use 40 × 30 or 50 × 25."
+  },
   "repairmen": {
     "btn_cancel_pay": "Cancel this payment",
     "cancel_msg": "Cancel the payment of {{amount}}? Nothing is deleted: a cancelling entry is recorded today, the money comes back into today's cash and he is owed it again.",
@@ -342,6 +353,11 @@
     "btn_deactivate": "Deactivate"
   },
   "settings": {
+    "logo": "Shop logo",
+    "logo_choose": "Choose an image",
+    "logo_remove": "Remove",
+    "logo_hint": "Printed at the top of receipts and tickets instead of the Warshati logo. Black and white prints best.",
+    "logo_bad": "This file is not an image the app can read.",
     "features": {
       "featCheckIn": "Check-in (drop-off slip)",
       "featCheckIn_desc": "A quick step at the counter before the ticket: client, device and problem in 30 seconds, and a slip for the client. Turn it into a ticket later in one click. Off: the Check-in page disappears and you create tickets directly (F3).",

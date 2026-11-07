@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Search, Trash2, Printer, ShoppingCart } from 'lucide-react'
 import api from '../../lib/api'
-import { PRINT_LOGO } from '../../lib/printKit'
+import { printLogo } from '../../lib/printKit'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
@@ -178,7 +178,7 @@ export default function POS() {
 
     const html = `<div dir="${dir}" style="box-sizing: border-box; width: 100%;">
       <div style="text-align:center; margin-bottom:10px;">
-        ${PRINT_LOGO}
+        ${printLogo(store)}
         <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
         ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
         ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}

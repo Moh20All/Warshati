@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Save, Printer, Plus, Trash2, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Save, Printer, Plus, Trash2, MessageCircle, Tag } from 'lucide-react'
 import { sendWhatsApp } from '../../lib/whatsapp'
 import api from '../../lib/api'
-import { PRINT_LOGO } from '../../lib/printKit'
+import { printLogo } from '../../lib/printKit'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
@@ -20,6 +20,8 @@ import { repairPhrases } from '../../lib/repairPhrases'
 import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useHotkeys } from '../../lib/hotkeys'
 import { deliveryReceiptHtml } from '../../lib/receipts'
+import { code128Svg, ticketBarcode } from '../../lib/barcode'
+import RepairLabelModal from '../../components/RepairLabelModal'
 import { repairmanShare } from '../../lib/repairmen'
 import { useAuth } from '../../lib/auth'
 
@@ -66,6 +68,7 @@ export default function TicketDetail() {
   const comma = lang.startsWith('ar') ? '،' : ','
   const [transitionModal, setTransitionModal] = useState(null)
   const [deliveredTicket, setDeliveredTicket] = useState(null) // just delivered: offer the delivery receipt
+  const [showLabel, setShowLabel] = useState(false) // adhesive sticker for the device
   const [missingField, setMissingField] = useState(null) // highlights the first empty required field
   const [finalCostInput, setFinalCostInput] = useState('')
   const [partsCostInput, setPartsCostInput] = useState('')
@@ -178,13 +181,14 @@ export default function TicketDetail() {
     const html = `
       <div dir="${dir}" style="box-sizing: border-box; width: 100%;">
         <div style="text-align:center; margin-bottom:15px;">
-          ${PRINT_LOGO}
+          ${printLogo(store)}
           <h2 style="margin:0; font-size:18px; text-transform: uppercase;">${storeName}</h2>
           ${storeAddress ? `<p style="margin:2px 0; font-size:11px;">${storeAddress}</p>` : ''}
           ${storePhone ? `<p style="margin:2px 0; font-size:11px;">${storePhone}</p>` : ''}
           <div style="border-top:2px solid #000; margin:10px 0;"></div>
           <h3 style="margin:0; font-size:15px; font-weight:bold;">REPAIR TICKET / تذكرة إصلاح</h3>
           <p class="p-mono" style="margin:5px 0; font-size:16px; font-weight:bold;">${ticket.ticketNumber}</p>
+          <div style="display:flex; justify-content:center;">${code128Svg(ticketBarcode(ticket.ticketNumber), { width: '46mm', height: '11mm' })}</div>
         </div>
 
         <div style="font-size: 12px; margin-bottom: 8px; border: 1px solid #000; padding: 6px; border-radius: 4px;">
@@ -287,6 +291,9 @@ export default function TicketDetail() {
           )}
           {!isNew && (
             <Button variant="outline" onClick={printTicket}><Printer className="h-4 w-4" /> {t('repairs.tickets.print')}</Button>
+          )}
+          {!isNew && ticket && (
+            <Button variant="outline" onClick={() => setShowLabel(true)}><Tag className="h-4 w-4" /> {t('repair_label.btn')}</Button>
           )}
           {ticket?.status === 'DELIVERED' && (
             <Button variant="outline" onClick={() => printDelivery(ticket)}><Printer className="h-4 w-4" /> {t('repairs.delivery.btn_print')}</Button>
@@ -460,6 +467,8 @@ export default function TicketDetail() {
           </div>
         )}
       </Modal>
+
+      <RepairLabelModal open={showLabel} onClose={() => setShowLabel(false)} ticket={ticket} store={store} />
 
       {/* Right after delivery: offer the delivery receipt (Settings → Store → Features) */}
       <Modal open={!!deliveredTicket} onClose={() => setDeliveredTicket(null)} title={t('repairs.delivery.prompt_title')} size="sm"

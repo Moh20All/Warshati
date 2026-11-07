@@ -47,4 +47,7 @@ export function code128Svg(text, { width = '100%', height = '12mm' } = {}) {
     + `style="display:block;width:${width};height:${height}" shape-rendering="crispEdges" fill="#000">${rects}</svg>`
 }
 
+/** What a repair ticket's barcode holds: its digits only ("TKT-2026-0051" → "20260051"), so set C keeps the bars wide */
+export const ticketBarcode = (ticketNumber) => String(ticketNumber || '').replace(/\D/g, '')
+
 export const CODE128_PATTERNS = PATTERNS // for tests

@@ -7,5 +7,9 @@ export const PRINT_LOGO = '<svg class="p-logo" xmlns="http://www.w3.org/2000/svg
   + '<circle cx="32" cy="34" r="4.5" fill="#000"/><circle cx="12" cy="16" r="6" fill="#000"/><circle cx="12" cy="16" r="2.52" fill="#fff"/>'
   + '<circle cx="52" cy="16" r="6" fill="#000"/><circle cx="52" cy="16" r="2.52" fill="#fff"/></svg>'
 
+/** Logo at the top of printed papers: the shop's own logo (Settings → Store), or none */
+export const printLogo = (store) =>
+  /^data:image\/(png|jpeg|webp);base64,/.test(store?.logoPath || '') ? `<img class="p-logo" src="${store.logoPath}" alt="" style="object-fit:contain">` : ''
+
 /** A4 reports print negatives with a real minus sign (no red on paper). */
 export const signed = (n) => (Number(n) < 0 ? `−${Math.abs(Number(n)).toLocaleString()}` : Number(n).toLocaleString())

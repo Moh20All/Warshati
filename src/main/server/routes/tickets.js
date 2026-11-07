@@ -54,6 +54,8 @@ router.get('/', async (req, res) => {
     if (search) {
       where.OR = [
         { ticketNumber: { contains: search } },
+        // A scanned ticket barcode holds only the digits: "20260051" = TKT-2026-0051
+        ...(/^\d{8,}$/.test(search) ? [{ ticketNumber: `TKT-${search.slice(0, 4)}-${search.slice(4)}` }] : []),
         { imei: { contains: search } },
         { customer: { name: { contains: search } } },
         { customer: { phone: { contains: search } } }

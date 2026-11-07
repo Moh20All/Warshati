@@ -1,11 +1,11 @@
 import { DEFAULT_WARRANTY_DAYS } from '../../lib/warranty'
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Store, Save, Printer, ToggleRight, Wrench } from 'lucide-react'
+import { Store, Save, Printer, ToggleRight, Wrench, Upload, Image as ImageIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
-import { PRINT_LOGO } from '../../lib/printKit'
+import { printLogo } from '../../lib/printKit'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -38,7 +38,8 @@ export default function StoreSettings() {
         name: store.name || '', phone: store.phone || '',
         address: store.address || '', currency: store.currency || 'DZD',
         warrantyDays: store.warrantyDays ?? DEFAULT_WARRANTY_DAYS,
-        ...Object.fromEntries(FEATURES.map(k => [k, store[k]])), drawerFloat: store.drawerFloat ?? 0
+        ...Object.fromEntries(FEATURES.map(k => [k, store[k]])), drawerFloat: store.drawerFloat ?? 0,
+        logoPath: store.logoPath || ''
       })
     }
   }, [store])
@@ -73,6 +74,22 @@ export default function StoreSettings() {
     })
   }
 
+  // Logo: shrunk to 256 px at most (PNG) so it stays small in the database and prints fast
+  const pickLogo = (file) => {
+    if (!file) return
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, 256 / Math.max(img.width, img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      setForm(f => ({ ...f, logoPath: canvas.toDataURL('image/png') }))
+      URL.revokeObjectURL(img.src)
+    }
+    img.onerror = () => toast.error(t('settings.logo_bad'))
+    img.src = URL.createObjectURL(file)
+  }
+
   const handleLanguageChange = (e) => {
     i18n.changeLanguage(e.target.value)
   }
@@ -87,7 +104,7 @@ export default function StoreSettings() {
 
       const html = `
         <div style="box-sizing: border-box; width: 100%; text-align:center;">
-          ${PRINT_LOGO}
+          ${printLogo(form)}
           <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
           ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
           ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
@@ -137,6 +154,24 @@ export default function StoreSettings() {
               <option value="fr">{t('settings.french')}</option>
               <option value="ar">{t('settings.arabic')}</option>
             </select>
+          </div>
+        </div>
+
+        {/* The shop's logo: printed at the top of receipts, tickets and reports instead of the Warshati mark */}
+        <div className="flex items-center gap-4">
+          <div className="h-16 w-16 shrink-0 rounded-md border border-border bg-white flex items-center justify-center overflow-hidden">
+            {form.logoPath ? <img src={form.logoPath} alt="" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="h-6 w-6 text-muted-foreground" />}
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-sm font-medium text-foreground">{t('settings.logo')}</p>
+            <div className="flex gap-2">
+              <label className="inline-flex items-center gap-1.5 h-8 px-3 rounded-sm border border-input text-sm cursor-pointer hover:bg-accent">
+                <Upload className="h-3.5 w-3.5" /> {t('settings.logo_choose')}
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={e => { pickLogo(e.target.files?.[0]); e.target.value = '' }} />
+              </label>
+              {form.logoPath && <Button variant="outline" size="sm" onClick={() => setForm({ ...form, logoPath: '' })}>{t('settings.logo_remove')}</Button>}
+            </div>
+            <p className="text-xs text-muted-foreground">{t('settings.logo_hint')}</p>
           </div>
         </div>
 

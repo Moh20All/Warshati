@@ -77,6 +77,17 @@ try {
   check('a cancelling entry cannot be cancelled', (await o('POST', `/repairmen/${ali.id}/payments/${reversal.id}/cancel`)).status, 400)
   check('payment of another repairman not found', (await o('POST', `/repairmen/${sami.id}/payments/${wrong.id}/cancel`)).status, 404)
 
+  // ── A scanned sticker (digits only) finds its ticket ──
+  const digits = t1.ticketNumber.replace(/\D/g, '')
+  const found = (await s('GET', `/tickets?search=${digits}`)).data.tickets
+  check('sticker barcode finds the ticket', found.length === 1 && found[0].id, t1.id)
+
+  // ── Shop logo: images only ──
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+  check('logo saved', (await o('PUT', '/store', { logoPath: PNG })).data.store.logoPath, PNG)
+  check('not an image refused', (await o('PUT', '/store', { logoPath: 'data:text/html;base64,PHNjcmlwdD4=' })).status, 400)
+  check('logo removed', (await o('PUT', '/store', { logoPath: '' })).data.store.logoPath, null)
+
   // ── Opening cash is saved with the daily close ──
   const close = (await o('POST', '/daily-close', { openingCash: 6000 })).data.close
   check('opening cash saved', Number(close.openingCash), 6000)

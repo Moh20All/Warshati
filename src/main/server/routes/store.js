@@ -45,7 +45,13 @@ router.put('/', requireAuth, requireRole('OWNER'), async (req, res) => {
         if (address !== undefined) data.address = address
         if (currency !== undefined) data.currency = currency
         if (warrantyDays !== undefined) data.warrantyDays = parseInt(warrantyDays)
-        if (logoPath !== undefined) data.logoPath = logoPath
+        // Logo: an image as a data URL (shrunk by the app), or empty to remove it
+        if (logoPath !== undefined) {
+            if (logoPath && (!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(logoPath) || logoPath.length > 400000)) {
+                return res.status(400).json({ error: 'The logo must be a PNG, JPEG or WebP image under 300 KB' })
+            }
+            data.logoPath = logoPath || null
+        }
         for (const k of ['featCheckIn', 'featDeliveryReceipt', 'featQuickCash', 'featDrawerFloat', 'featRepairmen']) {
             if (req.body[k] !== undefined) data[k] = !!req.body[k]
         }

@@ -9,8 +9,8 @@ import { useToast } from './ui/Toast'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 
-// Common label-roll sizes (width × height, mm)
-const SIZES = ['30x20', '40x25', '40x30', '50x25', '50x30', '58x40']
+// Label-roll sizes sold for thermal label printers (width × height, mm); Xprinter, Niimbot, Phomemo, Zebra rolls
+export const SIZES = ['30x20', '40x20', '40x25', '40x30', '50x20', '50x25', '50x30', '50x40', '57x32', '58x40', '60x40']
 
 const read = (k, d) => { try { return localStorage.getItem(k) ?? d } catch { return d } }
 const write = (k, v) => { try { localStorage.setItem(k, v) } catch { /* private mode */ } }
