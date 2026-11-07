@@ -30,6 +30,9 @@ export async function initPrisma() {
     datasources: { db: { url: `file:${dbPath}` } }
   });
 
+  // Dev: bring the developer's own database up to date too (same idempotent steps as an installed app)
+  if (isDev && fs.existsSync(dbPath)) await applyMigrations(prisma);
+
   if (!isDev) {
     let needsCopy = false;
 
