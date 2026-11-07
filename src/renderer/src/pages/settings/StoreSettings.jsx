@@ -5,7 +5,7 @@ import { Store, Save, Printer, ToggleRight, Wrench, Upload, Image as ImageIcon }
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
-import { printLogo } from '../../lib/printKit'
+import { printHeader } from '../../lib/printKit'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
@@ -98,16 +98,10 @@ export default function StoreSettings() {
     if (!selectedPrinter) return
     setTestingPrint(true)
     try {
-      const storeName = form.name || 'Warshati — ورشتي'
-      const storeAddress = form.address || ''
-      const storePhone = form.phone || ''
 
       const html = `
         <div style="box-sizing: border-box; width: 100%; text-align:center;">
-          ${printLogo(form)}
-          <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
-          ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
-          ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
+          ${printHeader(form)}
           <div style="border-top:2px solid #000; margin:10px 0;"></div>
           <p style="margin:0; font-size:11px;">Test Print / تجربة الطباعة</p>
           <div style="border-top:1px dashed #000; margin:8px 0;"></div>

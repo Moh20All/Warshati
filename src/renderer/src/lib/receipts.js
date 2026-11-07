@@ -1,5 +1,5 @@
 // Printable receipts built as HTML for the thermal/A4 printer (see usePrint).
-import { printLogo } from './printKit.js'
+import { printHeader } from './printKit.js'
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
@@ -29,10 +29,7 @@ export function deliveryReceiptHtml({ t, dir, store, cur, ticket }) {
 
   return `<div dir="${dir}" style="box-sizing:border-box; width:100%;">
     <div style="text-align:center; margin-bottom:10px;">
-      ${printLogo(store)}
-      <h2 style="margin:0; font-size:16px; text-transform:uppercase;">${esc(store?.name || 'Warshati — ورشتي')}</h2>
-      ${store?.address ? `<p style="margin:2px 0; font-size:10px;">${esc(store.address)}</p>` : ''}
-      ${store?.phone ? `<p style="margin:2px 0; font-size:10px;"><bdi>${esc(store.phone)}</bdi></p>` : ''}
+      ${printHeader(store)}
       <div style="border-top:2px solid #000; margin:8px 0;"></div>
       <p style="margin:0; font-size:13px; font-weight:bold;">${esc(t('repairs.delivery.title'))}</p>
       <p class="p-mono" style="margin:4px 0; font-size:14px; font-weight:bold;">${esc(ticket.ticketNumber)}</p>
@@ -72,10 +69,7 @@ export function paymentReceiptHtml({ t, dir, store, cur, debt, payment }) {
 
   return `<div dir="${dir}" style="box-sizing:border-box; width:100%;">
     <div style="text-align:center; margin-bottom:10px;">
-      ${printLogo(store)}
-      <h2 style="margin:0; font-size:16px; text-transform:uppercase;">${esc(store?.name || 'Warshati — ورشتي')}</h2>
-      ${store?.address ? `<p style="margin:2px 0; font-size:10px;">${esc(store.address)}</p>` : ''}
-      ${store?.phone ? `<p style="margin:2px 0; font-size:10px;">${esc(store.phone)}</p>` : ''}
+      ${printHeader(store)}
       <div style="border-top:2px solid #000; margin:8px 0;"></div>
       <p style="margin:0; font-size:13px; font-weight:bold;">${esc(t('finance.debts.receipt_title'))}</p>
     </div>

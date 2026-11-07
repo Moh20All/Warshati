@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Save, Printer, Plus, Trash2, MessageCircle, Tag } from 'lucide-react'
 import { sendWhatsApp } from '../../lib/whatsapp'
 import api from '../../lib/api'
-import { printLogo } from '../../lib/printKit'
+import { printHeader } from '../../lib/printKit'
 import { useCurrency } from '../../lib/currency'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
@@ -174,17 +174,11 @@ export default function TicketDetail() {
   const printTicket = () => {
     if (isNew || !ticket) return
     const dir = i18n.dir()
-    const storeName = store?.name || 'Warshati — ورشتي'
-    const storeAddress = store?.address || ''
-    const storePhone = store?.phone || ''
 
     const html = `
       <div dir="${dir}" style="box-sizing: border-box; width: 100%;">
         <div style="text-align:center; margin-bottom:15px;">
-          ${printLogo(store)}
-          <h2 style="margin:0; font-size:18px; text-transform: uppercase;">${storeName}</h2>
-          ${storeAddress ? `<p style="margin:2px 0; font-size:11px;">${storeAddress}</p>` : ''}
-          ${storePhone ? `<p style="margin:2px 0; font-size:11px;">${storePhone}</p>` : ''}
+          ${printHeader(store)}
           <div style="border-top:2px solid #000; margin:10px 0;"></div>
           <h3 style="margin:0; font-size:15px; font-weight:bold;">REPAIR TICKET / تذكرة إصلاح</h3>
           <p class="p-mono" style="margin:5px 0; font-size:16px; font-weight:bold;">${ticket.ticketNumber}</p>

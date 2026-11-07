@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Plus, Search, Printer, ArrowRight, User } from 'lucide-react'
 import api from '../../lib/api'
-import { printLogo } from '../../lib/printKit'
+import { printHeader } from '../../lib/printKit'
 import { usePrint } from '../../lib/usePrint'
 import { useToast } from '../../components/ui/Toast'
 import Button from '../../components/ui/Button'
@@ -67,16 +67,10 @@ export default function CheckInList() {
 
   const handlePrint = async (checkin) => {
     const dir = i18n.dir()
-    const storeName = store?.name || 'Warshati — ورشتي'
-    const storeAddress = store?.address || ''
-    const storePhone = store?.phone || ''
 
     const html = `<div dir="${dir}" style="box-sizing: border-box; width: 100%;">
       <div style="text-align:center; margin-bottom:10px;">
-        ${printLogo(store)}
-        <h2 style="margin:0; font-size:16px; text-transform: uppercase;">${storeName}</h2>
-        ${storeAddress ? `<p style="margin:2px 0; font-size:10px;">${storeAddress}</p>` : ''}
-        ${storePhone ? `<p style="margin:2px 0; font-size:10px;">${storePhone}</p>` : ''}
+        ${printHeader(store)}
         <div style="border-top:2px solid #000; margin:10px 0;"></div>
         <p style="margin:0; font-size:13px; font-weight:bold;">${t('repairs.checkin.receipt')} / ايصال</p>
       </div>
