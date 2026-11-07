@@ -9,6 +9,7 @@ import { useCurrency } from '../../lib/currency'
 import { useHotkeys, focusPageSearch } from '../../lib/hotkeys'
 import CatalogImagesPrompt from '../CatalogImagesPrompt'
 import AccessoryPhotosPrompt from '../AccessoryPhotos'
+import WhatsNewPrompt from '../WhatsNew'
 import ShortcutsHelp from '../ShortcutsHelp'
 
 export default function AppShell({ children }) {
@@ -42,6 +43,7 @@ export default function AppShell({ children }) {
                 </main>
                 <CatalogImagesPrompt />
                 <AccessoryPhotosPrompt />
+                <WhatsNewPrompt />
             </div>
             <ShortcutsHelp open={help} onClose={() => setHelp(false)} hide={store?.featCheckIn === false ? ['F4'] : []} />
         </div>

@@ -1,4 +1,12 @@
 {
+  "whats_new": {
+    "title": "What's new in {{version}}",
+    "prev": "Previous",
+    "next": "Next",
+    "open": "Open",
+    "done": "Let's go",
+    "also": "And also"
+  },
   "repair_label": {
     "btn": "Sticker",
     "title": "Device sticker (repair label)",

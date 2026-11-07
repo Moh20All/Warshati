@@ -1,4 +1,12 @@
 {
+  "whats_new": {
+    "title": "Nouveautés de la version {{version}}",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "open": "Voir",
+    "done": "C'est parti",
+    "also": "Et aussi"
+  },
   "repair_label": {
     "btn": "Étiquette",
     "title": "Étiquette du téléphone (étiquette de réparation)",

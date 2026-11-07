@@ -1,5 +1,9 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, Youtube, Globe, Facebook, Instagram, Music2, Link as LinkIcon, ExternalLink } from 'lucide-react'
+import { MessageCircle, Youtube, Globe, Facebook, Instagram, Music2, Link as LinkIcon, ExternalLink, Sparkles } from 'lucide-react'
+import { WhatsNewModal } from '../../components/WhatsNew'
+import { latestNotes } from '../../lib/whatsNew'
+import Button from '../../components/ui/Button'
 import cover from '../../assets/brand/about-cover.png'
 import avatar from '../../assets/brand/about-avatar.png'
 import avatarDark from '../../assets/brand/about-avatar-dark.png'
@@ -18,6 +22,8 @@ const LINKS = [
 /** About Warshati: a profile card with support, demos and every link (no long changelog). */
 export default function AboutApp() {
   const { t } = useTranslation()
+  const [showNotes, setShowNotes] = useState(false)
+  const notesVersion = latestNotes()
 
   return (
     <div className="animate-fade-in max-w-3xl mx-auto pb-10">
@@ -31,8 +37,14 @@ export default function AboutApp() {
             <img src={avatarDark} alt="Warshati" className="h-20 w-20 rounded-xl border-4 border-card shadow-sm hidden dark:block" />
             <span className="mb-1 px-2.5 py-1 rounded-full bg-primary-soft text-primary text-xs font-semibold p-mono" dir="ltr">v{__APP_VERSION__}</span>
           </div>
-          <h1 className="mt-3 text-[22px] leading-[30px] font-semibold text-foreground">Warshati — ورشتي</h1>
-          <p className="text-sm text-muted-foreground">{t('about.tagline')}</p>
+          <div className="mt-3 flex items-end justify-between gap-3 flex-wrap">
+            <div>
+              <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">Warshati — ورشتي</h1>
+              <p className="text-sm text-muted-foreground">{t('about.tagline')}</p>
+            </div>
+            {notesVersion && <Button variant="outline" size="sm" onClick={() => setShowNotes(true)}><Sparkles className="h-4 w-4 text-primary" /> {t('whats_new.title', { version: notesVersion })}</Button>}
+          </div>
+          <WhatsNewModal open={showNotes} version={notesVersion} onClose={() => setShowNotes(false)} />
 
           {/* The two things users come here for */}
           <div className="grid sm:grid-cols-2 gap-3 mt-6">
