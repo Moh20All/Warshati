@@ -2,24 +2,31 @@
 
 All notable changes to Warshati will be documented in this file.
 
-## Next version (not released yet)
+## v1.8.0 — 07/11/2026
+Repairmen, Device Stickers & Accessory Catalog
+
+### 🚀 Major Upgrades
+- **Repairmen:** Give a repair to a repairman paid per repair — a % of the profit (price − parts), a % of the price, a fixed amount, or typed by hand on the ticket. His share is a cost of the repair (price 20000, parts 15000, repairman 2000 → the shop keeps 3000). His page shows what he earned, what is paid and what is left; recording a payment takes it from the day's cash, and a wrong payment can be cancelled.
+- **Device stickers with barcode:** Print an adhesive label for each phone (ticket number, barcode, client, device) in 11 sizes from 30×20 to 60×40 mm, or any size. The repair ticket has the barcode too; scan it on the Repairs page (or with the phone app's camera) and the ticket opens.
+- **Delivery receipt:** When a repaired device is handed back, Warshati offers to print a receipt: what was paid, what is left, the warranty end date and a line for the client's signature.
+- **Accessory catalog:** 1,025 accessories in 14 categories, with photos, to browse (Inventory → Accessory catalog) and add to stock. The market price is only a suggestion — your prices stay yours. Photos are downloaded only after you agree: all of them, or the ones you choose.
+- **Ready-made choices on repair tickets:** Issue, diagnosis and parts used offer the most common choices (40 issues, 31 diagnoses, 25 parts) in French, Arabic and English; pick several or type freely.
+- **What's new window:** After an update, Warshati shows the new features with screenshots, once. Open it again from About.
 
 ### ✨ Improvements
-- **Ready-made choices on repair tickets:** Issue description, diagnosis and parts used each offer a list of the most common choices (40 issues, 31 diagnoses, 25 parts) in French, Arabic and English. Click the list button or start typing to filter; pick several, and add your own words anytime.
-- **Accessory catalog:** 1,025 accessories (cases, chargers, cables, earphones, packs...) in 14 categories to pick when adding stock. Picking one fills in the name; its market price is only shown as a suggestion — your buy and sell prices stay yours to type. Photos (about 20 MB) are downloaded only after you agree: all of them, or only the accessories you choose (Settings → Device Catalog too). Browse them all from Inventory → Accessory catalog (search, category, sort by price, "Add to stock").
-
-### 🛠️ Fixed (inventory)
-- Adding an accessory no longer asks for a phone brand and model.
-- Long forms now scroll inside their window: the Save button is always reachable, even on small screens.
-- **Features you switch on or off:** Settings → Store → Features, each with a short explanation.
-- **Delivery receipt:** When a repaired device is handed back, Warshati offers to print a receipt: what was paid, what is left, the warranty end date and a line for the client's signature. Delivered tickets always have a "Delivery receipt" button.
-- **Repairmen:** Give a repair to a repairman paid per repair — a % of the profit (price − parts), a % of the price, a fixed amount, or typed by hand on the ticket. His share is a cost of the repair (price 20000, parts 15000, repairman 2000 → the shop keeps 3000). His page shows what the shop owes him; recording a payment takes it from the day's cash.
+- **Features you switch on or off:** Settings → Store → Features, each with a short explanation (check-in, delivery receipt, quick cash, opening cash, repairmen).
+- **Shop logo on printed papers:** Add your logo in Settings → Store; it prints beside the shop's name, address and phone instead of the Warshati logo.
+- **Quick cash at the POS:** Buttons with the bills the client probably gives (exact, 5000, 6000…) fill the amount paid and show the change.
 - **Opening cash:** For shops that put a fixed amount in the drawer every morning; the daily close shows how much should be in the drawer.
-- **Quick cash at the POS:** Buttons with the bills the client probably gives (exact, 3000, 5000…) fill the amount paid and show the change. Typing still works.
 - **Supplier list shows what you owe:** Each supplier's balance and the total owed to all suppliers.
-- **Default warranty is 5 days:** New tickets now use the shop's default warranty from Settings → Store (it was always 30 before). Shops still on the old 30-day default move to 5 days once; a shop that chose another number keeps it.
+- **New About page:** WhatsApp support, YouTube demos, website and social links.
+- **Default warranty is 5 days:** New tickets use the shop's default warranty. Shops still on the old 30-day default move to 5 days once; a shop that chose another number keeps it.
+- **Mobile app:** the same repairmen, ticket lists, accessory catalog, quick cash, opening cash and supplier balances.
 
 ### 🛠️ Fixed
+- Phone numbers show in the right order in Arabic, on screen and on paper.
+- Long windows scroll: the Save button is always reachable, even on small screens.
+- Adding an accessory no longer asks for a phone brand and model.
 - The issue of an existing ticket looked editable, but changes were not saved. It is now shown as fixed.
 - "Customer name" and "Issue description" showed two asterisks.
 
