@@ -11,7 +11,7 @@ router.use(requireRole('OWNER'))
 router.get('/', async (req, res) => {
   try {
     const { search } = req.query
-    const where = {}
+    const where = { isActive: true }
     if (search) {
       where.OR = [
         { name: { contains: search } },
@@ -69,10 +69,13 @@ router.put('/:id', async (req, res) => {
   try {
     const { name, phone, address, notes } = req.body
     const data = {}
-    if (name !== undefined) data.name = name
-    if (phone !== undefined) data.phone = phone
-    if (address !== undefined) data.address = address
-    if (notes !== undefined) data.notes = notes
+    if (name !== undefined) {
+      if (!name.trim()) return res.status(400).json({ error: 'Name is required' })
+      data.name = name.trim()
+    }
+    if (phone !== undefined) data.phone = phone || null
+    if (address !== undefined) data.address = address || null
+    if (notes !== undefined) data.notes = notes || null
     const supplier = await prisma.supplier.update({ where: { id: req.params.id }, data })
     res.json({ supplier })
   } catch (err) {
@@ -80,13 +83,24 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-// DELETE /api/suppliers/:id
+// DELETE /api/suppliers/:id — gone if he has no history; with orders he is only hidden (the history stays right)
 router.delete('/:id', async (req, res) => {
   try {
-    await prisma.supplier.delete({ where: { id: req.params.id } })
+    const supplier = await prisma.supplier.findUnique({
+      where: { id: req.params.id },
+      include: { _count: { select: { purchaseOrders: true, supplierDebts: true } }, supplierDebts: { where: { status: { not: 'SETTLED' } }, select: { remaining: true } } }
+    })
+    if (!supplier) return res.status(404).json({ error: 'Supplier not found' })
+    if (supplier.supplierDebts.some(d => parseFloat(d.remaining) > 0)) return res.status(400).json({ error: 'OWED' })
+    if (supplier._count.purchaseOrders || supplier._count.supplierDebts) {
+      await prisma.supplier.update({ where: { id: supplier.id }, data: { isActive: false } })
+      return res.json({ success: true, archived: true })
+    }
+    await prisma.supplier.delete({ where: { id: supplier.id } })
     res.json({ success: true })
   } catch (err) {
-    res.status(500).json({ error: 'Cannot delete supplier with linked records' })
+    logger.error('Delete supplier error:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 

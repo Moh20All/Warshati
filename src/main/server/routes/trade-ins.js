@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js'
 import { requireAuth } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { rememberDevice } from '../lib/catalog.js'
+import { nextItemRef } from '../lib/numbering.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -63,7 +64,7 @@ router.post('/', async (req, res) => {
       // Auto-create inventory item
       const inventoryItem = await tx.inventoryItem.create({
         data: {
-          type: 'PHONE_USED',
+          type: 'PHONE_USED', sku: await nextItemRef(tx),
           name: `${tradeIn.brand} ${tradeIn.model} (Trade-In)`,
           brand: tradeIn.brand, model: tradeIn.model,
           imei: tradeIn.imei, color: tradeIn.color, storage: tradeIn.storage,
@@ -115,7 +116,7 @@ router.post('/:id/accept', async (req, res) => {
       // Create inventory item from trade-in
       const inventoryItem = await tx.inventoryItem.create({
         data: {
-          type: 'PHONE_USED',
+          type: 'PHONE_USED', sku: await nextItemRef(tx),
           name: `${tradeIn.brand} ${tradeIn.model} (Trade-In)`,
           brand: tradeIn.brand, model: tradeIn.model,
           imei: tradeIn.imei, color: tradeIn.color, storage: tradeIn.storage,

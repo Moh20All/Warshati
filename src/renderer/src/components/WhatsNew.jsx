@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, ExternalLink, Sparkles } from 'lucide-react'
-import { whatsNew } from '../lib/whatsNew'
+import { whatsNew, latestNotes } from '../lib/whatsNew'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 
+// Remembers the newest notes already shown (a jump from 1.7 to 1.8.1 still shows the 1.8.0 notes)
 const SEEN_KEY = 'warshati_whats_new_seen'
-const seen = () => { try { return localStorage.getItem(SEEN_KEY) } catch { return __APP_VERSION__ } }
-const markSeen = () => { try { localStorage.setItem(SEEN_KEY, __APP_VERSION__) } catch { /* private mode */ } }
+const seen = () => { try { return localStorage.getItem(SEEN_KEY) } catch { return latestNotes() } }
+const markSeen = () => { try { localStorage.setItem(SEEN_KEY, latestNotes()) } catch { /* private mode */ } }
 
 /** One screenshot at a time with its text, Previous / Next, and "Open" to go to that page; then "And also". */
 export function WhatsNewModal({ open, onClose, version }) {
@@ -55,8 +56,8 @@ export function WhatsNewModal({ open, onClose, version }) {
   )
 }
 
-/** Opens the notes of the installed version once per PC, right after an update. */
+/** Opens the newest notes once per PC, right after an update. */
 export default function WhatsNewPrompt() {
-  const [open, setOpen] = useState(() => !!whatsNew(__APP_VERSION__, 'en') && seen() !== __APP_VERSION__)
-  return <WhatsNewModal open={open} version={__APP_VERSION__} onClose={() => { markSeen(); setOpen(false) }} />
+  const [open, setOpen] = useState(() => seen() !== latestNotes())
+  return <WhatsNewModal open={open} version={latestNotes()} onClose={() => { markSeen(); setOpen(false) }} />
 }

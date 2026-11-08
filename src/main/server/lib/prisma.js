@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { app } from 'electron'
 import path from 'path'
 import fs from 'fs'
+import { fillMissingRefs } from './numbering.js'
 
 const isDev = !app.isPackaged
 export const dbPath = isDev
@@ -270,6 +271,14 @@ async function applyMigrations(prismaDb) {
       await addColumns('RepairmanPayment', [['reversalOf', 'TEXT']]);
     } catch (err) {
       logToDisk(`Features/repairmen migration failed: ${err.message}`);
+    }
+
+    // Every stock item has a ref (typed, or REF-xxxx) so items without a barcode can be found too
+    try {
+      const filled = await fillMissingRefs(prismaDb);
+      if (filled) logToDisk(`Gave ${filled} item(s) an automatic ref`);
+    } catch (err) {
+      logToDisk(`Item refs fill failed: ${err.message}`);
     }
 
     logToDisk('Schema migrations completed.');

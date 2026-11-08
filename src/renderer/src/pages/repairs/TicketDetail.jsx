@@ -13,7 +13,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
-import Modal from '../../components/ui/Modal'
+import Modal, { ConfirmModal } from '../../components/ui/Modal'
 import DevicePicker from '../../components/DevicePicker'
 import SuggestTextarea from '../../components/ui/SuggestTextarea'
 import { repairPhrases } from '../../lib/repairPhrases'
@@ -132,8 +132,22 @@ export default function TicketDetail() {
       if (isNew) queryClient.invalidateQueries({ queryKey: ['catalog'] }) // a hand-typed device may have been remembered
       toast.success(isNew ? t('repairs.details.created', { num: res.data.ticket.ticketNumber }) : t('repairs.details.updated'))
       if (isNew) navigate(`/repairs/tickets/${res.data.ticket.id}`, { replace: true })
+      else queryClient.invalidateQueries({ queryKey: ['ticket', id] })
     },
     onError: (err) => toast.error(err.response?.data?.error || 'Failed')
+  })
+
+  // Owner: delete a ticket made by mistake (refused once money moved: cancel it instead)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/tickets/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tickets'] })
+      queryClient.invalidateQueries({ queryKey: ['inventory'] })
+      toast.success(t('repairs.details.deleted'))
+      navigate('/repairs/tickets', { replace: true })
+    },
+    onError: (err) => { setConfirmDelete(false); toast.error(err.response?.data?.error === 'LOCKED' ? t('repairs.details.del_locked') : err.response?.data?.error || 'Failed') }
   })
 
   const transitionMutation = useMutation({
@@ -155,14 +169,12 @@ export default function TicketDetail() {
   })
 
   const handleSave = () => {
-    // A new ticket needs a customer, a device and the problem — check here, in the user's language
-    if (isNew) {
-      const missing = !form.customerId && !form.customerName.trim() ? 'customer'
-        : !form.deviceBrand.trim() || !form.deviceModel.trim() ? 'device'
-        : !form.issueDesc.trim() ? 'issue' : null
-      setMissingField(missing)
-      if (missing) return toast.warning(t(`repairs.details.err_missing_${missing}`))
-    }
+    // A ticket needs a customer, a device and the problem — check here, in the user's language
+    const missing = !form.customerName.trim() && (isNew ? !form.customerId : true) ? 'customer'
+      : !form.deviceBrand.trim() || !form.deviceModel.trim() ? 'device'
+      : !form.issueDesc.trim() ? 'issue' : null
+    setMissingField(missing)
+    if (missing) return toast.warning(t(`repairs.details.err_missing_${missing}`))
     const data = { ...form }
     if (data.finalCost) data.finalCost = parseFloat(data.finalCost)
     if (data.partsCost) data.partsCost = parseFloat(data.partsCost)
@@ -292,9 +304,15 @@ export default function TicketDetail() {
           {ticket?.status === 'DELIVERED' && (
             <Button variant="outline" onClick={() => printDelivery(ticket)}><Printer className="h-4 w-4" /> {t('repairs.delivery.btn_print')}</Button>
           )}
+          {isOwner && ticket && !ticket.sale && (
+            <Button variant="outline" onClick={() => setConfirmDelete(true)} aria-label={t('repairs.details.btn_delete')} title={t('repairs.details.btn_delete')}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+          )}
           <Button onClick={handleSave} loading={saveMutation.isPending}><Save className="h-4 w-4" /> {t('repairs.details.save')}</Button>
         </div>
       </div>
+
+      <ConfirmModal open={confirmDelete} onClose={() => setConfirmDelete(false)} onConfirm={() => deleteMutation.mutate()} loading={deleteMutation.isPending}
+        title={t('repairs.details.del_title')} message={t('repairs.details.del_msg', { num: ticket?.ticketNumber })} confirmText={t('repairs.details.btn_delete')} />
 
       {/* Status transitions */}
       {!isNew && nextStatuses.length > 0 && (
@@ -308,22 +326,15 @@ export default function TicketDetail() {
         </div>
       )}
 
-      {/* Customer info */}
-      {isNew ? (
-        <div className="grid grid-cols-2 gap-4 mb-4 p-4 border border-border rounded-md bg-card">
-          <Input label={`${t('repairs.details.lbl_name')} *`} value={form.customerName} onChange={e => { setForm({...form, customerName: e.target.value}); setMissingField(null) }} placeholder={t('repairs.details.ph_name')} autoFocus
-            error={missingField === 'customer' ? t('repairs.details.err_missing_customer') : undefined} />
-          <Input label={t('repairs.details.lbl_phone')} value={form.customerPhone} onChange={e => setForm({...form, customerPhone: e.target.value})} placeholder={t('repairs.details.ph_phone')} />
-        </div>
-      ) : ticket?.customer && (
-        <div className="mb-4 p-3 bg-muted rounded-md text-sm">
-          <span className="font-medium">{ticket.customer.name}</span> · <bdi dir="ltr">{ticket.customer.phone}</bdi>
-        </div>
-      )}
+      {/* Customer info (on an existing ticket, saving fixes the customer's own name/phone) */}
+      <div className="grid grid-cols-2 gap-4 mb-4 p-4 border border-border rounded-md bg-card">
+        <Input label={`${t('repairs.details.lbl_name')} *`} value={form.customerName} onChange={e => { setForm({...form, customerName: e.target.value}); setMissingField(null) }} placeholder={t('repairs.details.ph_name')} autoFocus={isNew}
+          error={missingField === 'customer' ? t('repairs.details.err_missing_customer') : undefined} />
+        <Input label={t('repairs.details.lbl_phone')} dir="ltr" value={form.customerPhone} onChange={e => setForm({...form, customerPhone: e.target.value})} placeholder={t('repairs.details.ph_phone')} />
+      </div>
 
       <div className="mb-4">
-        {/* The device of an existing ticket is fixed (the server does not change it on save) */}
-        <DevicePicker disabled={!isNew}
+        <DevicePicker
           value={{ category: form.deviceCategory, brand: form.deviceBrand, model: form.deviceModel }}
           onChange={(v) => setForm({ ...form, deviceCategory: v.category, deviceBrand: v.brand, deviceModel: v.model })} />
       </div>
@@ -333,9 +344,8 @@ export default function TicketDetail() {
         <Input label={t('repairs.details.lbl_pwd')} value={form.devicePassword} onChange={e => setForm({...form, devicePassword: e.target.value})} />
       </div>
       <div className="space-y-1.5 mb-4">
-        <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_issue')}{isNew ? ' *' : ''}</label>
-        {/* The issue is fixed once the ticket exists (the server keeps the original) */}
-        <SuggestTextarea value={form.issueDesc} onChange={v => { setForm(f => ({...f, issueDesc: v})); setMissingField(null) }} suggestions={repairPhrases('issue', lang)} invalid={missingField === 'issue'} disabled={!isNew} listLabel={t('repairs.details.pick_list')} comma={comma} placeholder={t('repairs.details.ph_issue')} />
+        <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_issue')} *</label>
+        <SuggestTextarea value={form.issueDesc} onChange={v => { setForm(f => ({...f, issueDesc: v})); setMissingField(null) }} suggestions={repairPhrases('issue', lang)} invalid={missingField === 'issue'} listLabel={t('repairs.details.pick_list')} comma={comma} placeholder={t('repairs.details.ph_issue')} />
         {missingField === 'issue' && <p className="text-xs text-destructive">{t('repairs.details.err_missing_issue')}</p>}
       </div>
       <div className="space-y-1.5 mb-4">

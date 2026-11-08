@@ -17,3 +17,13 @@ export const nextSaleNumber = (db) => nextNumber(db, 'Sale', 'saleNumber', `INV-
 export const nextTicketNumber = (db) => nextNumber(db, 'RepairTicket', 'ticketNumber', `TKT-${year()}-`)
 export const nextCheckInNumber = (db) => nextNumber(db, 'CheckIn', 'checkInNumber', `CI-${year()}-`)
 export const nextOrderNumber = (db) => nextNumber(db, 'PurchaseOrder', 'orderNumber', `PO-${year()}-`)
+
+// Stock reference for items with no ref typed (many have no barcode): REF-0001, searchable like any ref
+export const nextItemRef = (db) => nextNumber(db, 'InventoryItem', 'sku', 'REF-')
+
+/** Gives every item without a ref its own REF-xxxx (older items, from before refs were automatic) */
+export async function fillMissingRefs(db) {
+  const items = await db.inventoryItem.findMany({ where: { sku: null }, select: { id: true }, orderBy: { createdAt: 'asc' } })
+  for (const { id } of items) await db.inventoryItem.update({ where: { id }, data: { sku: await nextItemRef(db) } })
+  return items.length
+}

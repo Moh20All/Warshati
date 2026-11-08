@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Package, CreditCard, DollarSign, Plus, Trash2, History, BookPlus } from 'lucide-react'
+import { ArrowLeft, Package, CreditCard, DollarSign, Plus, Trash2, History, BookPlus, Pencil } from 'lucide-react'
 import PaymentHistoryModal from '../../components/PaymentHistoryModal'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
@@ -12,7 +12,7 @@ import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
-import Modal from '../../components/ui/Modal'
+import Modal, { ConfirmModal } from '../../components/ui/Modal'
 
 export default function SupplierDetail() {
   const cur = useCurrency()
@@ -88,6 +88,20 @@ export default function SupplierDetail() {
     onError: (err) => toast.error(err.response?.data?.error || t('finance.suppliers.err_failed'))
   })
 
+  // Edit his contact; delete him (hidden instead when he has history, refused while he is owed money)
+  const [edit, setEdit] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const editMutation = useMutation({
+    mutationFn: (d) => api.put(`/suppliers/${id}`, d),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['supplier', id] }); queryClient.invalidateQueries({ queryKey: ['suppliers'] }); setEdit(null); toast.success(t('finance.suppliers.success_updated')) },
+    onError: (err) => toast.error(err.response?.data?.error || t('finance.suppliers.err_failed'))
+  })
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/suppliers/${id}`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['suppliers'] }); toast.success(t('finance.suppliers.success_deleted')); navigate('/finance/suppliers', { replace: true }) },
+    onError: (err) => { setConfirmDelete(false); toast.error(err.response?.data?.error === 'OWED' ? t('finance.suppliers.err_owed') : err.response?.data?.error || t('finance.suppliers.err_failed')) }
+  })
+
   const cancelPayment = async (payment, reason) => {
     try {
       await api.post(`/supplier-debts/${historyId}/payments/${payment.id}/cancel`, { reason })
@@ -140,9 +154,26 @@ export default function SupplierDetail() {
         <div className="flex-1"><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{supplier.name}</h1>
           <p className="text-sm text-muted-foreground">{supplier.phone || supplier.address ? <>{supplier.phone && <bdi dir="ltr">{supplier.phone}</bdi>}{supplier.phone && supplier.address ? ' · ' : ''}{supplier.address}</> : t('finance.suppliers.no_contact')}</p>
         </div>
+        <Button variant="outline" onClick={() => setEdit({ name: supplier.name, phone: supplier.phone || '', address: supplier.address || '', notes: supplier.notes || '' })}><Pencil className="h-4 w-4" /> {t('finance.suppliers.btn_edit')}</Button>
+        <Button variant="outline" onClick={() => setConfirmDelete(true)} aria-label={t('finance.suppliers.btn_delete')} title={t('finance.suppliers.btn_delete')}><Trash2 className="h-4 w-4 text-destructive" /></Button>
         <Button variant="outline" onClick={() => setOpening({ amount: '', date: today(), notes: '' })}><BookPlus className="h-4 w-4" /> {t('finance.suppliers.btn_opening')}</Button>
         <Button onClick={openPO}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_new_po')}</Button>
       </div>
+
+      <Modal open={!!edit} onClose={() => setEdit(null)} title={t('finance.suppliers.edit_title')}
+        footer={<><Button variant="outline" onClick={() => setEdit(null)}>{t('finance.suppliers.btn_cancel')}</Button><Button onClick={() => editMutation.mutate(edit)} loading={editMutation.isPending} disabled={!edit?.name.trim()}>{t('finance.suppliers.btn_save')}</Button></>}>
+        {edit && (
+          <div className="space-y-4">
+            <Input label={t('finance.suppliers.lbl_name')} value={edit.name} onChange={e => setEdit({ ...edit, name: e.target.value })} required autoFocus />
+            <Input label={t('finance.suppliers.lbl_phone')} dir="ltr" value={edit.phone} onChange={e => setEdit({ ...edit, phone: e.target.value })} />
+            <Input label={t('finance.suppliers.lbl_address')} value={edit.address} onChange={e => setEdit({ ...edit, address: e.target.value })} />
+            <Input label={t('finance.suppliers.lbl_notes')} value={edit.notes} onChange={e => setEdit({ ...edit, notes: e.target.value })} />
+          </div>
+        )}
+      </Modal>
+
+      <ConfirmModal open={confirmDelete} onClose={() => setConfirmDelete(false)} onConfirm={() => deleteMutation.mutate()} loading={deleteMutation.isPending}
+        title={t('finance.suppliers.del_title')} message={t('finance.suppliers.del_msg', { name: supplier.name })} confirmText={t('finance.suppliers.btn_delete')} />
 
       <div className="flex border-b border-border mb-6">
         {tabs.map(tab => (

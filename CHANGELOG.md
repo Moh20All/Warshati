@@ -2,6 +2,19 @@
 
 All notable changes to Warshati will be documented in this file.
 
+## v1.8.1 — 08/11/2026
+Full control of suppliers, tickets and stock refs
+
+### ✨ Improvements
+- **Suppliers:** Edit a supplier's name, phone, address and notes, or delete it (supplier page → Modifier / 🗑). A supplier with orders is only hidden, so its history stays right; one you still owe money to cannot be deleted.
+- **Repair tickets:** Everything can be corrected after the ticket is created: customer name and phone, device, IMEI, color, password, problem and warranty. The owner can delete a ticket made by mistake (its parts go back to stock); a ticket with a deposit or an invoice is cancelled instead.
+- **Ref for every item:** The SKU field is now "Ref". Leave it empty and Warshati gives the item its own ref (REF-0001, REF-0002…), so items without a barcode can be searched, typed or scanned at the POS too. Items already in stock get theirs automatically.
+- **Mobile app:** the same supplier edit/delete, full ticket editing and delete, and refs.
+
+### 🛠️ Fixed
+- IMEI, color and password of an existing ticket looked editable but were not saved. They are now.
+- A shop updating straight from 1.7 to 1.8.1 still sees the 1.8 "What's new" window.
+
 ## v1.8.0 — 07/11/2026
 Repairmen, Device Stickers & Accessory Catalog
 

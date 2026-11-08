@@ -4,6 +4,7 @@ import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { rememberDevice } from '../lib/catalog.js'
+import { nextItemRef } from '../lib/numbering.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -130,7 +131,7 @@ router.post('/', requireRole('OWNER'), async (req, res) => {
       const created = await tx.inventoryItem.create({
         data: {
           type, name,
-          sku: sku || null, barcode: barcode || null, imei: imei || null,
+          sku: sku?.trim() || await nextItemRef(tx), barcode: barcode || null, imei: imei || null,
           brand: brand || null, model: model || null, color: color || null, storage: storage || null,
           quantity: qty, buyPrice, sellPrice, lowStockAt: lowStockAt || 3,
           warrantyDays: warrantyDays || 0
@@ -173,7 +174,7 @@ router.put('/:id', requireRole('OWNER'), async (req, res) => {
     const data = {}
     if (type !== undefined) data.type = type
     if (name !== undefined) data.name = name
-    if (sku !== undefined) data.sku = sku || null
+    if (sku !== undefined) data.sku = sku?.trim() || await nextItemRef(prisma) // emptied: a new automatic ref
     if (barcode !== undefined) data.barcode = barcode || null
     if (imei !== undefined) data.imei = imei || null
     if (brand !== undefined) data.brand = brand || null

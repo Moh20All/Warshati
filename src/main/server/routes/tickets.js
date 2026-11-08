@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { generateSaleNumber } from './sales.js'
 import { nextTicketNumber } from '../lib/numbering.js'
@@ -176,6 +176,17 @@ router.put('/:id', async (req, res) => {
   try {
     const { diagnosis, partsUsedNotes, estimatedCost, finalCost, partsCost, deposit, priority, estimatedDoneAt } = req.body
     const data = {}
+    // Device and problem can be corrected any time (they only describe the repair)
+    for (const k of ['deviceBrand', 'deviceModel', 'issueDesc']) {
+      if (req.body[k] !== undefined) {
+        if (!String(req.body[k]).trim()) return res.status(400).json({ error: 'Device brand, model, and issue description are required' })
+        data[k] = String(req.body[k]).trim()
+      }
+    }
+    for (const k of ['imei', 'devicePassword', 'color', 'condition']) {
+      if (req.body[k] !== undefined) data[k] = req.body[k] || null
+    }
+    if (req.body.warrantyDays !== undefined && Number.isFinite(parseInt(req.body.warrantyDays))) data.warrantyDays = Math.max(0, parseInt(req.body.warrantyDays))
     if (diagnosis !== undefined) data.diagnosis = diagnosis
     if (partsUsedNotes !== undefined) data.partsUsedNotes = partsUsedNotes
     if (estimatedCost !== undefined) data.estimatedCost = estimatedCost
@@ -197,10 +208,16 @@ router.put('/:id', async (req, res) => {
       data.deposit = parseFloat(deposit) || 0
     }
 
+    // A typo in the customer's name or phone is fixed on the customer himself
+    const customer = {}
+    if (req.body.customerName !== undefined && String(req.body.customerName).trim()) customer.name = String(req.body.customerName).trim()
+    if (req.body.customerPhone !== undefined) customer.phone = req.body.customerPhone || null
+
     const ticket = await prisma.$transaction(async (tx) => {
       if (depositDelta !== 0) {
         await tx.repairDeposit.create({ data: { repairTicketId: current.id, amount: depositDelta } })
       }
+      if (Object.keys(customer).length) await tx.customer.update({ where: { id: current.customerId }, data: customer })
       return tx.repairTicket.update({
         where: { id: req.params.id },
         data,
@@ -214,7 +231,35 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-  // POST /api/tickets/:id/transition — change status
+// DELETE /api/tickets/:id — owner only, for a ticket made by mistake: its parts go back to stock.
+// Not once money moved (invoice or deposit): those stay in the books, cancel the ticket instead.
+router.delete('/:id', requireRole('OWNER'), async (req, res) => {
+  try {
+    const ticket = await prisma.repairTicket.findUnique({
+      where: { id: req.params.id },
+      include: { sale: true, parts: true, _count: { select: { deposits: true, warrantyClaims: true } } }
+    })
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' })
+    if (ticket.sale || ticket._count.deposits || ticket._count.warrantyClaims) return res.status(400).json({ error: 'LOCKED' })
+
+    await prisma.$transaction(async (tx) => {
+      for (const p of ticket.parts) {
+        await tx.inventoryItem.update({ where: { id: p.inventoryItemId }, data: { quantity: { increment: p.quantity } } })
+      }
+      await tx.repairPart.deleteMany({ where: { repairTicketId: ticket.id } })
+      await tx.warrantyClaim.updateMany({ where: { newTicketId: ticket.id }, data: { newTicketId: null } })
+      await tx.repairTicket.delete({ where: { id: ticket.id } })
+      // Its check-in is waiting again
+      if (ticket.checkInId) await tx.checkIn.update({ where: { id: ticket.checkInId }, data: { convertedAt: null } })
+    })
+    res.json({ success: true })
+  } catch (err) {
+    logger.error('Delete ticket error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// POST /api/tickets/:id/transition — change status
 router.post('/:id/transition', async (req, res) => {
   try {
     const { status, finalCost, partsCost, paymentMethod } = req.body

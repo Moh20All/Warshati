@@ -269,7 +269,7 @@ export default function InventoryList() {
           )}
           <Input label={t('inventory.modal.color')} value={form.color} onChange={e => setForm({...form, color: e.target.value})} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label={t('inventory.modal.sku')} value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} />
+            <Input label={t('inventory.modal.sku')} value={form.sku} onChange={e => setForm({...form, sku: e.target.value})} placeholder={t('inventory.modal.sku_auto')} />
             <Input label={t('inventory.modal.barcode')} value={form.barcode} onChange={e => setForm({...form, barcode: e.target.value})} />
             {isPhone && <Input label={t('inventory.modal.storage')} value={form.storage} onChange={e => setForm({...form, storage: e.target.value})} className="col-span-2" />}
           </div>
