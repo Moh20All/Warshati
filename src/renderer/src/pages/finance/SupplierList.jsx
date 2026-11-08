@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Modal from '../../components/ui/Modal'
+import { ImportButton } from '../../components/ImportModal'
 
 export default function SupplierList() {
   const { t } = useTranslation()
@@ -45,7 +46,10 @@ export default function SupplierList() {
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.suppliers.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.suppliers.subtitle')}</p></div>
-        <Button onClick={() => setShowAdd(true)}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_add')}</Button>
+        <div className="flex gap-2">
+          <ImportButton kind="suppliers" />
+          <Button onClick={() => setShowAdd(true)}><Plus className="h-4 w-4" /> {t('finance.suppliers.btn_add')}</Button>
+        </div>
       </div>
       <div className="mb-4 flex items-center gap-4 flex-wrap">
         <div className="max-w-sm flex-1"><Input placeholder={t('finance.suppliers.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>

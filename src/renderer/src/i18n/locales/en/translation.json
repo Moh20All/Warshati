@@ -1234,5 +1234,60 @@
     "print": "Print {{count}} labels",
     "printed": "{{count}} labels sent to the printer",
     "print_failed": "Printing failed: {{error}}"
+  },
+  "import": {
+    "btn": "Import",
+    "title_inventory": "Import stock from Excel",
+    "title_customers": "Import customers from Excel",
+    "title_suppliers": "Import suppliers from Excel",
+    "choose_file": "Choose your Excel or CSV file",
+    "reading": "Reading the file…",
+    "formats": "Excel (.xlsx) or CSV. The first line must be the column titles. An old .xls file: open it in Excel and save it as .xlsx.",
+    "rows_found": "{{count}} rows",
+    "truncated": "only the first 20,000 are imported",
+    "item_type": "These items are",
+    "map_hint": "For each field, choose the column of your file that has it (or \"Not imported\"):",
+    "col_none": "— Not imported —",
+    "need_field": "Choose the column for \"{{field}}\".",
+    "preview": "Preview (first 5 rows)",
+    "btn_import": "Import {{count}} rows",
+    "btn_cancel": "Cancel",
+    "btn_done": "Done",
+    "done_created": "{{count}} added",
+    "done_skipped": "{{count}} rows were not added:",
+    "line": "Line {{line}}",
+    "note_inventory": "Imported stock is stock you already have: no expense is recorded. Items without a ref get one automatically. Prices are taken from your file only.",
+    "note_customers": "A customer whose phone is already saved is not added twice. A debt column is added as what the customer already owed (opening balance).",
+    "note_suppliers": "A supplier already saved with the same name is not added twice. A debt column is added as what you already owed (opening balance).",
+    "reasons": {
+      "NO_NAME": "No name",
+      "EXISTS": "Already saved (same name, phone, ref, barcode or IMEI)",
+      "INVALID": "Could not be read"
+    },
+    "errors": {
+      "FORMAT": "Choose an Excel (.xlsx) or CSV file.",
+      "EMPTY": "The file has no rows under its titles.",
+      "UNREADABLE": "This file could not be read."
+    },
+    "fields": {
+      "name": "Name",
+      "sku": "Ref",
+      "barcode": "Barcode",
+      "imei": "IMEI",
+      "brand": "Brand",
+      "model": "Model",
+      "color": "Color",
+      "storage": "Storage",
+      "quantity": "Quantity",
+      "buyPrice": "Buy price",
+      "sellPrice": "Sell price",
+      "lowStockAt": "Low stock alert",
+      "warrantyDays": "Warranty (days)",
+      "phone": "Phone",
+      "email": "Email",
+      "notes": "Notes",
+      "address": "Address",
+      "debt": "Debt"
+    }
   }
 }

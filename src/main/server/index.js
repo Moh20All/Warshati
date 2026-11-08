@@ -19,6 +19,7 @@ import dailyCloseRoutes from './routes/daily-close.js'
 import reportRoutes from './routes/reports.js'
 import catalogRoutes from './routes/catalog.js'
 import repairmenRoutes from './routes/repairmen.js'
+import importRoutes from './routes/import.js'
 import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
@@ -29,6 +30,7 @@ const app = express()
 const hostAddress = () => (isSharing() ? '0.0.0.0' : '127.0.0.1')
 
 app.use(cors())
+app.use('/api/import', express.json({ limit: '30mb' })) // the owner's Excel files (sent as base64) and their rows
 app.use(express.json())
 
 // Only the Warshati window knows this launch's key; other PCs need the shop's pairing code.
@@ -70,6 +72,7 @@ app.use('/api/daily-close', dailyCloseRoutes)
 app.use('/api/reports', reportRoutes)
 app.use('/api/catalog', catalogRoutes)
 app.use('/api/repairmen', repairmenRoutes)
+app.use('/api/import', importRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {

@@ -3,7 +3,10 @@
 All notable changes to Warshati will be documented in this file.
 
 ## v1.8.1 — 08/11/2026
-Full control of suppliers, tickets and stock refs
+Import from Excel, full control of suppliers, tickets and stock refs
+
+### 🚀 Major Upgrades
+- **Import from Excel or CSV:** Bring your stock (parts, accessories, new or used phones), customers and suppliers from your own file (Inventory, Customers, Suppliers → Import). Whatever your columns are called ("اسم", "Désignation", "Prix de vente"…), you choose which column fills each field; Warshati pre-selects the obvious ones and shows a preview first. Prices come only from your file. Imported stock is stock you already have (no expense). A debt column becomes an opening balance. Rows already saved or without a name are skipped and listed with the reason. Also on the mobile app.
 
 ### ✨ Improvements
 - **Suppliers:** Edit a supplier's name, phone, address and notes, or delete it (supplier page → Modifier / 🗑). A supplier with orders is only hidden, so its history stays right; one you still owe money to cannot be deleted.

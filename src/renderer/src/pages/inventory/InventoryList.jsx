@@ -7,6 +7,7 @@ import LabelsModal from '../../components/LabelsModal'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { useAuth } from '../../lib/auth'
+import { ImportButton } from '../../components/ImportModal'
 import ExportButton from '../../components/ExportButton'
 import DevicePicker from '../../components/DevicePicker'
 import { storageText, useAccessories, catalogImageSrc } from '../../lib/catalog'
@@ -211,6 +212,7 @@ export default function InventoryList() {
           <Button variant="outline" onClick={() => setLabelItems((data || []).map(i => ({ ...i, copies: 0 })))} disabled={!data?.length}>
             <Barcode className="h-4 w-4" /> {t('labels.button', 'Labels')}
           </Button>
+          {isOwner && <ImportButton kind="inventory" />}
           {isOwner && (
             <Button onClick={() => { setEditItem(null); setForm({...emptyForm}); setShowForm(true) }}>
               <Plus className="h-4 w-4" /> {t('inventory.add_item')}

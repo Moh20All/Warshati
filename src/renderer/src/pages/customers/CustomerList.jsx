@@ -10,9 +10,12 @@ import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
+import { ImportButton } from '../../components/ImportModal'
+import { useAuth } from '../../lib/auth'
 
 export default function Customers() {
   const { t } = useTranslation()
+  const { isOwner } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -76,9 +79,12 @@ export default function Customers() {
           <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('customers.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t('customers.subtitle')}</p>
         </div>
-        <Button onClick={() => setShowAdd(true)}>
-          <Plus className="h-4 w-4" /> {t('customers.new_customer')}
-        </Button>
+        <div className="flex gap-2">
+          {isOwner && <ImportButton kind="customers" />}
+          <Button onClick={() => setShowAdd(true)}>
+            <Plus className="h-4 w-4" /> {t('customers.new_customer')}
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4 max-w-sm">

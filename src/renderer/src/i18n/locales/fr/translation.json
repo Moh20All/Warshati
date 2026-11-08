@@ -1234,5 +1234,60 @@
     "print": "Imprimer {{count}} étiquettes",
     "printed": "{{count}} étiquettes envoyées à l'imprimante",
     "print_failed": "Échec de l'impression : {{error}}"
+  },
+  "import": {
+    "btn": "Importer",
+    "title_inventory": "Importer le stock depuis Excel",
+    "title_customers": "Importer des clients depuis Excel",
+    "title_suppliers": "Importer des fournisseurs depuis Excel",
+    "choose_file": "Choisissez votre fichier Excel ou CSV",
+    "reading": "Lecture du fichier…",
+    "formats": "Excel (.xlsx) ou CSV. La première ligne doit contenir les titres des colonnes. Un ancien fichier .xls : ouvrez-le dans Excel et enregistrez-le en .xlsx.",
+    "rows_found": "{{count}} lignes",
+    "truncated": "seules les 20 000 premières sont importées",
+    "item_type": "Ces articles sont",
+    "map_hint": "Pour chaque champ, choisissez la colonne de votre fichier qui le contient (ou « Non importé ») :",
+    "col_none": "— Non importé —",
+    "need_field": "Choisissez la colonne pour « {{field}} ».",
+    "preview": "Aperçu (5 premières lignes)",
+    "btn_import": "Importer {{count}} lignes",
+    "btn_cancel": "Annuler",
+    "btn_done": "Terminé",
+    "done_created": "{{count}} ajoutés",
+    "done_skipped": "{{count}} lignes n’ont pas été ajoutées :",
+    "line": "Ligne {{line}}",
+    "note_inventory": "Le stock importé est du stock que vous avez déjà : aucune dépense n’est enregistrée. Les articles sans réf. en reçoivent une automatiquement. Les prix viennent uniquement de votre fichier.",
+    "note_customers": "Un client dont le téléphone est déjà enregistré n’est pas ajouté deux fois. Une colonne de dette est ajoutée comme ce que le client devait déjà (solde d’ouverture).",
+    "note_suppliers": "Un fournisseur déjà enregistré avec le même nom n’est pas ajouté deux fois. Une colonne de dette est ajoutée comme ce que vous deviez déjà (solde d’ouverture).",
+    "reasons": {
+      "NO_NAME": "Pas de nom",
+      "EXISTS": "Déjà enregistré (même nom, téléphone, réf., code-barres ou IMEI)",
+      "INVALID": "Illisible"
+    },
+    "errors": {
+      "FORMAT": "Choisissez un fichier Excel (.xlsx) ou CSV.",
+      "EMPTY": "Le fichier n’a aucune ligne sous ses titres.",
+      "UNREADABLE": "Ce fichier ne peut pas être lu."
+    },
+    "fields": {
+      "name": "Nom",
+      "sku": "Réf.",
+      "barcode": "Code-barres",
+      "imei": "IMEI",
+      "brand": "Marque",
+      "model": "Modèle",
+      "color": "Couleur",
+      "storage": "Stockage",
+      "quantity": "Quantité",
+      "buyPrice": "Prix d’achat",
+      "sellPrice": "Prix de vente",
+      "lowStockAt": "Alerte stock bas",
+      "warrantyDays": "Garantie (jours)",
+      "phone": "Téléphone",
+      "email": "Email",
+      "notes": "Notes",
+      "address": "Adresse",
+      "debt": "Dette"
+    }
   }
 }
