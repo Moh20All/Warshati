@@ -62,10 +62,21 @@ function printFontCss() {
  * Wrap sanitised HTML in a print-ready document: Plex Sans 500 (700 for bold),
  * Plex Mono for document numbers (.p-mono), black only, zero margins.
  */
-export function wrapForPrint(cleanHtml, width) {
+// Thermal heads print less than the paper: 72 mm on 80 mm paper (576 dots), 48 mm on 58 mm.
+// A receipt laid out on the whole paper loses its right side, so it uses the printable width
+// (Settings → Store → Printer can make it narrower for printers that print less).
+export const PRINT_AREA = { '80mm': 72, '58mm': 48 }
+export function printArea(width, area) {
+  const max = PRINT_AREA[width]
+  if (!max) return null
+  const mm = parseInt(area)
+  return mm >= 30 && mm <= max ? mm : max
+}
+
+export function wrapForPrint(cleanHtml, width, area) {
   let pageCss = '@page { margin: 0; }'
-  if (width === '80mm') pageCss = '@page { margin: 0; size: 80mm 297mm; }'
-  if (width === '58mm') pageCss = '@page { margin: 0; size: 58mm 297mm; }'
+  const mm = printArea(width, area)
+  if (mm) pageCss = `@page { margin: 0; size: ${width} 297mm; } body { width: ${mm}mm !important; padding: 2px 1.5mm !important; }`
   const label = labelSize(width)
   if (label) pageCss = `@page { margin: 0; size: ${label.w}mm ${label.h}mm; } body { padding: 0 !important; }`
   const logo = width === '58mm' ? 30 : 40
@@ -122,6 +133,7 @@ export function printHtml({
   html,
   printerName,
   width = '80mm',
+  area,
   stabilityDelay = 1000,
   timeout = 120000
 }) {
@@ -143,7 +155,7 @@ export function printHtml({
   log.info(`[PRINT] Hidden BrowserWindow created. ID: ${printWindow.id}`)
 
   const cleanHtml = sanitiseHtml(html)
-  const content = wrapForPrint(cleanHtml, width)
+  const content = wrapForPrint(cleanHtml, width, area)
 
   return new Promise(async (resolve) => {
     const timer = setTimeout(() => {

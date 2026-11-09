@@ -407,6 +407,9 @@
     "printer_select": "Select Printer",
     "printer_none": "No printer (use browser print)",
     "printer_width": "Paper Width",
+    "print_area": "Printable width",
+    "print_area_auto": "Automatic (72 mm on 80 mm paper, 48 mm on 58 mm)",
+    "print_area_hint": "If the right side of receipts is cut, choose a smaller width and print a test.",
     "printer_test": "Test Print",
     "printer_test_success": "Test print sent!",
     "printer_test_fail": "Print failed: {{error}}"

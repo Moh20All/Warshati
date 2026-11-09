@@ -23,6 +23,7 @@ export default function StoreSettings() {
   const [receiptWidth, setReceiptWidth] = useState(localStorage.getItem('warshati_receipt_width') || '80mm')
   const [ticketWidth, setTicketWidth] = useState(localStorage.getItem('warshati_ticket_width') || '80mm')
   const [reportWidth, setReportWidth] = useState(localStorage.getItem('warshati_report_width') || 'A4')
+  const [printArea, setPrintArea] = useState(localStorage.getItem('warshati_print_area') || '') // '' = 72 mm (80 mm paper) / 48 mm (58 mm)
   const [showDialog, setShowDialog] = useState(localStorage.getItem('warshati_show_print_dialog') === 'true')
   const [testingPrint, setTestingPrint] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', address: '', currency: 'DZD', warrantyDays: DEFAULT_WARRANTY_DAYS, drawerFloat: 0 })
@@ -66,6 +67,7 @@ export default function StoreSettings() {
     localStorage.setItem('warshati_receipt_width', receiptWidth)
     localStorage.setItem('warshati_ticket_width', ticketWidth)
     localStorage.setItem('warshati_report_width', reportWidth)
+    localStorage.setItem('warshati_print_area', printArea)
     localStorage.setItem('warshati_show_print_dialog', showDialog)
     saveMutation.mutate({
       ...form,
@@ -114,7 +116,7 @@ export default function StoreSettings() {
           <p style="margin:0; font-size:11px;">✓ Working correctly! / يعمل بنجاح</p>
         </div>
       `
-      const result = await window.api.printReceipt({ html, printerName: selectedPrinter, width: receiptWidth })
+      const result = await window.api.printReceipt({ html, printerName: selectedPrinter, width: receiptWidth, area: printArea })
       if (result.success) toast.success(t('settings.printer_test_success'))
       else toast.error(t('settings.printer_test_fail', { error: result.error || 'Unknown error' }))
     } catch (err) {
@@ -255,6 +257,16 @@ export default function StoreSettings() {
               <select value={reportWidth} onChange={e => setReportWidth(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring" disabled>
                 <option value="A4">A4</option>
               </select>
+            </div>
+
+            {/* Thermal paper: printable width (the right side is cut when it is too wide) */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">{t('settings.print_area')}</label>
+              <select value={printArea} onChange={e => setPrintArea(e.target.value)} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                <option value="">{t('settings.print_area_auto')}</option>
+                {[70, 68, 66, 64, 60].map(mm => <option key={mm} value={mm}>{mm} mm</option>)}
+              </select>
+              <p className="text-xs text-muted-foreground">{t('settings.print_area_hint')}</p>
             </div>
           </div>
 

@@ -407,6 +407,9 @@
     "printer_select": "Sélectionner l'imprimante",
     "printer_none": "Aucune imprimante (impression navigateur)",
     "printer_width": "Largeur du papier",
+    "print_area": "Largeur imprimable",
+    "print_area_auto": "Automatique (72 mm sur papier 80 mm, 48 mm sur 58 mm)",
+    "print_area_hint": "Si le côté droit des tickets est coupé, choisissez une largeur plus petite et imprimez un test.",
     "printer_test": "Test d'impression",
     "printer_test_success": "Impression test envoyée !",
     "printer_test_fail": "Échec de l'impression : {{error}}"

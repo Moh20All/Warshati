@@ -8,7 +8,8 @@
 export function usePrint() {
   const getPrinterConfig = (type = 'receipt') => ({
     printerName: localStorage.getItem('warshati_printer') || '',
-    width: localStorage.getItem(`warshati_${type}_width`) || '80mm'
+    width: localStorage.getItem(`warshati_${type}_width`) || '80mm',
+    area: localStorage.getItem('warshati_print_area') || '' // printable width in mm; empty = 72 (80 mm paper) / 48 (58 mm)
   })
 
   /**
@@ -31,7 +32,8 @@ export function usePrint() {
       const result = await window.api.printReceipt({ 
         html, 
         printerName: finalPrinterName, 
-        width: config.width 
+        width: config.width,
+        area: config.area
       })
       return result
     } catch (err) {

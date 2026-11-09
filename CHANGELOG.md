@@ -15,6 +15,8 @@ Import from Excel, full control of suppliers, tickets and stock refs
 - **Mobile app:** the same supplier edit/delete, full ticket editing and delete, and refs.
 
 ### 🛠️ Fixed
+- 80 mm and 58 mm receipts no longer lose their right side: they are laid out on the printer's printable width (72 mm / 48 mm). If a printer still cuts, choose a smaller "Printable width" in Settings → Store → Printer.
+- The installer is much smaller (88 MB instead of 198 MB).
 - IMEI, color and password of an existing ticket looked editable but were not saved. They are now.
 - A shop updating straight from 1.7 to 1.8.1 still sees the 1.8 "What's new" window.
 

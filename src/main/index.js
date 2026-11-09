@@ -203,8 +203,8 @@ app.whenReady().then(async () => {
     });
 
     // Print HTML content: silent to thermal printer, or with dialog as fallback
-    ipcMain.handle('print-receipt', async (event, { html, printerName, width = '80mm' }) => {
-        return printHtml({ html, printerName, width })
+    ipcMain.handle('print-receipt', async (event, { html, printerName, width = '80mm', area }) => {
+        return printHtml({ html, printerName, width, area })
     });
 
     // DATABASE BACKUP & RESTORE

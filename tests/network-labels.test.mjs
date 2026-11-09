@@ -70,8 +70,14 @@ try {
   check('the till finds it', (await o('GET', `/inventory/barcode/${got}`)).data.item?.id, a.data.item.id)
   check('second call assigns nothing', Object.keys((await o('POST', '/inventory/assign-barcodes', { ids: [a.data.item.id] })).data.assigned).length, 0)
 
-  const { pageSizeFromWidth } = await importProject('src/main/server/lib/print.js')
+  const { pageSizeFromWidth, wrapForPrint } = await importProject('src/main/server/lib/print.js')
   check('40x30 label prints on a 40 × 30 mm page', JSON.stringify(pageSizeFromWidth('label:40x30')), JSON.stringify({ width: 40000, height: 30000 }))
+  // Thermal receipts fit the print head, not the paper (the right side was cut on 80 mm printers)
+  check('80 mm paper: laid out on 72 mm', wrapForPrint('x', '80mm').includes('width: 72mm'), true)
+  check('58 mm paper: laid out on 48 mm', wrapForPrint('x', '58mm').includes('width: 48mm'), true)
+  check('narrower width chosen in settings', wrapForPrint('x', '80mm', '64').includes('width: 64mm'), true)
+  check('never wider than the head', wrapForPrint('x', '58mm', '70').includes('width: 48mm'), true)
+  check('A4 untouched', wrapForPrint('x', 'A4').includes('width: 72mm'), false)
 
   finish()
 } catch (e) {
