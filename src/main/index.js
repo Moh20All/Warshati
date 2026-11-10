@@ -26,7 +26,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { startServer, applyNetworkMode } from './server/index.js'
 
-import { checkLicense, activateLicense } from './license.js'
+import { checkLicense, quickLicense, activateLicense } from './license.js'
 import { exportXlsx } from './export.js'
 import { SESSION_KEY, SESSION_HEADER } from './server/lib/session-key.js'
 import { isOwner } from './server/lib/backup.js'
@@ -138,6 +138,15 @@ app.whenReady().then(async () => {
             return r.ok
                 ? { valid: true, license: null, plan: network.VIP_PLAN, deactivationMessage: null }
                 : { valid: false, license: null, networkError: r.code, hostName: net.hostName || net.host }
+        }
+        // An activated PC opens at once; the online check runs behind and only speaks up if the key was revoked
+        const quick = await quickLicense()
+        if (quick) {
+            applyNetworkMode().catch((e) => log.error('[Network] Could not apply sharing mode:', e))
+            checkLicense().then((result) => {
+                if (!result.valid && !mainWindow?.isDestroyed()) mainWindow?.webContents.send('license-status', { ...result, plan: network.getPlan() })
+            }).catch(() => {})
+            return { ...quick, plan: network.getPlan() }
         }
         const result = await checkLicense()
         await applyNetworkMode().catch((e) => log.error('[Network] Could not apply sharing mode:', e))

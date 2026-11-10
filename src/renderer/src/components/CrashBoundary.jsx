@@ -1,7 +1,6 @@
 import { Component } from 'react'
 import { useState } from 'react'
 import { AlertTriangle, RotateCcw, Send, CheckCircle2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 
 /**
  * Error Boundary that catches React rendering errors and shows a recovery UI
@@ -52,6 +51,7 @@ function CrashRecoveryUI({ error, errorInfo, onRestart }) {
   const handleReport = async () => {
     setSending(true)
     try {
+      const { supabase } = await import('../lib/supabase') // loaded only when a crash is reported
       await supabase.from('crash_reports').insert({
         error: errorMessage,
         stack: stackTrace,

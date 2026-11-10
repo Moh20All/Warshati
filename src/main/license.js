@@ -82,6 +82,25 @@ const MESSAGES = {
   other_device: 'This license is registered to a different device. Please contact support.'
 }
 
+/**
+ * Instant answer at startup, without the network: an activated PC inside its grace period opens right away.
+ * Returns null when the full check is needed now (no license, or the grace period is over).
+ */
+export async function quickLicense() {
+  try {
+    const local = await prisma.localLicense.findFirst()
+    if (!local) return null
+    const last = new Date(local.lastValidatedAt || local.activatedAt)
+    const days = Math.floor((Date.now() - last.getTime()) / 86400000)
+    if (days > OFFLINE_GRACE_DAYS) return null
+    setPlan(local.plan)
+    return { valid: true, license: local, deactivationMessage: null }
+  } catch (e) {
+    log.error('[License] Quick check error:', e)
+    return null
+  }
+}
+
 /** Startup check. Returns { valid, license, deactivationMessage }. */
 export async function checkLicense() {
   let local = null

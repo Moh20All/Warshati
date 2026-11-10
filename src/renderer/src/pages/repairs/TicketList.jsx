@@ -46,8 +46,9 @@ export default function TicketList() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['tickets', search, statusFilter],
-    queryFn: () => api.get('/tickets', { params: { search: search || undefined, status: statusFilter || undefined } }).then(r => r.data.tickets)
+    queryFn: () => api.get('/tickets', { params: { search: search || undefined, status: statusFilter || undefined } }).then(r => r.data)
   })
+  const tickets = data?.tickets
 
   const transitionMutation = useMutation({
     mutationFn: ({ id, status, finalCost, partsCost, paymentMethod }) => 
@@ -144,7 +145,8 @@ export default function TicketList() {
       </div>
 
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
-        : <Table columns={columns} data={data || []} emptyTitle={t('repairs.tickets.empty_title')} emptyDescription={t('repairs.tickets.empty_desc')} onRowClick={(r) => navigate(`/repairs/tickets/${r.id}`)} />}
+        : <Table columns={columns} data={tickets || []} emptyTitle={t('repairs.tickets.empty_title')} emptyDescription={t('repairs.tickets.empty_desc')} onRowClick={(r) => navigate(`/repairs/tickets/${r.id}`)} />}
+      {data?.limited && <p className="mt-3 text-xs text-muted-foreground">{t('lists.latest', { shown: tickets.length, total: data.total })}</p>}
 
       {/* Final Cost Modal for Mark Done */}
       <Modal open={!!costModal} onClose={() => setCostModal(null)} title={t('repairs.tickets.modal_done')}

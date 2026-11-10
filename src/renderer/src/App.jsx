@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useAuth } from './lib/auth'
 import api from './lib/api'
 import { FullPageSpinner } from './components/ui/Spinner'
@@ -17,31 +17,32 @@ import FirstRunWizard from './pages/FirstRunWizard'
 
 // Main pages
 import Dashboard from './pages/Dashboard'
-import CustomerList from './pages/customers/CustomerList'
-import CustomerProfile from './pages/customers/CustomerProfile'
-import InventoryList from './pages/inventory/InventoryList'
-import AccessoriesPage from './pages/inventory/Accessories'
-import CheckInList from './pages/repairs/CheckInList'
-import TicketList from './pages/repairs/TicketList'
-import TicketDetail from './pages/repairs/TicketDetail'
-import WarrantyList from './pages/repairs/WarrantyList'
-import TradeInList from './pages/repairs/TradeInList'
-import POS from './pages/sales/POS'
-import InvoiceList from './pages/sales/InvoiceList'
-import DebtLedger from './pages/finance/DebtLedger'
-import SupplierList from './pages/finance/SupplierList'
-import SupplierDetail from './pages/finance/SupplierDetail'
-import ExpenseList from './pages/finance/ExpenseList'
-import DailyClose from './pages/finance/DailyClose'
-import MonthlySummary from './pages/finance/MonthlySummary'
-import UsersPage from './pages/settings/Users'
-import StoreSettings from './pages/settings/StoreSettings'
-import BackupPage from './pages/settings/Backup'
-import AboutApp from './pages/settings/AboutApp'
-import DeviceCatalogPage from './pages/settings/DeviceCatalog'
-import DevicesPage from './pages/catalog/Devices'
-import RepairmenPage from './pages/settings/Repairmen'
-import ActivityPage from './pages/settings/Activity'
+// Every other page is loaded the first time it is opened, so the app shows up fast on a small PC
+const CustomerList = lazy(() => import('./pages/customers/CustomerList'))
+const CustomerProfile = lazy(() => import('./pages/customers/CustomerProfile'))
+const InventoryList = lazy(() => import('./pages/inventory/InventoryList'))
+const AccessoriesPage = lazy(() => import('./pages/inventory/Accessories'))
+const CheckInList = lazy(() => import('./pages/repairs/CheckInList'))
+const TicketList = lazy(() => import('./pages/repairs/TicketList'))
+const TicketDetail = lazy(() => import('./pages/repairs/TicketDetail'))
+const WarrantyList = lazy(() => import('./pages/repairs/WarrantyList'))
+const TradeInList = lazy(() => import('./pages/repairs/TradeInList'))
+const POS = lazy(() => import('./pages/sales/POS'))
+const InvoiceList = lazy(() => import('./pages/sales/InvoiceList'))
+const DebtLedger = lazy(() => import('./pages/finance/DebtLedger'))
+const SupplierList = lazy(() => import('./pages/finance/SupplierList'))
+const SupplierDetail = lazy(() => import('./pages/finance/SupplierDetail'))
+const ExpenseList = lazy(() => import('./pages/finance/ExpenseList'))
+const DailyClose = lazy(() => import('./pages/finance/DailyClose'))
+const MonthlySummary = lazy(() => import('./pages/finance/MonthlySummary'))
+const UsersPage = lazy(() => import('./pages/settings/Users'))
+const StoreSettings = lazy(() => import('./pages/settings/StoreSettings'))
+const BackupPage = lazy(() => import('./pages/settings/Backup'))
+const AboutApp = lazy(() => import('./pages/settings/AboutApp'))
+const DeviceCatalogPage = lazy(() => import('./pages/settings/DeviceCatalog'))
+const DevicesPage = lazy(() => import('./pages/catalog/Devices'))
+const RepairmenPage = lazy(() => import('./pages/settings/Repairmen'))
+const ActivityPage = lazy(() => import('./pages/settings/Activity'))
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
   if (loading) return <FullPageSpinner />
@@ -97,6 +98,12 @@ export default function App() {
         setNeedsSetup(true)
       })
       .finally(() => setChecking(false))
+    // The app opened on the saved license; the online check may still find it revoked
+    window.api.onLicenseStatus?.((_e, result) => {
+      if (result?.valid) return
+      setIsActivated(false)
+      setDeactivationMessage(result?.deactivationMessage || null)
+    })
   }, [])
 
   if (checking) return <FullPageSpinner />
@@ -109,7 +116,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <Suspense fallback={<FullPageSpinner />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/setup" element={<FirstRunWizard />} />
@@ -157,6 +164,6 @@ export default function App() {
 
         <Route path="*" element={<Navigate to={needsSetup ? '/setup' : '/dashboard'} replace />} />
       </Routes>
-    </>
+    </Suspense>
   )
 }

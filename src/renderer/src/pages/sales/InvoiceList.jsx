@@ -49,8 +49,9 @@ export default function InvoiceList() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['sales', search],
-    queryFn: () => api.get('/sales', { params: { search: search || undefined } }).then(r => r.data.sales)
+    queryFn: () => api.get('/sales', { params: { search: search || undefined } }).then(r => r.data)
   })
+  const sales = data?.sales
 
   const printReceipt = (s) => {
     const dir = i18n.dir()
@@ -118,7 +119,7 @@ export default function InvoiceList() {
     print.print(html)
   }
 
-  const exportRows = (data || []).map(s => ({
+  const exportRows = (sales || []).map(s => ({
     number: s.saleNumber, date: s.createdAt,
     customer: s.customer?.name || t('sales.invoices.walk_in'),
     method: s.paymentMethod,
@@ -165,7 +166,8 @@ export default function InvoiceList() {
       </div>
       <div className="mb-4 max-w-sm"><Input placeholder={t('sales.invoices.search_ph')} icon={Search} data-search value={search} onChange={e => setSearch(e.target.value)} /></div>
       {isLoading ? <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
-        : <Table columns={columns} data={data || []} emptyTitle={t('sales.invoices.empty_title')} emptyDescription={t('sales.invoices.empty_desc')} />}
+        : <Table columns={columns} data={sales || []} emptyTitle={t('sales.invoices.empty_title')} emptyDescription={t('sales.invoices.empty_desc')} />}
+      {data?.limited && <p className="mt-3 text-xs text-muted-foreground">{t('lists.latest', { shown: sales.length, total: data.total })}</p>}
 
       <Modal open={!!refundSale} onClose={() => setRefundSale(null)} title={t('sales.invoices.refund_title', { num: refundSale?.saleNumber })}
         footer={<><Button variant="outline" onClick={() => setRefundSale(null)} disabled={refundMutation.isPending}>{t('sales.invoices.refund_cancel')}</Button><Button variant="danger" onClick={() => refundMutation.mutate({ id: refundSale.id, reason: refundReason })} loading={refundMutation.isPending}>{t('sales.invoices.refund_confirm')}</Button></>}>

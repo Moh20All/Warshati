@@ -1358,5 +1358,8 @@
     "col_share": "His share",
     "col_shop": "Shop keeps",
     "col_value": "Value"
+  },
+  "lists": {
+    "latest": "Showing the latest {{shown}} of {{total}}. Search to find older ones."
   }
 }

@@ -18,6 +18,8 @@ export async function generateTicketNumber(db = prisma) {
 
 // Repair warranty when a shop has no setting yet
 export const DEFAULT_WARRANTY_DAYS = 5
+// Lists stop at this many rows when nothing is searched (a year of a busy shop is thousands)
+export const LIST_LIMIT = 300
 
 /** Warranty days for a new ticket: the typed value (0 allowed), otherwise the store's default */
 export async function warrantyFor(db, typed) {
@@ -62,12 +64,13 @@ router.get('/', async (req, res) => {
         { customer: { phone: { contains: search } } }
       ]
     }
-    const tickets = await prisma.repairTicket.findMany({
-      where,
-      include: { customer: true, createdBy: { select: { name: true } } },
-      orderBy: { receivedAt: 'desc' }
-    })
-    res.json({ tickets })
+    // Without a search, the list is the latest 300: older tickets are found by number, IMEI or client
+    const take = search ? undefined : LIST_LIMIT
+    const [tickets, total] = await Promise.all([
+      prisma.repairTicket.findMany({ where, include: { customer: true, createdBy: { select: { name: true } } }, orderBy: { receivedAt: 'desc' }, take }),
+      prisma.repairTicket.count({ where })
+    ])
+    res.json({ tickets, total, limited: tickets.length < total })
   } catch (err) {
     logger.error('List tickets error:', err)
     res.status(500).json({ error: 'Internal server error' })

@@ -21,6 +21,7 @@ import catalogRoutes from './routes/catalog.js'
 import repairmenRoutes from './routes/repairmen.js'
 import importRoutes from './routes/import.js'
 import activityRoutes from './routes/activity.js'
+import dashboardRoutes from './routes/dashboard.js'
 import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
@@ -75,6 +76,7 @@ app.use('/api/catalog', catalogRoutes)
 app.use('/api/repairmen', repairmenRoutes)
 app.use('/api/import', importRoutes)
 app.use('/api/activity', activityRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // Health check
 app.get('/api/health', (_req, res) => {

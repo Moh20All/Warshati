@@ -17,6 +17,12 @@ Import from Excel, full control of suppliers, tickets and stock refs
 - **Ref for every item:** The SKU field is now "Ref". Leave it empty and Warshati gives the item its own ref (REF-0001, REF-0002…), so items without a barcode can be searched, typed or scanned at the POS too. Items already in stock get theirs automatically.
 - **Mobile app:** the same supplier edit/delete, full ticket editing and delete, and refs.
 
+### ⚡ Faster
+- **Opens at once on an activated PC:** the license is confirmed online in the background instead of making you wait for the internet (up to 5 s before) — a revoked key still locks the app as soon as the check answers.
+- **The first screen loads one small answer** (counts and the latest rows) instead of downloading every ticket, sale and debt of the shop: after a year that was close to 10 MB on every open.
+- **Tickets and invoices show the latest 300** when nothing is searched; a search still looks through everything.
+- Pages load the first time they are opened, so the app itself starts lighter; the daily backup waits 45 s instead of running the moment the app opens.
+
 ### 🛠️ Fixed
 - 80 mm and 58 mm receipts no longer lose their right side: they are laid out on the printer's printable width (72 mm / 48 mm). If a printer still cuts, choose a smaller "Printable width" in Settings → Store → Printer.
 - The installer is much smaller (88 MB instead of 198 MB).

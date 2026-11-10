@@ -22,24 +22,10 @@ export default function Dashboard() {
     queryFn: () => api.get('/store').then(r => r.data.store)
   })
 
-  const { data: tickets } = useQuery({
-    queryKey: ['tickets-dash'],
-    queryFn: () => api.get('/tickets').then(r => r.data.tickets)
-  })
-
-  const { data: sales } = useQuery({
-    queryKey: ['sales-dash'],
-    queryFn: () => api.get('/sales').then(r => r.data.sales)
-  })
-
-  const { data: debts } = useQuery({
-    queryKey: ['debts-dash'],
-    queryFn: () => api.get('/debts').then(r => r.data.debts)
-  })
-
-  const { data: lowStock } = useQuery({
-    queryKey: ['low-stock-dash'],
-    queryFn: () => api.get('/inventory/low-stock-count').then(r => r.data.count)
+  // One small answer with counts and the latest rows (never the whole history)
+  const { data: dash } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => api.get('/dashboard').then(r => r.data)
   })
 
   const { data: todayFigures } = useQuery({
@@ -47,20 +33,19 @@ export default function Dashboard() {
     queryFn: () => api.get('/daily-close/preview').then(r => r.data)
   })
 
-  // Calculate stats
-  const activeTickets = tickets?.filter(t => ['DIAGNOSING', 'WAITING_PARTS', 'IN_REPAIR'].includes(t.status)) || []
-  const readyTickets = tickets?.filter(t => t.status === 'DONE') || []
-  const urgentTickets = activeTickets.filter(t => t.priority === 'URGENT').length || 0
-
-  const today = new Date().toDateString()
-  const todaySales = sales?.filter(s => new Date(s.createdAt).toDateString() === today) || []
+  const activeTickets = dash?.activeTickets || []
+  const activeCount = dash?.tickets.active || 0
+  const readyCount = dash?.tickets.ready || 0
+  const urgentTickets = dash?.tickets.urgent || 0
+  const todaySales = dash?.todaySales || []
+  const lowStock = dash?.lowStock
 
   // Today's figures come from the server so they always match the Daily Close
   const netProfit = todayFigures?.netProfit || 0
   const deliveredToday = todaySales.filter(s => s.repairTicketId).length
 
-  const openDebts = debts?.filter(d => d.status !== 'SETTLED') || []
-  const totalDebt = openDebts.reduce((sum, d) => sum + parseFloat(d.remaining), 0)
+  const openDebts = dash?.debts.open || 0
+  const totalDebt = dash?.debts.total || 0
 
   const printOverview = () => {
     const dir = i18n.dir()
@@ -98,7 +83,7 @@ export default function Dashboard() {
             <h3 style="font-size: 16px; border-bottom: 1px dotted #000; padding-bottom: 5px; margin-bottom: 15px;">Recent Shop Sales</h3>
             ${todaySales.slice(0, 10).map(s => `
                <div style="font-size: 12px; margin-bottom: 8px; border-bottom: 1px dotted #000; padding-bottom: 5px;">
-                  <strong class="p-mono">${s.saleNumber}</strong> - ${s.total.toLocaleString()} ${cur}
+                  <strong class="p-mono">${s.saleNumber}</strong> - ${Number(s.total).toLocaleString()} ${cur}
                   <div style="color: #000;">${s.customer?.name || 'Walk-in'} | ${s.paymentMethod}</div>
                </div>
             `).join('')}
@@ -110,19 +95,17 @@ export default function Dashboard() {
   }
 
   const kpis = [
-    { label: t('dashboard.pending_repairs'), value: activeTickets.length, icon: Ticket, color: 'text-info', sub: readyTickets.length > 0 ? `${readyTickets.length} ready for pickup` : (urgentTickets > 0 ? `${urgentTickets} urgent` : 'No active jobs'), subColor: readyTickets.length > 0 ? 'text-success' : 'text-muted-foreground', onClick: () => navigate('/repairs/tickets') },
+    { label: t('dashboard.pending_repairs'), value: activeCount, icon: Ticket, color: 'text-info', sub: readyCount > 0 ? `${readyCount} ready for pickup` : (urgentTickets > 0 ? `${urgentTickets} urgent` : 'No active jobs'), subColor: readyCount > 0 ? 'text-success' : 'text-muted-foreground', onClick: () => navigate('/repairs/tickets') },
     // Staff see today's drawer cash instead of the shop's profit
     isOwner
       ? { label: t('dashboard.net_profit'), value: `${netProfit.toLocaleString()} ${cur}`, icon: TrendingUp, color: 'text-success', sub: `${todaySales.length - deliveredToday} sales, ${deliveredToday} delivered repairs`, onClick: () => navigate('/finance/daily-close') }
       : { label: t('finance.reports.stat_net_cash'), value: `${(todayFigures?.netCash || 0).toLocaleString()} ${cur}`, icon: TrendingUp, color: 'text-success', sub: `${todaySales.length - deliveredToday} sales, ${deliveredToday} delivered repairs`, onClick: () => navigate('/finance/daily-close') },
-    { label: t('dashboard.outstanding_debt'), value: `${totalDebt.toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning', sub: `${openDebts.length} entries`, onClick: () => navigate('/finance/debts') },
+    { label: t('dashboard.outstanding_debt'), value: `${totalDebt.toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning', sub: `${openDebts} entries`, onClick: () => navigate('/finance/debts') },
     { label: t('dashboard.low_stock'), value: lowStock ?? '—', icon: Package, color: 'text-destructive', onClick: () => navigate('/inventory') }
   ]
 
-  // Recent tickets
-  const recentTickets = tickets?.slice(0, 5) || []
-  // Recent sales
-  const recentSales = sales?.slice(0, 5) || []
+  const recentTickets = dash?.recentTickets || []
+  const recentSales = dash?.recentSales || []
 
   const daysSince = (d) => Math.floor((Date.now() - new Date(d).getTime()) / 86400000)
 
@@ -219,7 +202,7 @@ export default function Dashboard() {
                     <span className="text-sm font-mono font-medium text-primary">{s.saleNumber}</span>
                     <StatusBadge kind="sale" value={s.status} />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{s.customer?.name || 'Walk-in'} · {s.items?.length || 0} items</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{s.customer?.name || 'Walk-in'} · {s.itemsCount || 0} items</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">{Number(s.total).toLocaleString()} {cur}</p>

@@ -4,6 +4,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { nextSaleNumber } from '../lib/numbering.js'
 import { audit } from '../lib/activity.js'
+import { LIST_LIMIT } from './tickets.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -28,12 +29,18 @@ router.get('/', async (req, res) => {
         { customer: { phone: { contains: search } } }
       ]
     }
-    const sales = await prisma.sale.findMany({
-      where,
-      include: { customer: true, createdBy: { select: { name: true } }, items: { include: { inventoryItem: true } }, debtEntry: true, refund: true },
-      orderBy: { createdAt: 'desc' }
-    })
-    res.json({ sales })
+    // Without a search, the latest 300 (older invoices are found by number or client); lines carry the item's name only
+    const take = search ? undefined : LIST_LIMIT
+    const [sales, total] = await Promise.all([
+      prisma.sale.findMany({
+        where,
+        include: { customer: true, createdBy: { select: { name: true } }, items: { include: { inventoryItem: { select: { id: true, name: true, type: true } } } }, debtEntry: true, refund: true },
+        orderBy: { createdAt: 'desc' },
+        take
+      }),
+      prisma.sale.count({ where })
+    ])
+    res.json({ sales, total, limited: sales.length < total })
   } catch (err) {
     logger.error('List sales error:', err)
     res.status(500).json({ error: 'Internal server error' })

@@ -23,6 +23,8 @@ const api = {
     getLocalLicense: () => ipcRenderer.invoke('get-local-license'),
     getMachineId: () => ipcRenderer.invoke('get-machine-id'),
     activateLicense: (licenseKey) => ipcRenderer.invoke('activate-license', licenseKey),
+    // The background check after a quick start found the key revoked / moved
+    onLicenseStatus: (callback) => ipcRenderer.on('license-status', callback),
 
     // Database Backup & Restore
     backupDB: (token) => ipcRenderer.invoke('backup-db', token),

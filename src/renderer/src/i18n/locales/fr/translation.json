@@ -1358,5 +1358,8 @@
     "col_share": "Sa part",
     "col_shop": "Reste au magasin",
     "col_value": "Valeur"
+  },
+  "lists": {
+    "latest": "Les {{shown}} plus récents sur {{total}}. Cherchez pour trouver les plus anciens."
   }
 }

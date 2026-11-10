@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageSquarePlus, Send, CheckCircle2 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 
@@ -21,6 +20,7 @@ export default function FeedbackModal({ open, onClose }) {
     setError('')
 
     try {
+      const { supabase } = await import('../lib/supabase') // loaded only when feedback is sent, not at startup
       const { error: insertErr } = await supabase.from('feedback').insert({
         type,
         message: message.trim(),

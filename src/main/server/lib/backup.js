@@ -66,7 +66,8 @@ export async function runAutoBackup() {
 
 /** Runs now and then every few hours, so a shop left open overnight still gets a new day's backup. */
 export function scheduleAutoBackups() {
-  runAutoBackup()
+  // Not at the very moment the app opens: the snapshot would compete with the first screen's queries
+  setTimeout(runAutoBackup, 45 * 1000)
   setInterval(runAutoBackup, 3 * 60 * 60 * 1000)
 }
 
