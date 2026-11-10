@@ -109,6 +109,20 @@ model RepairmanPayment {
   @@index([paidAt])
 }
 
+// Who did what (Settings → Activity): deletions, price changes, cancelled payments, refunds, discounts, imports
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String   // kept as it was, even if the user is renamed or removed
+  action    String   // ticket_delete, inventory_price… (lib/activity.js)
+  label     String   // what it was about: ticket number, item name…
+  details   String?  // JSON: amounts, old → new
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String

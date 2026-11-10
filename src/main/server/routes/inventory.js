@@ -5,6 +5,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { rememberDevice } from '../lib/catalog.js'
 import { nextItemRef } from '../lib/numbering.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -188,10 +189,21 @@ router.put('/:id', requireRole('OWNER'), async (req, res) => {
     if (warrantyDays !== undefined) data.warrantyDays = warrantyDays
     if (isActive !== undefined) data.isActive = isActive
 
+    const before = await prisma.inventoryItem.findUnique({ where: { id: req.params.id } })
+    if (!before) return res.status(404).json({ error: 'Item not found' })
     const item = await prisma.inventoryItem.update({
       where: { id: req.params.id },
       data
     })
+    // Prices and stock typed by hand go to the activity log
+    const changed = (k) => data[k] !== undefined && Number(item[k]) !== Number(before[k])
+    if (changed('buyPrice') || changed('sellPrice')) {
+      audit(req, 'inventory_price', item.name, {
+        ...(changed('buyPrice') ? { buy: [Number(before.buyPrice), Number(item.buyPrice)] } : {}),
+        ...(changed('sellPrice') ? { sell: [Number(before.sellPrice), Number(item.sellPrice)] } : {})
+      })
+    }
+    if (changed('quantity')) audit(req, 'inventory_quantity', item.name, { quantity: [before.quantity, item.quantity] })
     await rememberDevice(prisma, { category: deviceCategoryFor(item.type, req.body.deviceCategory), brand: item.brand, model: item.model })
     const isLowStock = item.quantity <= item.lowStockAt
     res.json({ item, isLowStock })
@@ -254,10 +266,11 @@ router.post('/:id/restock', requireRole('OWNER'), async (req, res) => {
 // DELETE /api/inventory/:id — soft deactivate
 router.delete('/:id', requireRole('OWNER'), async (req, res) => {
   try {
-    await prisma.inventoryItem.update({
+    const item = await prisma.inventoryItem.update({
       where: { id: req.params.id },
       data: { isActive: false }
     })
+    audit(req, 'inventory_delete', item.name, { quantity: item.quantity })
     res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' })

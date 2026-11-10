@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -88,7 +89,8 @@ router.put('/:id', requireRole('OWNER'), async (req, res) => {
 // DELETE /api/expenses/:id
 router.delete('/:id', requireRole('OWNER'), async (req, res) => {
   try {
-    await prisma.expense.delete({ where: { id: req.params.id } })
+    const expense = await prisma.expense.delete({ where: { id: req.params.id } })
+    audit(req, 'expense_delete', expense.description, { amount: Number(expense.amount) })
     res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' })

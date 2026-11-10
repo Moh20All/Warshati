@@ -273,6 +273,27 @@ async function applyMigrations(prismaDb) {
       logToDisk(`Features/repairmen migration failed: ${err.message}`);
     }
 
+    // v1.8.1: activity log (own try/catch)
+    try {
+      const logTable = await prismaDb.$queryRaw`SELECT name FROM sqlite_schema WHERE type='table' AND name='ActivityLog'`;
+      if (logTable.length === 0) {
+        logToDisk('Migrating: creating ActivityLog table');
+        await prismaDb.$executeRawUnsafe(`CREATE TABLE "ActivityLog" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT,
+    "userName" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+    "details" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)`);
+        await prismaDb.$executeRawUnsafe(`CREATE INDEX "ActivityLog_createdAt_idx" ON "ActivityLog"("createdAt")`);
+        await prismaDb.$executeRawUnsafe(`CREATE INDEX "ActivityLog_action_idx" ON "ActivityLog"("action")`);
+      }
+    } catch (err) {
+      logToDisk(`Activity log migration failed: ${err.message}`);
+    }
+
     // Every stock item has a ref (typed, or REF-xxxx) so items without a barcode can be found too
     try {
       const filled = await fillMissingRefs(prismaDb);

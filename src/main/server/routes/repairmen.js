@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -120,6 +121,8 @@ router.post('/:id/payments/:paymentId/cancel', requireRole('OWNER'), async (req,
     await prisma.repairmanPayment.create({
       data: { repairmanId: payment.repairmanId, amount: -num(payment.amount), reversalOf: payment.id, notes: `Cancelled: ${req.body?.reason || 'wrong payment'}` }
     })
+    const who = await prisma.repairman.findUnique({ where: { id: payment.repairmanId }, select: { name: true } })
+    audit(req, 'payment_cancel', who?.name, { kind: 'repairman', amount: num(payment.amount), reason: req.body?.reason || '' })
     res.json(await balance(prisma, payment.repairmanId))
   } catch (err) {
     logger.error('Cancel repairman payment error:', err)

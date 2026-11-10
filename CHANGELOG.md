@@ -8,6 +8,9 @@ Import from Excel, full control of suppliers, tickets and stock refs
 ### 🚀 Major Upgrades
 - **Import from Excel or CSV:** Bring your stock (parts, accessories, new or used phones), customers and suppliers from your own file (Inventory, Customers, Suppliers → Import). Whatever your columns are called ("اسم", "Désignation", "Prix de vente"…), you choose which column fills each field; Warshati pre-selects the obvious ones and shows a preview first. Prices come only from your file. Imported stock is stock you already have (no expense). A debt column becomes an opening balance. Rows already saved or without a name are skipped and listed with the reason. Also on the mobile app.
 
+- **Activity log:** Settings → Activity shows who did what, with the date: deleted tickets, suppliers, items and expenses; cancelled tickets; repair and item prices changed; stock typed by hand; cancelled payments (customer, supplier, repairman); refunds; discounts given at the till; imports. Filter by action, user and dates. Owner only, also on the mobile app.
+- **Monthly summary shows where the money is:** repairs by brand and by problem (count, revenue, profit), income per repairman (his share and what the shop keeps), products by type, and slow stock: items in stock for 90+ days with nothing sold, and what they are worth.
+
 ### ✨ Improvements
 - **Suppliers:** Edit a supplier's name, phone, address and notes, or delete it (supplier page → Modifier / 🗑). A supplier with orders is only hidden, so its history stays right; one you still owe money to cannot be deleted.
 - **Repair tickets:** Everything can be corrected after the ticket is created: customer name and phone, device, IMEI, color, password, problem and warranty. The owner can delete a ticket made by mistake (its parts go back to stock); a ticket with a deposit or an invoice is cancelled instead.

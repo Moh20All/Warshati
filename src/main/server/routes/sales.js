@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { nextSaleNumber } from '../lib/numbering.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -149,6 +150,7 @@ router.post('/', async (req, res) => {
       return created
     })
 
+    if (parseFloat(discount) > 0) audit(req, 'sale_discount', sale.saleNumber, { discount: parseFloat(discount), total })
     res.status(201).json({ sale })
   } catch (err) {
     if (err instanceof SaleError) return res.status(400).json({ error: err.message })
@@ -208,6 +210,7 @@ router.post('/:id/refund', requireRole('OWNER'), async (req, res) => {
       })
     })
 
+    audit(req, 'sale_refund', sale.saleNumber, { amount, reason: req.body.reason || '' })
     res.json({ sale: updated, refundedAmount: amount })
   } catch (err) {
     logger.error('Refund sale error:', err)

@@ -7,7 +7,7 @@ import {
   CalendarCheck, Store, Users, Database,
   ChevronLeft, ChevronRight, LayoutDashboard,
   Contact, Package, BarChart3, Info,
-  MessageSquarePlus, Smartphone, Keyboard, Network
+  MessageSquarePlus, Smartphone, Keyboard, Network, History
 } from 'lucide-react'
 import { isConnectedPc } from '../../lib/plan'
 import { useState } from 'react'
@@ -68,6 +68,7 @@ export default function Sidebar({ onShowShortcuts }) {
       items: [
         { name: t('navigation.store'), path: '/settings/store', icon: Store, ownerOnly: true },
         { name: t('navigation.users'), path: '/settings/users', icon: Users, ownerOnly: true },
+        { name: t('activity.title'), path: '/settings/activity', icon: History, ownerOnly: true },
         // A connected PC's data (and its backups) live on the main PC
       ...(isConnectedPc() ? [] : [{ name: t('navigation.backup'), path: '/settings/backup', icon: Database, ownerOnly: true }]),
       { name: t('navigation.network', 'Shop network'), path: '/settings/network', icon: Network, ownerOnly: true },

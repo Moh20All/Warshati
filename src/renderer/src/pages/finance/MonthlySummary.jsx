@@ -30,7 +30,8 @@ export default function MonthlySummary() {
   const [data, setData] = useState(null)
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7))
   const print = usePrint()
-  const { summary = { dailyData: [] }, stats = {}, topItems = [] } = data || {}
+  const { summary = { dailyData: [] }, stats = {}, topItems = [], insights = {} } = data || {}
+  const money = (v) => `${Number(v || 0).toLocaleString()} ${cur}`
 
   const { data: store } = useQuery({
     queryKey: ['store'],
@@ -297,7 +298,46 @@ export default function MonthlySummary() {
               </div>
             </div>
           </div>
+
+          {/* Where the money is */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MiniTable title={t('insights.by_brand')} icon={Wrench} rows={insights.byBrand} empty={t('insights.none')}
+              cols={[[t('insights.col_name'), r => r.name], [t('insights.col_count'), r => r.count, 'num'], [t('insights.col_revenue'), r => money(r.revenue), 'num'], [t('insights.col_profit'), r => money(r.profit), 'num bold']]} />
+            <MiniTable title={t('insights.by_issue')} icon={Wrench} rows={insights.byIssue} empty={t('insights.none')}
+              cols={[[t('insights.col_name'), r => r.name], [t('insights.col_count'), r => r.count, 'num'], [t('insights.col_revenue'), r => money(r.revenue), 'num'], [t('insights.col_profit'), r => money(r.profit), 'num bold']]} />
+            {store?.featRepairmen && (
+              <MiniTable title={t('insights.by_repairman')} icon={Wrench} rows={insights.byRepairman} empty={t('insights.none')}
+                cols={[[t('insights.col_name'), r => r.name], [t('insights.col_count'), r => r.count, 'num'], [t('insights.col_revenue'), r => money(r.revenue), 'num'], [t('insights.col_share'), r => money(r.share), 'num'], [t('insights.col_shop'), r => money(r.shop), 'num bold']]} />
+            )}
+            <MiniTable title={t('insights.products')} icon={Package} rows={insights.products} empty={t('insights.none')}
+              cols={[[t('insights.col_name'), r => t(`inventory.types.${r.type.toLowerCase()}`, { defaultValue: r.type })], [t('insights.col_qty'), r => r.quantity, 'num'], [t('insights.col_revenue'), r => money(r.revenue), 'num'], [t('insights.col_profit'), r => money(r.profit), 'num bold']]} />
+            <MiniTable title={t('insights.slow_stock')} icon={Package} rows={insights.slowStock?.items} empty={t('insights.slow_none', { days: insights.slowStock?.days })}
+              hint={insights.slowStock?.count ? t('insights.slow_hint', { days: insights.slowStock.days, count: insights.slowStock.count, total: money(insights.slowStock.total) }) : null}
+              cols={[[t('insights.col_name'), r => r.name], [t('insights.col_qty'), r => r.quantity, 'num'], [t('insights.col_value'), r => money(r.value), 'num bold']]} />
+          </div>
         </>
+      )}
+    </div>
+  )
+}
+
+// cols: [header, cell(row), 'num' | 'num bold']
+function MiniTable({ title, icon: Icon, rows = [], cols, empty, hint }) {
+  return (
+    <div className="bg-card border border-border rounded-xl p-6">
+      <div className="flex items-center gap-2 mb-1"><Icon className="w-5 h-5 text-primary" /><h2 className="font-semibold text-foreground">{title}</h2></div>
+      {hint && <p className="text-xs text-muted-foreground mb-3">{hint}</p>}
+      {rows.length === 0 ? <p className="text-xs text-muted-foreground italic mt-3">{empty}</p> : (
+        <table className="w-full text-sm mt-3">
+          <thead><tr className="text-xs text-muted-foreground">{cols.map(([h, , k = '']) => <th key={h} className={`pb-2 font-medium ${k.includes('num') ? 'text-end' : 'text-start'}`}>{h}</th>)}</tr></thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} className="border-t border-border">
+                {cols.map(([h, cell, k = '']) => <td key={h} className={`py-1.5 ${k.includes('num') ? 'text-end tabular-nums' : 'truncate max-w-[180px]'} ${k.includes('bold') ? 'font-semibold' : ''}`}>{cell(r)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   )

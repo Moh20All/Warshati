@@ -8,6 +8,7 @@ import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { nextItemRef, nextNumber } from '../lib/numbering.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -227,6 +228,7 @@ router.post('/:kind', async (req, res) => {
       skipped.push({ line, name: r.name, reason })
     }
   }
+  audit(req, 'import_run', kind, { created, skipped: skipped.length })
   res.json({ created, skipped })
 })
 

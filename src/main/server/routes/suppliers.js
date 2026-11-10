@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -92,12 +93,11 @@ router.delete('/:id', async (req, res) => {
     })
     if (!supplier) return res.status(404).json({ error: 'Supplier not found' })
     if (supplier.supplierDebts.some(d => parseFloat(d.remaining) > 0)) return res.status(400).json({ error: 'OWED' })
-    if (supplier._count.purchaseOrders || supplier._count.supplierDebts) {
-      await prisma.supplier.update({ where: { id: supplier.id }, data: { isActive: false } })
-      return res.json({ success: true, archived: true })
-    }
-    await prisma.supplier.delete({ where: { id: supplier.id } })
-    res.json({ success: true })
+    const archived = !!(supplier._count.purchaseOrders || supplier._count.supplierDebts)
+    if (archived) await prisma.supplier.update({ where: { id: supplier.id }, data: { isActive: false } })
+    else await prisma.supplier.delete({ where: { id: supplier.id } })
+    audit(req, 'supplier_delete', supplier.name, { archived })
+    res.json(archived ? { success: true, archived: true } : { success: true })
   } catch (err) {
     logger.error('Delete supplier error:', err)
     res.status(500).json({ error: 'Internal server error' })

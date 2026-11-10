@@ -6,6 +6,7 @@ import { generateSaleNumber } from './sales.js'
 import { nextTicketNumber } from '../lib/numbering.js'
 import { rememberDevice } from '../lib/catalog.js'
 import { repairmanShare } from './repairmen.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -224,6 +225,11 @@ router.put('/:id', async (req, res) => {
         include: { customer: true }
       })
     })
+    // A repair price changed after it was set is worth a line in the activity log
+    const newCost = parseFloat(finalCost)
+    if (Number.isFinite(newCost) && current.finalCost != null && newCost !== parseFloat(current.finalCost)) {
+      audit(req, 'ticket_price', current.ticketNumber, { price: [Number(current.finalCost), newCost] })
+    }
     res.json({ ticket })
   } catch (err) {
     logger.error('Update ticket error:', err)
@@ -252,6 +258,7 @@ router.delete('/:id', requireRole('OWNER'), async (req, res) => {
       // Its check-in is waiting again
       if (ticket.checkInId) await tx.checkIn.update({ where: { id: ticket.checkInId }, data: { convertedAt: null } })
     })
+    audit(req, 'ticket_delete', ticket.ticketNumber, { device: `${ticket.deviceBrand} ${ticket.deviceModel}`, parts: ticket.parts.length })
     res.json({ success: true })
   } catch (err) {
     logger.error('Delete ticket error:', err)
@@ -358,6 +365,7 @@ router.post('/:id/transition', async (req, res) => {
         include: { customer: true, sale: true }
       })
     })
+    if (status === 'CANCELLED') audit(req, 'ticket_cancel', ticket.ticketNumber, { device: `${ticket.deviceBrand} ${ticket.deviceModel}` })
     res.json({ ticket: updated })
   } catch (err) {
     logger.error('Transition error:', err)

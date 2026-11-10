@@ -2,6 +2,7 @@ import { Router } from 'express'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
@@ -159,6 +160,8 @@ router.post('/:id/payments/:paymentId/cancel', requireRole('OWNER'), async (req,
         include: { customer: true, payments: { orderBy: { paidAt: 'desc' } } }
       })
     })
+    const reversed = debt.payments.find(p => p.reversalOf === req.params.paymentId)
+    audit(req, 'payment_cancel', debt.customer?.name, { kind: 'customer', amount: Math.abs(Number(reversed?.amount || 0)), reason: req.body.reason || '' })
     res.json({ debt })
   } catch (err) {
     if (err instanceof DebtError) return res.status(400).json({ error: err.message })
