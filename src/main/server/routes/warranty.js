@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { generateTicketNumber, warrantyFor } from './tickets.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('repairs'))
 
 // GET /api/warranty — list all claims
 router.get('/', async (req, res) => {

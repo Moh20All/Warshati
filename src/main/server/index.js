@@ -24,6 +24,7 @@ import activityRoutes from './routes/activity.js'
 import dashboardRoutes from './routes/dashboard.js'
 import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
+import { recordWrites } from './lib/activity.js'
 
 import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, NETWORK_PLAN } from '../network.js'
 
@@ -47,6 +48,9 @@ app.use('/api', (req, res, next) => {
     if (getConfig().mode === 'host' && getPlan() < NETWORK_PLAN) return res.status(403).json({ error: 'not_vip' })
     res.status(403).json({ error: 'Forbidden' })
 })
+
+// Every change made through the API gets a line in the activity log
+app.use('/api', recordWrites)
 
 // A connected PC checks the pairing code and learns the shop's name
 app.get('/api/network/hello', async (_req, res) => {

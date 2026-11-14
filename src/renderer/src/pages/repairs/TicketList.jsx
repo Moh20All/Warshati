@@ -12,6 +12,7 @@ import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Modal from '../../components/ui/Modal'
 import Button from '../../components/ui/Button'
+import { useAuth } from '../../lib/auth'
 
 const statusOptions = ['', 'DIAGNOSING', 'WAITING_PARTS', 'IN_REPAIR', 'DONE', 'DELIVERED', 'CANCELLED']
 
@@ -21,6 +22,7 @@ export default function TicketList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const { ownRepairsOnly } = useAuth()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [costModal, setCostModal] = useState(null)
@@ -39,7 +41,8 @@ export default function TicketList() {
     IN_REPAIR: [
       { label: t('repairs.tickets.actions.mark_done'), next: 'DONE', icon: CheckCircle, color: 'text-success', needsCost: true }
     ],
-    DONE: [
+    // Handing back takes the payment: at the counter, not by the repairman
+    DONE: ownRepairsOnly ? [] : [
       { label: t('repairs.tickets.actions.delivered'), next: 'DELIVERED', icon: Truck, color: 'text-primary', needsPayment: true }
     ]
   }
@@ -126,8 +129,8 @@ export default function TicketList() {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.tickets.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('repairs.tickets.subtitle')}</p></div>
-        <Button onClick={() => navigate('/repairs/tickets/new')}><Plus className="h-4 w-4" /> {t('repairs.tickets.new')}</Button>
+        <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairs.tickets.title')}</h1><p className="text-sm text-muted-foreground mt-1">{ownRepairsOnly ? t('repairmen.my_repairs') : t('repairs.tickets.subtitle')}</p></div>
+        {!ownRepairsOnly && <Button onClick={() => navigate('/repairs/tickets/new')}><Plus className="h-4 w-4" /> {t('repairs.tickets.new')}</Button>}
       </div>
 
       <div className="flex items-center gap-3 mb-4">

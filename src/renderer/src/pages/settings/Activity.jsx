@@ -9,7 +9,7 @@ import Table from '../../components/ui/Table'
 
 const select = 'h-9 rounded-sm border border-input bg-popover px-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
-/** Who did what (owner): deletions, price changes, cancelled payments, refunds, discounts, imports. */
+/** Who did what: every change made in the shop (the API writes the lines itself, see lib/activity.js). */
 export default function Activity() {
   const { t } = useTranslation()
   const cur = useCurrency()
@@ -19,11 +19,11 @@ export default function Activity() {
     queryKey: ['activity', filter],
     queryFn: () => api.get('/activity', { params: Object.fromEntries(Object.entries(filter).filter(([, v]) => v)) }).then(r => r.data)
   })
-  const { data: users = [] } = useQuery({ queryKey: ['users'], queryFn: () => api.get('/users').then(r => r.data.users ?? r.data) })
+  const users = data?.users || []
 
   // { price: [9000, 9500], reason: 'typo' } → "Price: 9,000 → 9,500 · Reason: typo"
   const money = (k) => ['price', 'buy', 'sell', 'amount', 'discount', 'total'].includes(k)
-  const val = (k, v) => typeof v === 'number' ? (money(k) ? `${v.toLocaleString()} ${cur}` : v.toLocaleString()) : k === 'kind' ? t(`activity.kind_${v}`) : v === true ? '✓' : String(v)
+  const val = (k, v) => typeof v === 'number' ? (money(k) ? `${v.toLocaleString()} ${cur}` : v.toLocaleString()) : k === 'kind' ? t(`activity.kind_${v}`) : k === 'status' ? t(`repairs.statuses.${v}`, { defaultValue: v }) : v === true ? '✓' : String(v)
   const details = (d) => Object.entries(d || {})
     .filter(([, v]) => v !== null && v !== undefined && v !== '' && v !== false)
     .map(([k, v]) => `${t(`activity.d.${k}`, { defaultValue: k })}: ${Array.isArray(v) ? `${val(k, v[0])} → ${val(k, v[1])}` : val(k, v)}`)

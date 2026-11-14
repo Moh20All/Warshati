@@ -294,6 +294,20 @@ async function applyMigrations(prismaDb) {
       logToDisk(`Activity log migration failed: ${err.message}`);
     }
 
+    // v1.9: per-account permissions and repairman logins (own try/catch)
+    try {
+      const have = (await prismaDb.$queryRawUnsafe(`PRAGMA table_info("User")`)).map(c => c.name);
+      for (const name of ['permissions', 'repairmanId']) {
+        if (!have.includes(name)) {
+          logToDisk(`Migrating User table: adding ${name}`);
+          await prismaDb.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN "${name}" TEXT`);
+        }
+      }
+      await prismaDb.$executeRawUnsafe(`CREATE UNIQUE INDEX IF NOT EXISTS "User_repairmanId_key" ON "User"("repairmanId")`);
+    } catch (err) {
+      logToDisk(`Permissions migration failed: ${err.message}`);
+    }
+
     // Every stock item has a ref (typed, or REF-xxxx) so items without a barcode can be found too
     try {
       const filled = await fillMissingRefs(prismaDb);

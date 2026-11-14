@@ -4,6 +4,7 @@ import prisma from '../lib/prisma.js'
 import { signToken } from '../lib/jwt.js'
 import { requireAuth } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { publicUser } from '../lib/permissions.js'
 import { DEFAULT_WARRANTY_DAYS } from './tickets.js'
 
 const router = Router()
@@ -56,16 +57,7 @@ router.post('/login', async (req, res) => {
         }
         failures.delete(email)
 
-        const token = signToken(user)
-        res.json({
-            token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
-        })
+        res.json({ token: signToken(user), user: publicUser(user) })
     } catch (err) {
         logger.error('Login error:', err)
         res.status(500).json({ error: 'Internal server error' })
@@ -108,11 +100,8 @@ router.post('/recover', async (req, res) => {
 // GET /api/auth/me
 router.get('/me', requireAuth, async (req, res) => {
     try {
-        const user = await prisma.user.findUnique({
-            where: { id: req.user.id },
-            select: { id: true, name: true, email: true, role: true, isActive: true }
-        })
-        res.json({ user })
+        const user = await prisma.user.findUnique({ where: { id: req.user.id } })
+        res.json({ user: publicUser(user) })
     } catch (err) {
         logger.error('Me error:', err)
         res.status(500).json({ error: 'Internal server error' })
@@ -160,12 +149,7 @@ router.post('/setup', async (req, res) => {
         res.json({
             store: { id: store.id, name: store.name },
             token,
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            user: publicUser(user)
         })
     } catch (err) {
         logger.error('[Raw Prisma Error in /api/auth/setup]:', err)

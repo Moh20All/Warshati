@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { Plus, Pencil, ArrowLeft, Wallet, Undo2 } from 'lucide-react'
+import { Plus, Pencil, ArrowLeft, Wallet, Undo2, KeyRound } from 'lucide-react'
 import api from '../../lib/api'
 import { useCurrency } from '../../lib/currency'
 import { PAY_TYPES } from '../../lib/repairmen'
@@ -12,8 +12,10 @@ import Input from '../../components/ui/Input'
 import Table from '../../components/ui/Table'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
 import StatusBadge from '../../components/ui/StatusBadge'
+import PermissionPicker from '../../components/PermissionPicker'
+import { useAuth } from '../../lib/auth'
 
-const emptyForm = { name: '', phone: '', payType: 'PROFIT_PERCENT', payValue: '', isActive: true }
+const emptyForm = { name: '', phone: '', payType: 'PROFIT_PERCENT', payValue: '', isActive: true, login: false, email: '', password: '', permissions: [] }
 
 /** Repairmen paid per repair (Settings → Store → Features → Repairmen). Click one to see his repairs and pay him. */
 export default function Repairmen() {
@@ -21,6 +23,7 @@ export default function Repairmen() {
   const cur = useCurrency()
   const toast = useToast()
   const queryClient = useQueryClient()
+  const { isOwner } = useAuth() // only an owner gives a login or changes what it may do
   const [edit, setEdit] = useState(null) // {} = new, or the repairman being edited
   const [form, setForm] = useState(emptyForm)
   const [openId, setOpenId] = useState(null)
@@ -28,7 +31,8 @@ export default function Repairmen() {
   const money = (v) => `${Number(v || 0).toLocaleString()} ${cur}`
   const rule = (r) => r.payType === 'FIXED' ? t('repairmen.rule_fixed', { amount: money(r.payValue) }) : t(`repairmen.rule_${r.payType === 'PRICE_PERCENT' ? 'price' : 'profit'}`, { value: Number(r.payValue) })
 
-  const { data: list = [], isLoading } = useQuery({ queryKey: ['repairmen'], queryFn: () => api.get('/repairmen').then(r => r.data.repairmen) })
+  const { data, isLoading } = useQuery({ queryKey: ['repairmen', 'manage'], queryFn: () => api.get('/repairmen').then(r => r.data) })
+  const list = data?.repairmen || []
   const { data: page } = useQuery({ queryKey: ['repairman', openId], queryFn: () => api.get(`/repairmen/${openId}`).then(r => r.data.repairman), enabled: !!openId })
   // Empty amount = pay what he is owed
   const payValue = parseFloat(payAmount === '' ? page?.owed : payAmount) || 0
@@ -52,10 +56,23 @@ export default function Repairmen() {
     onError: (err) => toast.error(err.response?.data?.error || 'Failed')
   })
 
-  const openEdit = (r) => { setEdit(r || {}); setForm(r ? { name: r.name, phone: r.phone || '', payType: r.payType, payValue: String(Number(r.payValue)), isActive: r.isActive } : emptyForm) }
+  const openEdit = (r) => {
+    setEdit(r || {})
+    setForm(r ? {
+      name: r.name, phone: r.phone || '', payType: r.payType, payValue: String(Number(r.payValue)), isActive: r.isActive,
+      login: !!r.account?.isActive, email: r.account?.email || '', password: '', permissions: r.account?.permissions || []
+    } : emptyForm)
+  }
+  // His login travels with him: asked for, changed, or switched off (never sent when there is none to touch)
+  const payload = () => {
+    const { login, email, password, permissions, ...repairman } = form
+    const account = login ? { enabled: true, email, password, permissions } : edit?.account ? { enabled: false } : undefined
+    return { ...repairman, payValue: parseFloat(form.payValue) || 0, ...(isOwner && account ? { account } : {}) }
+  }
+  const loginMissing = isOwner && form.login && (!form.email.trim() || (!edit?.account && !form.password))
 
   const columns = [
-    { key: 'name', label: t('repairmen.col_name'), render: (v, r) => <span className={`font-medium ${r.isActive ? '' : 'text-muted-foreground line-through'}`}>{v}</span> },
+    { key: 'name', label: t('repairmen.col_name'), render: (v, r) => <span className={`font-medium inline-flex items-center gap-1.5 ${r.isActive ? '' : 'text-muted-foreground line-through'}`}>{v}{r.account?.isActive && <KeyRound className="h-3.5 w-3.5 text-primary" aria-label={t('repairmen.has_login')} />}</span> },
     { key: 'payType', label: t('repairmen.col_rule'), render: (_, r) => rule(r) },
     { key: 'owed', label: t('repairmen.col_owed'), render: (v) => v > 0 ? <span className="font-semibold text-destructive">{money(v)}</span> : money(v) },
     { key: 'actions', label: '', className: 'text-right', render: (_, r) => (
@@ -65,9 +82,9 @@ export default function Repairmen() {
 
   return (
     <div className="animate-fade-in max-w-3xl">
-      <Link to="/settings/store" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline mb-2">
+      {isOwner && <Link to="/settings/store" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline mb-2">
         <ArrowLeft className="h-3.5 w-3.5 rtl:rotate-180" /> {t('settings.title')}
-      </Link>
+      </Link>}
       <div className="flex items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('repairmen.title')}</h1>
@@ -80,8 +97,8 @@ export default function Repairmen() {
         : <Table columns={columns} data={list} emptyTitle={t('repairmen.empty')} emptyDescription={t('repairmen.empty_desc')} onRowClick={(r) => setOpenId(r.id)} />}
 
       {/* Add / edit */}
-      <Modal open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? t('repairmen.title_edit') : t('repairmen.btn_add')}
-        footer={<><Button variant="outline" onClick={() => setEdit(null)}>{t('inventory.modal.cancel')}</Button><Button onClick={() => save.mutate({ ...form, payValue: parseFloat(form.payValue) || 0 })} loading={save.isPending} disabled={!form.name.trim()}>{t('settings.save')}</Button></>}>
+      <Modal open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? t('repairmen.title_edit') : t('repairmen.btn_add')} size={isOwner ? 'lg' : 'md'}
+        footer={<><Button variant="outline" onClick={() => setEdit(null)}>{t('inventory.modal.cancel')}</Button><Button onClick={() => save.mutate(payload())} loading={save.isPending} disabled={!form.name.trim() || loginMissing}>{t('settings.save')}</Button></>}>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <Input label={t('repairmen.col_name')} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required autoFocus />
@@ -102,6 +119,25 @@ export default function Repairmen() {
             <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /> {t('repairmen.active')}
             </label>
+          )}
+          {/* His login: he signs in like anyone and sees the repairs given to him */}
+          {isOwner && (
+            <div className="space-y-3 pt-3 border-t border-border">
+              <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                <input type="checkbox" checked={form.login} onChange={e => setForm({ ...form, login: e.target.checked })} /> <KeyRound className="h-4 w-4 text-primary" /> {t('repairmen.login_enable')}
+              </label>
+              <p className="text-xs text-muted-foreground">{t('repairmen.login_hint')}</p>
+              {form.login && <>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label={t('users.lbl_email')} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
+                  <Input label={edit?.account ? t('users.lbl_pwd_edit') : t('users.lbl_pwd')} type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required={!edit?.account} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">{t('repairmen.login_extra')}</label>
+                  <PermissionPicker groups={data?.permissionGroups} value={form.permissions} onChange={(permissions) => setForm({ ...form, permissions })} />
+                </div>
+              </>}
+            </div>
           )}
         </div>
       </Modal>

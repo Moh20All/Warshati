@@ -42,9 +42,16 @@ try {
   check('staff cannot read the log', (await s('GET', '/activity')).status, 403)
   const log = (await o('GET', '/activity')).data
   const actions = log.entries.map(e => e.action).sort().join()
-  check('every sensitive action is recorded once',
-    actions, 'expense_delete,inventory_price,inventory_quantity,payment_cancel,sale_discount,sale_refund,supplier_delete,ticket_cancel,ticket_delete,ticket_price')
+  // Every change is there once: the detailed line (price, cancel, delete…) replaces the plain one
+  check('everything done in the shop is recorded once',
+    actions, 'customer_create,debt_create,debt_payment,expense_create,expense_delete,inventory_create,inventory_create,inventory_price,inventory_quantity,inventory_update,login,payment_cancel,repairman_create,sale_create,sale_discount,sale_refund,settings_update,supplier_create,supplier_delete,ticket_cancel,ticket_create,ticket_create,ticket_create,ticket_delete,ticket_price,user_create')
   const by = (a) => log.entries.find(e => e.action === a)
+  const first = (a) => log.entries.filter(e => e.action === a).at(-1) // the list is newest first
+  check('a new ticket: who, number and device', `${first('ticket_create').userName}|${first('ticket_create').label}|${first('ticket_create').details.device}`, `Staff|${t1.ticketNumber}|Samsung A54`)
+  check('a plain sale: number and total', `${by('sale_create').label.startsWith('INV-')}|${by('sale_create').details.total}`, 'true|300')
+  check('a payment on a debt: whose and how much', `${by('debt_payment').label}|${by('debt_payment').details.amount}`, 'Karim|2000')
+  check('signing in', `${by('login').userName}|${by('login').label}`, 'Staff|Staff')
+  check('the "who" filter lists every account', log.users.map(u => u.name).sort().join(), 'Owner,Staff')
   check('price change keeps old → new', JSON.stringify(by('inventory_price').details), '{"sell":[7000,7500]}')
   check('stock typed by hand keeps old → new', JSON.stringify(by('inventory_quantity').details), '{"quantity":[5,4]}')
   check('the discount says who gave it', `${by('sale_discount').userName}|${by('sale_discount').details.discount}`, 'Staff|100')
@@ -55,7 +62,7 @@ try {
   check('deleted expense with its amount', `${by('expense_delete').label}|${by('expense_delete').details.amount}`, 'Loyer|20000')
   check('filter by action', (await o('GET', '/activity?action=ticket_cancel')).data.entries.length, 1)
   check('filter by user', (await o('GET', `/activity?userId=${by('sale_discount').userId}`)).data.entries.every(e => e.userName === 'Staff'), true)
-  check('total counts everything', log.total, 10)
+  check('total counts everything', log.total, 26)
 
   // ── Insights ──
   await o('POST', `/tickets/${t1.id}/transition`, { status: 'DONE', finalCost: 9500, partsCost: 4000 })

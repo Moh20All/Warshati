@@ -2,6 +2,23 @@
 
 All notable changes to Warshati will be documented in this file.
 
+## Next version — not released yet
+Permissions for each account, repairmen who sign in, and an activity log that records everything
+
+### 🚀 Major Upgrades
+- **You choose what each user can do:** Settings → Users → edit a user and tick what the account may open and do. Daily work: repairs, sales, trade-ins, inventory, customers, customer debts, expenses, daily close. Management: suppliers, repairmen, monthly summary, activity log. Sensitive actions: change the stock, refunds, corrections (delete tickets, customers and expenses; cancel payments; add old debts), see the profit. The menu shows only the pages ticked, and the app refuses the rest. A change works at once, without signing in again. Users you already have keep exactly what staff could do before. Owners can still do everything; users, shop settings, backup and network stay the owner's.
+- **Repairmen can sign in:** on a repairman's form, tick "He can sign in to the app" and give him an email and a password. He signs in on any PC of the shop and the Tickets page shows only the repairs given to him. On his repair he writes the diagnosis, takes parts from stock and moves it to "in repair", "waiting for parts" and "done". Handing the device back, the invoice, the deposit, the customer and cancelling stay at the counter. You can tick more for him (for example Sales) like for any user. Repairmen keep their own page and are not mixed with the users. Switching a repairman off closes his login.
+- **The activity log records everything:** every change made in the shop now gets a line with who did it and when: tickets opened, changed, moved to another status, parts taken; sales; debt payments; customers, items and suppliers added or changed; purchases; expenses; trade-ins; warranty; daily close; users and settings; sign-ins. The detailed lines (price changes, refunds, cancellations, deletions) are still there. It no longer depends on each screen remembering to write its line: the app writes it for every change.
+
+### ✨ Improvements
+- **Shop network on the Pro plan:** several PCs on the same data now come with Pro as well as VIP.
+- **Repairmen in the menu:** when the feature is on, Repairmen has its own entry under Settings.
+- **Mobile app:** the same tick boxes for users, and the login for repairmen.
+
+### 🛠️ Fixed
+- Saving a ticket after emptying the estimate box failed. It saves now.
+- Adding a stock item without a sell price showed a general error. It now says the price is missing.
+
 ## v1.8.1 — 08/11/2026
 Import from Excel, full control of suppliers, tickets and stock refs
 

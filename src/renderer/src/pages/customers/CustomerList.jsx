@@ -15,7 +15,7 @@ import { useAuth } from '../../lib/auth'
 
 export default function Customers() {
   const { t } = useTranslation()
-  const { isOwner } = useAuth()
+  const { can } = useAuth()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -80,7 +80,7 @@ export default function Customers() {
           <p className="text-sm text-muted-foreground mt-1">{t('customers.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          {isOwner && <ImportButton kind="customers" />}
+          {can('customers') && <ImportButton kind="customers" />}
           <Button onClick={() => setShowAdd(true)}>
             <Plus className="h-4 w-4" /> {t('customers.new_customer')}
           </Button>

@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('customers', 'repairs', 'sales', 'debts', 'tradeins'))
 
 // GET /api/customers — list with search
 router.get('/', async (req, res) => {
@@ -118,7 +119,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE /api/customers/:id
-router.delete('/:id', requireRole('OWNER'), async (req, res) => {
+router.delete('/:id', requirePerm('corrections'), async (req, res) => {
   try {
     await prisma.customer.delete({ where: { id: req.params.id } })
     res.json({ success: true })

@@ -21,7 +21,7 @@ import { KBD_CLASS } from '../../lib/hotkeys'
 
 export default function Sidebar({ onShowShortcuts }) {
   const { t } = useTranslation()
-  const { isOwner } = useAuth()
+  const { isOwner, can } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const { data: store } = useQuery({ queryKey: ['store'], queryFn: () => api.get('/store').then(r => r.data.store) })
@@ -31,8 +31,8 @@ export default function Sidebar({ onShowShortcuts }) {
       group: t('navigation.groups.main'),
       items: [
         { name: t('navigation.dashboard'), path: '/dashboard', icon: LayoutDashboard },
-        { name: t('navigation.customers'), path: '/customers', icon: Contact },
-        { name: t('navigation.inventory'), path: '/inventory', icon: Package, kbd: 'F7' },
+        { name: t('navigation.customers'), path: '/customers', icon: Contact, perm: ['customers'] },
+        { name: t('navigation.inventory'), path: '/inventory', icon: Package, kbd: 'F7', perm: ['inventory', 'inventory_edit'] },
         { name: t('navigation.devices'), path: '/devices', icon: Smartphone }
       ]
     },
@@ -40,27 +40,27 @@ export default function Sidebar({ onShowShortcuts }) {
       group: t('navigation.groups.repairs'),
       items: [
         // Check-in can be switched off (Settings → Store → Features)
-        ...(store?.featCheckIn === false ? [] : [{ name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList, kbd: 'F4' }]),
-        { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket, kbd: 'F6' },
-        { name: t('navigation.warranty'), path: '/repairs/warranty', icon: Shield },
-        { name: t('navigation.trade_ins'), path: '/repairs/trade-ins', icon: ArrowLeftRight }
+        ...(store?.featCheckIn === false ? [] : [{ name: t('navigation.check_in'), path: '/repairs/checkins', icon: ClipboardList, kbd: 'F4', perm: ['repairs'] }]),
+        { name: t('navigation.tickets'), path: '/repairs/tickets', icon: Ticket, kbd: 'F6', perm: ['repairs', 'my_repairs'] },
+        { name: t('navigation.warranty'), path: '/repairs/warranty', icon: Shield, perm: ['repairs'] },
+        { name: t('navigation.trade_ins'), path: '/repairs/trade-ins', icon: ArrowLeftRight, perm: ['tradeins'] }
       ]
     },
     {
       group: t('navigation.groups.sales'),
       items: [
-        { name: t('navigation.pos'), path: '/sales/pos', icon: ShoppingCart, kbd: 'F2' },
-        { name: t('navigation.invoices'), path: '/sales/invoices', icon: Receipt }
+        { name: t('navigation.pos'), path: '/sales/pos', icon: ShoppingCart, kbd: 'F2', perm: ['sales'] },
+        { name: t('navigation.invoices'), path: '/sales/invoices', icon: Receipt, perm: ['sales'] }
       ]
     },
     {
       group: t('navigation.groups.finance'),
       items: [
-        { name: t('navigation.expenses'), path: '/finance/expenses', icon: CreditCard },
-        { name: t('navigation.suppliers'), path: '/finance/suppliers', icon: BookOpen, ownerOnly: true },
-        { name: t('navigation.debt_ledger'), path: '/finance/debts', icon: FileWarning, kbd: 'F8' },
-        { name: t('navigation.daily_close'), path: '/finance/daily-close', icon: CalendarCheck, kbd: 'F9' },
-        { name: t('navigation.monthly_summary'), path: '/finance/monthly-summary', icon: BarChart3, ownerOnly: true }
+        { name: t('navigation.expenses'), path: '/finance/expenses', icon: CreditCard, perm: ['expenses'] },
+        { name: t('navigation.suppliers'), path: '/finance/suppliers', icon: BookOpen, perm: ['suppliers'] },
+        { name: t('navigation.debt_ledger'), path: '/finance/debts', icon: FileWarning, kbd: 'F8', perm: ['debts'] },
+        { name: t('navigation.daily_close'), path: '/finance/daily-close', icon: CalendarCheck, kbd: 'F9', perm: ['daily_close'] },
+        { name: t('navigation.monthly_summary'), path: '/finance/monthly-summary', icon: BarChart3, perm: ['reports'] }
       ]
     },
     {
@@ -68,7 +68,9 @@ export default function Sidebar({ onShowShortcuts }) {
       items: [
         { name: t('navigation.store'), path: '/settings/store', icon: Store, ownerOnly: true },
         { name: t('navigation.users'), path: '/settings/users', icon: Users, ownerOnly: true },
-        { name: t('activity.title'), path: '/settings/activity', icon: History, ownerOnly: true },
+        // Repairmen paid per repair can be switched on in Settings → Store → Features
+        ...(store?.featRepairmen ? [{ name: t('repairmen.title'), path: '/settings/repairmen', icon: Wrench, perm: ['repairmen'] }] : []),
+        { name: t('activity.title'), path: '/settings/activity', icon: History, perm: ['activity'] },
         // A connected PC's data (and its backups) live on the main PC
       ...(isConnectedPc() ? [] : [{ name: t('navigation.backup'), path: '/settings/backup', icon: Database, ownerOnly: true }]),
       { name: t('navigation.network', 'Shop network'), path: '/settings/network', icon: Network, ownerOnly: true },
@@ -76,7 +78,9 @@ export default function Sidebar({ onShowShortcuts }) {
         { name: t('navigation.about', 'About App'), path: '/settings/about', icon: Info }
       ]
     }
-  ].map(section => ({ ...section, items: section.items.filter(i => isOwner || !i.ownerOnly) }))
+  // Each account sees the pages ticked for it (perm: any one of them is enough); ownerOnly stays the owner's
+  ].map(section => ({ ...section, items: section.items.filter(i => (i.ownerOnly ? isOwner : !i.perm || can(...i.perm))) }))
+    .filter(section => section.items.length)
 
   return (
     <aside className={`flex flex-col h-screen bg-muted border-e border-border transition-all duration-200 ${collapsed ? 'w-16' : 'w-56'}`}>

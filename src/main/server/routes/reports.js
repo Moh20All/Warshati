@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { dayRange, monthRange, loadMovements, summarize } from '../lib/finance.js'
 
 const router = Router()
 router.use(requireAuth)
-router.use(requireRole('OWNER'))
+router.use(requirePerm('reports'))
 
 // GET /api/reports/monthly?month=YYYY-MM
 router.get('/monthly', async (req, res) => {

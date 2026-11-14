@@ -12,7 +12,7 @@ import { usePrint } from '../lib/usePrint'
 
 export default function Dashboard() {
   const cur = useCurrency()
-  const { user, isOwner } = useAuth()
+  const { user, can } = useAuth()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const print = usePrint()
@@ -30,13 +30,14 @@ export default function Dashboard() {
 
   const { data: todayFigures } = useQuery({
     queryKey: ['daily-close-preview'],
-    queryFn: () => api.get('/daily-close/preview').then(r => r.data)
+    queryFn: () => api.get('/daily-close/preview').then(r => r.data),
+    enabled: can('daily_close')
   })
 
   const activeTickets = dash?.activeTickets || []
-  const activeCount = dash?.tickets.active || 0
-  const readyCount = dash?.tickets.ready || 0
-  const urgentTickets = dash?.tickets.urgent || 0
+  const activeCount = dash?.tickets?.active || 0
+  const readyCount = dash?.tickets?.ready || 0
+  const urgentTickets = dash?.tickets?.urgent || 0
   const todaySales = dash?.todaySales || []
   const lowStock = dash?.lowStock
 
@@ -44,8 +45,8 @@ export default function Dashboard() {
   const netProfit = todayFigures?.netProfit || 0
   const deliveredToday = todaySales.filter(s => s.repairTicketId).length
 
-  const openDebts = dash?.debts.open || 0
-  const totalDebt = dash?.debts.total || 0
+  const openDebts = dash?.debts?.open || 0
+  const totalDebt = dash?.debts?.total || 0
 
   const printOverview = () => {
     const dir = i18n.dir()
@@ -94,15 +95,16 @@ export default function Dashboard() {
     print.print(html, 'report')
   }
 
+  // Each card is there only for an account that may see it
   const kpis = [
-    { label: t('dashboard.pending_repairs'), value: activeCount, icon: Ticket, color: 'text-info', sub: readyCount > 0 ? `${readyCount} ready for pickup` : (urgentTickets > 0 ? `${urgentTickets} urgent` : 'No active jobs'), subColor: readyCount > 0 ? 'text-success' : 'text-muted-foreground', onClick: () => navigate('/repairs/tickets') },
-    // Staff see today's drawer cash instead of the shop's profit
-    isOwner
+    dash?.tickets && { label: t('dashboard.pending_repairs'), value: activeCount, icon: Ticket, color: 'text-info', sub: readyCount > 0 ? `${readyCount} ready for pickup` : (urgentTickets > 0 ? `${urgentTickets} urgent` : 'No active jobs'), subColor: readyCount > 0 ? 'text-success' : 'text-muted-foreground', onClick: () => navigate('/repairs/tickets') },
+    // Without the Profit permission: today's drawer cash instead of the shop's profit
+    !can('daily_close') ? null : can('profit')
       ? { label: t('dashboard.net_profit'), value: `${netProfit.toLocaleString()} ${cur}`, icon: TrendingUp, color: 'text-success', sub: `${todaySales.length - deliveredToday} sales, ${deliveredToday} delivered repairs`, onClick: () => navigate('/finance/daily-close') }
       : { label: t('finance.reports.stat_net_cash'), value: `${(todayFigures?.netCash || 0).toLocaleString()} ${cur}`, icon: TrendingUp, color: 'text-success', sub: `${todaySales.length - deliveredToday} sales, ${deliveredToday} delivered repairs`, onClick: () => navigate('/finance/daily-close') },
-    { label: t('dashboard.outstanding_debt'), value: `${totalDebt.toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning', sub: `${openDebts} entries`, onClick: () => navigate('/finance/debts') },
-    { label: t('dashboard.low_stock'), value: lowStock ?? '—', icon: Package, color: 'text-destructive', onClick: () => navigate('/inventory') }
-  ]
+    can('debts') && { label: t('dashboard.outstanding_debt'), value: `${totalDebt.toLocaleString()} ${cur}`, icon: CreditCard, color: 'text-warning', sub: `${openDebts} entries`, onClick: () => navigate('/finance/debts') },
+    can('inventory', 'inventory_edit') && { label: t('dashboard.low_stock'), value: lowStock ?? '—', icon: Package, color: 'text-destructive', onClick: () => navigate('/inventory') }
+  ].filter(Boolean)
 
   const recentTickets = dash?.recentTickets || []
   const recentSales = dash?.recentSales || []
@@ -124,12 +126,12 @@ export default function Dashboard() {
       {/* Quick Access Buttons */}
       <div className="flex flex-wrap gap-2 mb-6">
         {[
-          { label: t('dashboard.new_ticket'), icon: Plus, path: '/repairs/tickets/new', color: 'bg-primary text-primary-foreground border-primary hover:bg-primary-hover' },
-          { label: t('dashboard.new_sale'), icon: ShoppingCart, path: '/sales/pos', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
-          { label: t('dashboard.add_customer'), icon: UserPlus, path: '/customers?new=1', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
-          { label: t('dashboard.add_expense'), icon: Receipt, path: '/finance/expenses?new=1', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
-          { label: t('dashboard.daily_close'), icon: CalendarCheck, path: '/finance/daily-close', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
-        ].map(btn => (
+          { label: t('dashboard.new_ticket'), icon: Plus, path: '/repairs/tickets/new', perm: 'repairs', color: 'bg-primary text-primary-foreground border-primary hover:bg-primary-hover' },
+          { label: t('dashboard.new_sale'), icon: ShoppingCart, path: '/sales/pos', perm: 'sales', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.add_customer'), icon: UserPlus, path: '/customers?new=1', perm: 'customers', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.add_expense'), icon: Receipt, path: '/finance/expenses?new=1', perm: 'expenses', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+          { label: t('dashboard.daily_close'), icon: CalendarCheck, path: '/finance/daily-close', perm: 'daily_close', color: 'bg-secondary text-secondary-foreground border-transparent hover:bg-accent hover:text-accent-foreground' },
+        ].filter(btn => can(btn.perm)).map(btn => (
           <button
             key={btn.label}
             onClick={() => navigate(btn.path)}
@@ -158,8 +160,8 @@ export default function Dashboard() {
 
       {/* Two column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Tickets */}
-        <div className="border border-border rounded-md bg-card">
+        {/* Recent Tickets (a repairman: the repairs given to him) */}
+        {dash?.tickets && <div className="border border-border rounded-md bg-card">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">{t('dashboard.recent_tickets')}</h3>
             <button onClick={() => navigate('/repairs/tickets')} className="text-xs text-primary hover:underline cursor-pointer">{t('dashboard.view_all')}</button>
@@ -184,10 +186,10 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Recent Sales */}
-        <div className="border border-border rounded-md bg-card">
+        {can('sales') && <div className="border border-border rounded-md bg-card">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h3 className="font-semibold text-foreground">{t('dashboard.recent_sales')}</h3>
             <button onClick={() => navigate('/sales/invoices')} className="text-xs text-primary hover:underline cursor-pointer">{t('dashboard.view_all')}</button>
@@ -211,7 +213,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   )

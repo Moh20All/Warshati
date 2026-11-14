@@ -52,7 +52,14 @@ function ProtectedRoute({ children }) {
 
 function P({ children }) { return <ProtectedRoute>{children}</ProtectedRoute> }
 
-// Owner-only pages: staff are sent back to the dashboard
+// Pages an account may open: an owner all of them, anyone else those ticked for it (any one of `perm`)
+function A({ perm, children }) {
+  const { can, loading } = useAuth()
+  if (!loading && !can(...perm)) return <Navigate to="/dashboard" replace />
+  return <ProtectedRoute>{children}</ProtectedRoute>
+}
+
+// Owner-only pages: everyone else is sent back to the dashboard
 function O({ children }) {
   const { isOwner, loading } = useAuth()
   if (!loading && !isOwner) return <Navigate to="/dashboard" replace />
@@ -125,40 +132,40 @@ export default function App() {
         <Route path="/dashboard" element={<P><Dashboard /></P>} />
 
         {/* Customers */}
-        <Route path="/customers" element={<P><CustomerList /></P>} />
-        <Route path="/customers/:id" element={<P><CustomerProfile /></P>} />
+        <Route path="/customers" element={<A perm={['customers']}><CustomerList /></A>} />
+        <Route path="/customers/:id" element={<A perm={['customers']}><CustomerProfile /></A>} />
 
         {/* Inventory */}
-        <Route path="/inventory" element={<P><InventoryList /></P>} />
-        <Route path="/inventory/accessories" element={<P><AccessoriesPage /></P>} />
+        <Route path="/inventory" element={<A perm={['inventory', 'inventory_edit']}><InventoryList /></A>} />
+        <Route path="/inventory/accessories" element={<A perm={['inventory', 'inventory_edit']}><AccessoriesPage /></A>} />
         <Route path="/devices" element={<P><DevicesPage /></P>} />
 
         {/* Repairs */}
-        <Route path="/repairs/checkins" element={<P><CheckInList /></P>} />
-        <Route path="/repairs/tickets" element={<P><TicketList /></P>} />
-        <Route path="/repairs/tickets/:id" element={<P><TicketDetail /></P>} />
-        <Route path="/repairs/warranty" element={<P><WarrantyList /></P>} />
-        <Route path="/repairs/trade-ins" element={<P><TradeInList /></P>} />
+        <Route path="/repairs/checkins" element={<A perm={['repairs']}><CheckInList /></A>} />
+        <Route path="/repairs/tickets" element={<A perm={['repairs', 'my_repairs']}><TicketList /></A>} />
+        <Route path="/repairs/tickets/:id" element={<A perm={['repairs', 'my_repairs']}><TicketDetail /></A>} />
+        <Route path="/repairs/warranty" element={<A perm={['repairs']}><WarrantyList /></A>} />
+        <Route path="/repairs/trade-ins" element={<A perm={['tradeins']}><TradeInList /></A>} />
 
         {/* Sales */}
-        <Route path="/sales/pos" element={<P><POS /></P>} />
-        <Route path="/sales/invoices" element={<P><InvoiceList /></P>} />
+        <Route path="/sales/pos" element={<A perm={['sales']}><POS /></A>} />
+        <Route path="/sales/invoices" element={<A perm={['sales']}><InvoiceList /></A>} />
 
         {/* Finance */}
-        <Route path="/finance/expenses" element={<P><ExpenseList /></P>} />
-        <Route path="/finance/suppliers" element={<O><SupplierList /></O>} />
-        <Route path="/finance/suppliers/:id" element={<O><SupplierDetail /></O>} />
-        <Route path="/finance/debts" element={<P><DebtLedger /></P>} />
-        <Route path="/finance/daily-close" element={<P><DailyClose /></P>} />
-        <Route path="/finance/monthly-summary" element={<O><MonthlySummary /></O>} />
+        <Route path="/finance/expenses" element={<A perm={['expenses']}><ExpenseList /></A>} />
+        <Route path="/finance/suppliers" element={<A perm={['suppliers']}><SupplierList /></A>} />
+        <Route path="/finance/suppliers/:id" element={<A perm={['suppliers']}><SupplierDetail /></A>} />
+        <Route path="/finance/debts" element={<A perm={['debts']}><DebtLedger /></A>} />
+        <Route path="/finance/daily-close" element={<A perm={['daily_close']}><DailyClose /></A>} />
+        <Route path="/finance/monthly-summary" element={<A perm={['reports']}><MonthlySummary /></A>} />
 
         {/* Settings */}
         <Route path="/settings/users" element={<O><UsersPage /></O>} />
         <Route path="/settings/store" element={<O><StoreSettings /></O>} />
         <Route path="/settings/backup" element={<O><BackupPage /></O>} />
         <Route path="/settings/catalog" element={<O><DeviceCatalogPage /></O>} />
-        <Route path="/settings/repairmen" element={<O><RepairmenPage /></O>} />
-        <Route path="/settings/activity" element={<O><ActivityPage /></O>} />
+        <Route path="/settings/repairmen" element={<A perm={['repairmen']}><RepairmenPage /></A>} />
+        <Route path="/settings/activity" element={<A perm={['activity']}><ActivityPage /></A>} />
         <Route path="/settings/network" element={<O><NetworkPage /></O>} />
         <Route path="/settings/about" element={<P><AboutApp /></P>} />
 

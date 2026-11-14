@@ -5,14 +5,21 @@
 import { Router } from 'express'
 import ExcelJS from 'exceljs'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth } from '../middleware/auth.js'
+import { can } from '../lib/permissions.js'
 import logger from '../lib/logger.js'
 import { nextItemRef, nextNumber } from '../lib/numbering.js'
 import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
-router.use(requireRole('OWNER'))
+
+// Importing needs the permission that adding the same things by hand needs
+const NEEDS = { inventory: 'inventory_edit', customers: 'customers', suppliers: 'suppliers' }
+const allowed = (req, res, kind) => {
+  if (!NEEDS[kind]) return res.status(400).json({ error: 'Unknown import' }) && false
+  return can(req.user, NEEDS[kind]) || (res.status(403).json({ error: 'Insufficient permissions' }) && false)
+}
 
 const MAX_ROWS = 20000
 
@@ -130,7 +137,7 @@ export function guessColumns(kind, headers) {
 router.post('/read', async (req, res) => {
   try {
     const { kind, fileName, data } = req.body
-    if (!FIELDS[kind]) return res.status(400).json({ error: 'Unknown import' })
+    if (!allowed(req, res, kind)) return
     if (!data) return res.status(400).json({ error: 'No file' })
     const table = (await readTable(fileName, Buffer.from(data, 'base64'))).filter(r => r.some(c => c !== ''))
     if (table.length < 2) return res.status(400).json({ error: 'EMPTY' })
@@ -209,7 +216,7 @@ async function addSupplier(r) {
 // POST /api/import/:kind
 router.post('/:kind', async (req, res) => {
   const { kind } = req.params
-  if (!FIELDS[kind]) return res.status(400).json({ error: 'Unknown import' })
+  if (!allowed(req, res, kind)) return
   const rows = Array.isArray(req.body.rows) ? req.body.rows.slice(0, MAX_ROWS) : []
   const itemType = ITEM_TYPES.includes(req.body.itemType) ? req.body.itemType : 'PART'
   const add = { inventory: (r) => addInventory(r, itemType), customers: addCustomer, suppliers: addSupplier }[kind]

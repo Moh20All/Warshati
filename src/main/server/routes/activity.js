@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { ACTIONS } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
-router.use(requireRole('OWNER'))
+router.use(requirePerm('activity'))
 
 // GET /api/activity?from=YYYY-MM-DD&to=YYYY-MM-DD&action=&userId=&limit=&offset= — newest first
 router.get('/', async (req, res) => {
@@ -26,7 +26,9 @@ router.get('/', async (req, res) => {
       prisma.activityLog.findMany({ where, orderBy: { createdAt: 'desc' }, take, skip }),
       prisma.activityLog.count({ where })
     ])
-    res.json({ entries: entries.map(e => ({ ...e, details: e.details ? JSON.parse(e.details) : null })), total, actions: ACTIONS })
+    // Everyone who can sign in (users and repairmen), for the "who" filter
+    const users = await prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+    res.json({ entries: entries.map(e => ({ ...e, details: e.details ? JSON.parse(e.details) : null })), total, actions: ACTIONS, users })
   } catch (err) {
     logger.error('Activity log list error:', err)
     res.status(500).json({ error: 'Internal server error' })

@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import prisma from '../lib/prisma.js'
 import { requireAuth, requireRole } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
+import { PERMISSION_GROUPS, STAFF_DEFAULT, cleanPermissions, grantedTo } from '../lib/permissions.js'
 
 const router = Router()
 
@@ -16,25 +17,22 @@ async function wouldRemoveLastOwner(targetId, { role, isActive }) {
     return otherOwners === 0
 }
 
-// All user routes require OWNER role
+/** The account as the Users page shows it: `permissions` = the boxes ticked for it */
+const shape = (u) => ({ id: u.id, name: u.name, email: u.email, role: u.role, isActive: u.isActive, createdAt: u.createdAt, permissions: grantedTo(u) })
+
+/** The list sent by the app, ready to store (undefined: not sent, leave as it is) */
+const stored = (list) => (list === undefined ? undefined : JSON.stringify(cleanPermissions(list) ?? []))
+
+// All user routes require OWNER role: accounts and what they may do are the owner's alone
 router.use(requireAuth)
 router.use(requireRole('OWNER'))
 
-// GET /api/users
+// GET /api/users — the shop's users, and the permissions that exist (the apps draw their tick boxes from it).
+// A repairman's login is not here: it is made and changed on his own page (Repairmen).
 router.get('/', async (req, res) => {
     try {
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true
-            },
-            orderBy: { createdAt: 'desc' }
-        })
-        res.json({ users })
+        const users = await prisma.user.findMany({ where: { repairmanId: null }, orderBy: { createdAt: 'desc' } })
+        res.json({ users: users.map(shape), permissionGroups: PERMISSION_GROUPS, staffDefault: STAFF_DEFAULT })
     } catch (err) {
         logger.error('List users error:', err)
         res.status(500).json({ error: 'Internal server error' })
@@ -60,23 +58,10 @@ router.post('/', async (req, res) => {
 
         const passwordHash = await bcrypt.hash(password, 10)
         const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                passwordHash,
-                role: role || 'STAFF'
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true
-            }
+            data: { name, email, passwordHash, role: role || 'STAFF', permissions: stored(req.body.permissions) }
         })
 
-        res.status(201).json({ user })
+        res.status(201).json({ user: shape(user) })
     } catch (err) {
         logger.error('Create user error:', err)
         res.status(500).json({ error: 'Internal server error' })
@@ -105,24 +90,14 @@ router.put('/:id', async (req, res) => {
         if (email !== undefined) data.email = email
         if (role !== undefined) data.role = role
         if (isActive !== undefined) data.isActive = isActive
+        if (req.body.permissions !== undefined) data.permissions = stored(req.body.permissions)
         if (password) {
             data.passwordHash = await bcrypt.hash(password, 10)
         }
 
-        const user = await prisma.user.update({
-            where: { id },
-            data,
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true,
-                createdAt: true
-            }
-        })
+        const user = await prisma.user.update({ where: { id }, data })
 
-        res.json({ user })
+        res.json({ user: shape(user) })
     } catch (err) {
         if (err.code === 'P2002') return res.status(400).json({ error: 'Email already in use' })
         if (err.code === 'P2025') return res.status(404).json({ error: 'User not found' })
@@ -144,19 +119,9 @@ router.delete('/:id', async (req, res) => {
             return res.status(400).json({ error: 'The store must keep at least one active owner' })
         }
 
-        const user = await prisma.user.update({
-            where: { id },
-            data: { isActive: false },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                isActive: true
-            }
-        })
+        const user = await prisma.user.update({ where: { id }, data: { isActive: false } })
 
-        res.json({ user })
+        res.json({ user: shape(user) })
     } catch (err) {
         logger.error('Deactivate user error:', err)
         res.status(500).json({ error: 'Internal server error' })

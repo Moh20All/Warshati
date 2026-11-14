@@ -1,12 +1,13 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { nextCheckInNumber } from '../lib/numbering.js'
 import { rememberDevice } from '../lib/catalog.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('repairs'))
 
 // Generate CI number: CI-YYYY-NNNN (pass the transaction client when inside one)
 async function generateCINumber(db = prisma) {

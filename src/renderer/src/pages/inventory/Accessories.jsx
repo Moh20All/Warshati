@@ -16,7 +16,7 @@ const normalize = (s) => String(s || '').toLowerCase().normalize('NFD').replace(
 export default function AccessoriesPage() {
   const { t } = useTranslation()
   const cur = useCurrency()
-  const { isOwner } = useAuth()
+  const { isOwner, can } = useAuth()
   const navigate = useNavigate()
   const { data: accessories = [], isLoading } = useAccessories()
   const { data: status } = useAccessoryStatus()
@@ -110,7 +110,7 @@ export default function AccessoriesPage() {
                         {a.oldPrice != null && <p className="text-[11px] text-muted-foreground line-through">{a.oldPrice.toLocaleString()} {cur}</p>}
                       </> : <span className="text-muted-foreground">—</span>}
                     </div>
-                    {isOwner && (
+                    {can('inventory_edit') && (
                       <button type="button" onClick={() => navigate(`/inventory?accessory=${a.id}`)} title={t('accessories.add_to_stock')}
                         className="inline-flex items-center gap-1 h-7 px-2 rounded-sm text-xs font-semibold text-primary hover:bg-primary/10 cursor-pointer whitespace-nowrap shrink-0">
                         <Plus className="h-3.5 w-3.5" /> {t('accessories.add_to_stock')}

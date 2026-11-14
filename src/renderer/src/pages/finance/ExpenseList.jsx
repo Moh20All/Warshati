@@ -18,7 +18,7 @@ const categories = ['SUPPLIER_RESTOCK', 'RENT', 'UTILITIES', 'TOOLS_EQUIPMENT', 
 export default function ExpenseList() {
   const cur = useCurrency()
   const { t } = useTranslation()
-  const { isOwner } = useAuth()
+  const { can } = useAuth()
   const queryClient = useQueryClient()
   const toast = useToast()
   const [catFilter, setCatFilter] = useState('')
@@ -66,7 +66,7 @@ export default function ExpenseList() {
     { key: 'paidTo', label: t('finance.expenses.col_paid_to'), render: (v) => v || '—' },
     { key: 'expenseDate', label: t('finance.expenses.col_date'), render: (v) => new Date(v).toLocaleDateString() },
     { key: 'createdBy', label: t('finance.expenses.col_by'), render: (v) => v?.name || '—' },
-    { key: 'actions', label: '', className: 'text-right', render: (_, r) => isOwner && (
+    { key: 'actions', label: '', className: 'text-right', render: (_, r) => can('corrections') && (
       <div className="flex items-center justify-end gap-1">
         <button onClick={(e) => { e.stopPropagation(); openEdit(r) }} title={t('finance.expenses.btn_edit')} className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><Pencil className="h-3.5 w-3.5" /></button>
         <button onClick={(e) => { e.stopPropagation(); setDeleteItem(r) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"><Trash2 className="h-3.5 w-3.5" /></button>

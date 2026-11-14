@@ -28,7 +28,7 @@ export default function DebtLedger() {
   const [statusFilter, setStatusFilter] = useState('')
   const [paymentModal, setPaymentModal] = useState(null)
   const [paymentAmount, setPaymentAmount] = useState('')
-  const { isOwner } = useAuth()
+  const { can } = useAuth()
   const printer = usePrint()
   const [historyId, setHistoryId] = useState(null)
   const [printPrompt, setPrintPrompt] = useState(null) // { debt, payment } right after a payment
@@ -147,7 +147,7 @@ export default function DebtLedger() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div><h1 className="text-[22px] leading-[30px] font-semibold text-foreground">{t('finance.debts.title')}</h1><p className="text-sm text-muted-foreground mt-1">{t('finance.debts.subtitle')}</p></div>
         <div className="flex gap-2">
-        {isOwner && <Button onClick={() => { setDebtForm(emptyDebt()); setAddOpen(true) }}><Plus className="h-4 w-4" /> {t('finance.debts.btn_add_debt')}</Button>}
+        {can('corrections') && <Button onClick={() => { setDebtForm(emptyDebt()); setAddOpen(true) }}><Plus className="h-4 w-4" /> {t('finance.debts.btn_add_debt')}</Button>}
         <ExportButton fileName="warshati-debts" sheetName={t('finance.debts.title')} columns={[
           { header: t('finance.debts.col_customer'), key: 'customer', width: 22 },
           { header: t('customers.columns.phone', 'Phone'), key: 'phone', width: 16 },
@@ -233,7 +233,7 @@ export default function DebtLedger() {
           <PaymentHistoryModal open={!!debt} onClose={() => setHistoryId(null)}
             title={t('finance.debts.history_title', { name: debt?.customer?.name || '' })}
             payments={debt?.payments || []}
-            canCancel={isOwner && debt?.sale?.status !== 'REFUNDED'}
+            canCancel={can('corrections') && debt?.sale?.status !== 'REFUNDED'}
             onCancel={cancelPayment}
             onPrint={(p) => printReceipt(debt, p)} />
         )

@@ -45,6 +45,10 @@ export function AuthProvider({ children }) {
         setUser(null)
     }
 
+    // What this account may do: an owner everything, anyone else the list the owner ticked for it (it comes
+    // with the sign-in). The API checks the same list; here it only decides what the screens show.
+    const can = (...keys) => user?.role === 'OWNER' || keys.some(k => user?.permissions?.includes(k))
+
     const value = {
         user,
         token,
@@ -52,7 +56,10 @@ export function AuthProvider({ children }) {
         login,
         logout,
         isAuthenticated: !!token && !!user,
-        isOwner: user?.role === 'OWNER'
+        isOwner: user?.role === 'OWNER',
+        can,
+        // A repairman's login without the Repairs permission: he works on the repairs given to him
+        ownRepairsOnly: !can('repairs') && can('my_repairs')
     }
 
     return (

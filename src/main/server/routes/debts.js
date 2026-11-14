@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { audit } from '../lib/activity.js'
 
@@ -8,7 +8,7 @@ const router = Router()
 router.use(requireAuth)
 
 // GET /api/debts — list all open debts
-router.get('/', async (req, res) => {
+router.get('/', requirePerm('debts'), async (req, res) => {
   try {
     const { search, status } = req.query
     const where = {}
@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/debts/customer/:customerId
-router.get('/customer/:customerId', async (req, res) => {
+router.get('/customer/:customerId', requirePerm('debts', 'customers', 'sales'), async (req, res) => {
   try {
     const debts = await prisma.debtEntry.findMany({
       where: { customerId: req.params.customerId },
@@ -48,7 +48,7 @@ router.get('/customer/:customerId', async (req, res) => {
 })
 
 // POST /api/debts/:id/payment — record a payment
-router.post('/:id/payment', async (req, res) => {
+router.post('/:id/payment', requirePerm('debts'), async (req, res) => {
   try {
     const { amount, notes } = req.body
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Amount must be positive' })
@@ -102,7 +102,7 @@ function balance(total, paid) {
 
 // POST /api/debts — owner enters a debt by hand (e.g. from the old paper notebook).
 // It is an opening balance: not revenue and not cash today. Payments on it count as cash collected.
-router.post('/', requireRole('OWNER'), async (req, res) => {
+router.post('/', requirePerm('corrections'), async (req, res) => {
   try {
     const { customerId, customerName, customerPhone, amount, date, notes } = req.body
     const total = parseFloat(amount)
@@ -139,7 +139,7 @@ router.post('/', requireRole('OWNER'), async (req, res) => {
 
 // POST /api/debts/:id/payments/:paymentId/cancel — owner cancels a wrong payment.
 // Nothing is deleted: a cancelling entry is recorded today, so today's cash goes down by that amount.
-router.post('/:id/payments/:paymentId/cancel', requireRole('OWNER'), async (req, res) => {
+router.post('/:id/payments/:paymentId/cancel', requirePerm('corrections'), async (req, res) => {
   try {
     const debt = await prisma.$transaction(async (tx) => {
       const entry = await tx.debtEntry.findUnique({ where: { id: req.params.id }, include: { sale: true, payments: true } })

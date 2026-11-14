@@ -1,12 +1,13 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { rememberDevice } from '../lib/catalog.js'
 import { nextItemRef } from '../lib/numbering.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('tradeins'))
 
 // GET /api/trade-ins
 router.get('/', async (req, res) => {

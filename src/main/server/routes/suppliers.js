@@ -1,12 +1,12 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
-router.use(requireRole('OWNER'))
+router.use(requirePerm('suppliers'))
 
 // GET /api/suppliers
 router.get('/', async (req, res) => {

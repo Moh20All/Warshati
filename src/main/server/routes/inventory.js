@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import crypto from 'crypto'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { rememberDevice } from '../lib/catalog.js'
 import { nextItemRef } from '../lib/numbering.js'
@@ -9,6 +9,7 @@ import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('inventory', 'inventory_edit', 'sales', 'repairs', 'my_repairs', 'tradeins'))
 
 // Phones in stock are catalog phones; parts/accessories only when the form says which device they fit
 const deviceCategoryFor = (type, given) => (type === 'PHONE_NEW' || type === 'PHONE_USED' ? 'PHONE' : given)
@@ -91,7 +92,7 @@ router.get('/barcode/:code', async (req, res) => {
 
 // POST /api/inventory/assign-barcodes { ids } — labels: items without a barcode get one.
 // 12 digits starting with 20 (the range reserved for in-shop codes, never on a maker's product).
-router.post('/assign-barcodes', async (req, res) => {
+router.post('/assign-barcodes', requirePerm('inventory', 'inventory_edit'), async (req, res) => {
   try {
     const ids = Array.isArray(req.body.ids) ? req.body.ids.slice(0, 500).map(String) : []
     const missing = await prisma.inventoryItem.findMany({ where: { id: { in: ids }, barcode: null }, select: { id: true } })
@@ -117,13 +118,15 @@ router.post('/assign-barcodes', async (req, res) => {
 })
 
 // POST /api/inventory
-router.post('/', requireRole('OWNER'), async (req, res) => {
+router.post('/', requirePerm('inventory_edit'), async (req, res) => {
   try {
     const { type, name, sku, barcode, imei, brand, model, color, storage, quantity, buyPrice, sellPrice, lowStockAt, warrantyDays } = req.body
     // false = stock the shop already owned (e.g. first setup): no cash left the drawer today
     const recordExpense = req.body.recordExpense !== false
-    if (!type || !name || buyPrice === undefined || sellPrice === undefined) {
-      return res.status(400).json({ error: 'Type, name, buyPrice, and sellPrice are required' })
+    // An empty price box arrives as null or '': refused here, not as a database error
+    const priced = (v) => v !== null && v !== '' && Number.isFinite(Number(v)) && Number(v) >= 0
+    if (!type || !name || !priced(buyPrice) || !priced(sellPrice)) {
+      return res.status(400).json({ error: 'Type, name, buy price and sell price are required' })
     }
     const qty = quantity ? parseInt(quantity) : 0
 
@@ -169,7 +172,7 @@ router.post('/', requireRole('OWNER'), async (req, res) => {
 })
 
 // PUT /api/inventory/:id
-router.put('/:id', requireRole('OWNER'), async (req, res) => {
+router.put('/:id', requirePerm('inventory_edit'), async (req, res) => {
   try {
     const { type, name, sku, barcode, imei, brand, model, color, storage, quantity, buyPrice, sellPrice, lowStockAt, warrantyDays, isActive } = req.body
     const data = {}
@@ -217,7 +220,7 @@ router.put('/:id', requireRole('OWNER'), async (req, res) => {
 })
 
 // POST /api/inventory/:id/restock — Fast restock that auto-logs expense
-router.post('/:id/restock', requireRole('OWNER'), async (req, res) => {
+router.post('/:id/restock', requirePerm('inventory_edit'), async (req, res) => {
   try {
     const { addQuantity, unitCost, updateBuyPrice } = req.body
     if (!addQuantity || addQuantity <= 0) {
@@ -264,7 +267,7 @@ router.post('/:id/restock', requireRole('OWNER'), async (req, res) => {
 })
 
 // DELETE /api/inventory/:id — soft deactivate
-router.delete('/:id', requireRole('OWNER'), async (req, res) => {
+router.delete('/:id', requirePerm('inventory_edit'), async (req, res) => {
   try {
     const item = await prisma.inventoryItem.update({
       where: { id: req.params.id },

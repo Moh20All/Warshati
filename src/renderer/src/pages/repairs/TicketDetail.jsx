@@ -44,7 +44,9 @@ export default function TicketDetail() {
   const queryClient = useQueryClient()
   const toast = useToast()
   const print = usePrint()
-  const { isOwner } = useAuth()
+  const { can, ownRepairsOnly } = useAuth()
+  // A repairman on his own repair: the counter's fields (customer, deposit, who repairs it…) are read-only
+  const counter = !ownRepairsOnly
   const isNew = id === 'new'
 
   const { data: store } = useQuery({
@@ -304,7 +306,7 @@ export default function TicketDetail() {
           {ticket?.status === 'DELIVERED' && (
             <Button variant="outline" onClick={() => printDelivery(ticket)}><Printer className="h-4 w-4" /> {t('repairs.delivery.btn_print')}</Button>
           )}
-          {isOwner && ticket && !ticket.sale && (
+          {can('corrections') && ticket && !ticket.sale && (
             <Button variant="outline" onClick={() => setConfirmDelete(true)} aria-label={t('repairs.details.btn_delete')} title={t('repairs.details.btn_delete')}><Trash2 className="h-4 w-4 text-destructive" /></Button>
           )}
           <Button onClick={handleSave} loading={saveMutation.isPending}><Save className="h-4 w-4" /> {t('repairs.details.save')}</Button>
@@ -318,7 +320,7 @@ export default function TicketDetail() {
       {!isNew && nextStatuses.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6 p-3 bg-muted rounded-md">
           <span className="text-sm text-muted-foreground mr-2 self-center">{t('repairs.details.move_to')}</span>
-          {nextStatuses.map(s => (
+          {nextStatuses.filter(s => counter || !['CANCELLED', 'DELIVERED'].includes(s)).map(s => (
             <Button key={s} variant={s === 'CANCELLED' ? 'danger' : 'outline'} size="sm" onClick={() => { setTransitionModal(s); if (s === 'DONE') { setFinalCostInput(form.finalCost || ''); setPartsCostInput(form.partsCost || '') } }}>
               {t(`repairs.statuses.${s}`)}
             </Button>
@@ -328,9 +330,9 @@ export default function TicketDetail() {
 
       {/* Customer info (on an existing ticket, saving fixes the customer's own name/phone) */}
       <div className="grid grid-cols-2 gap-4 mb-4 p-4 border border-border rounded-md bg-card">
-        <Input label={`${t('repairs.details.lbl_name')} *`} value={form.customerName} onChange={e => { setForm({...form, customerName: e.target.value}); setMissingField(null) }} placeholder={t('repairs.details.ph_name')} autoFocus={isNew}
+        <Input label={`${t('repairs.details.lbl_name')} *`} value={form.customerName} onChange={e => { setForm({...form, customerName: e.target.value}); setMissingField(null) }} placeholder={t('repairs.details.ph_name')} autoFocus={isNew} disabled={!counter}
           error={missingField === 'customer' ? t('repairs.details.err_missing_customer') : undefined} />
-        <Input label={t('repairs.details.lbl_phone')} dir="ltr" value={form.customerPhone} onChange={e => setForm({...form, customerPhone: e.target.value})} placeholder={t('repairs.details.ph_phone')} />
+        <Input label={t('repairs.details.lbl_phone')} dir="ltr" value={form.customerPhone} onChange={e => setForm({...form, customerPhone: e.target.value})} placeholder={t('repairs.details.ph_phone')} disabled={!counter} />
       </div>
 
       <div className="mb-4">
@@ -397,12 +399,12 @@ export default function TicketDetail() {
       <div className="grid grid-cols-3 gap-4 mb-4">
         <Input label={t('repairs.details.lbl_final')} type="number" value={form.finalCost} onChange={e => setForm({...form, finalCost: e.target.value})} />
         <Input label={t('repairs.details.lbl_parts')} type="number" value={form.partsCost} onChange={e => setForm({...form, partsCost: e.target.value})} />
-        <Input label={t('repairs.details.lbl_deposit')} type="number" value={form.deposit} onChange={e => setForm({...form, deposit: e.target.value})} />
+        <Input label={t('repairs.details.lbl_deposit')} type="number" value={form.deposit} onChange={e => setForm({...form, deposit: e.target.value})} disabled={!counter} />
       </div>
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">{t('repairs.details.lbl_priority')}</label>
-          <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+          <select value={form.priority} disabled={!counter} onChange={e => setForm({...form, priority: e.target.value})} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted">
             <option value="LOW">{t('repairs.priorities.LOW')}</option><option value="NORMAL">{t('repairs.priorities.NORMAL')}</option><option value="URGENT">{t('repairs.priorities.URGENT')}</option>
           </select>
         </div>
@@ -410,13 +412,13 @@ export default function TicketDetail() {
         {store?.featRepairmen && (
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('repairmen.lbl_repairman')}</label>
-            <select value={form.repairmanId} disabled={!!ticket?.sale} onChange={e => setForm({ ...form, repairmanId: e.target.value })} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted">
+            <select value={form.repairmanId} disabled={!!ticket?.sale || !counter} onChange={e => setForm({ ...form, repairmanId: e.target.value })} className="flex h-9 w-full rounded-sm border border-input bg-popover px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted">
               <option value="">{t('repairmen.none')}</option>
               {repairmen.filter(r => r.isActive || r.id === form.repairmanId).map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
           </div>
         )}
-        {store?.featRepairmen && isOwner && form.repairmanId && (
+        {store?.featRepairmen && can('repairmen') && form.repairmanId && (
           <Input label={t('repairmen.lbl_share')} type="number" min="0" value={form.repairmanPay} disabled={!!ticket?.sale}
             onChange={e => setForm({ ...form, repairmanPay: e.target.value })}
             placeholder={ruleShare !== null ? t('repairmen.auto_share', { amount: `${ruleShare.toLocaleString()} ${cur}` }) : ''} />
@@ -424,7 +426,7 @@ export default function TicketDetail() {
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input label={t('repairs.details.lbl_est_date')} type="date" value={form.estimatedDoneAt} onChange={e => setForm({...form, estimatedDoneAt: e.target.value})} />
-        <Input label={t('repairs.details.lbl_warranty_days')} type="number" value={form.warrantyDays} onChange={e => { warrantyTouched.current = true; setForm({...form, warrantyDays: e.target.value}) }} />
+        <Input label={t('repairs.details.lbl_warranty_days')} type="number" value={form.warrantyDays} disabled={!counter} onChange={e => { warrantyTouched.current = true; setForm({...form, warrantyDays: e.target.value}) }} />
       </div>
 
       {/* Transition confirmation */}

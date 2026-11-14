@@ -18,7 +18,7 @@ model LocalLicense {
   machineId   String
   activatedAt DateTime @default(now())
   lastValidatedAt DateTime? // last successful online check; drives the offline grace period
-  plan        Int      @default(1) // 1 lifetime, 2 cloud + mobile, 3 VIP (everything, e.g. shop network)
+  plan        Int      @default(1) // 1 lifetime, 2 Pro (lifetime + shop network), 3 VIP (everything)
 }
 
 // ─────────────────────────────────────────
@@ -94,6 +94,7 @@ model Repairman {
 
   tickets   RepairTicket[]
   payments  RepairmanPayment[]
+  account   User?    // his login, if the owner gave him one: he then sees the repairs given to him
 }
 
 // Money the owner handed to a repairman (leaves the drawer on that day)
@@ -109,7 +110,7 @@ model RepairmanPayment {
   @@index([paidAt])
 }
 
-// Who did what (Settings → Activity): deletions, price changes, cancelled payments, refunds, discounts, imports
+// Who did what (Settings → Activity): every change made in the shop, written by the API itself
 model ActivityLog {
   id        String   @id @default(cuid())
   userId    String?
@@ -131,6 +132,9 @@ model User {
   role         Role     @default(STAFF)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
+  permissions  String?  // JSON list ticked by the owner (lib/permissions.js); null = the defaults. Owners can do everything
+  repairmanId  String?  @unique // this account is a repairman's login (made from the Repairmen page, not Users)
+  repairman    Repairman? @relation(fields: [repairmanId], references: [id])
 
   checkIns     CheckIn[]
   tickets      RepairTicket[]

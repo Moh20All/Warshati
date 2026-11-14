@@ -25,7 +25,8 @@ const emptyForm = { type: 'PART', name: '', sku: '', barcode: '', deviceCategory
 export default function InventoryList() {
   const cur = useCurrency()
   const { t } = useTranslation()
-  const { isOwner } = useAuth()
+  const { can } = useAuth()
+  const canEdit = can('inventory_edit') // add, change, restock, remove, import; buy prices
   const queryClient = useQueryClient()
   const toast = useToast()
   const navigate = useNavigate()
@@ -121,14 +122,14 @@ export default function InventoryList() {
   const [params, setParams] = useSearchParams()
   const fromCatalog = params.get('accessory')
   useEffect(() => {
-    if (!fromCatalog || !isOwner) return
+    if (!fromCatalog || !canEdit) return
     if (!showForm) { setEditItem(null); setForm({ ...emptyForm, type: 'ACCESSORY', brand: '', model: '' }); setShowForm(true); return }
     const a = accessories.find(x => x.id === fromCatalog)
     if (!a) return // still loading
     setSuggested(a)
     setForm(f => ({ ...f, name: a.name }))
     setParams({}, { replace: true })
-  }, [fromCatalog, showForm, accessories, isOwner]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fromCatalog, showForm, accessories, canEdit]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSave = (e) => {
     e.preventDefault()
@@ -166,14 +167,14 @@ export default function InventoryList() {
       )
     },
     // Buy price (the shop's margin) and stock management are owner-only
-    ...(isOwner ? [{ key: 'buyPrice', label: t('inventory.columns.buy_price'), render: (v) => `${Number(v).toLocaleString()} ${cur}` }] : []),
+    ...(canEdit ? [{ key: 'buyPrice', label: t('inventory.columns.buy_price'), render: (v) => `${Number(v).toLocaleString()} ${cur}` }] : []),
     { key: 'sellPrice', label: t('inventory.columns.sell_price'), render: (v) => `${Number(v).toLocaleString()} ${cur}` },
     {
       key: 'actions', label: '', className: 'text-right',
       render: (_, r) => (
         <div className="flex items-center justify-end gap-1">
           <button onClick={(e) => { e.stopPropagation(); setLabelItems([{ ...r, copies: 1 }]) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer" title={t('labels.title', 'Print barcode labels')}><Barcode className="h-3.5 w-3.5" /></button>
-          {isOwner && <>
+          {canEdit && <>
           {!r.imei && (
             <button onClick={(e) => { e.stopPropagation(); setRestockItem(r); setRestockAmount(''); setRestockCost(r.buyPrice); setUpdateBuyPrice(false) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer" title={t('inventory.restock.title', 'Quick Restock')}><Package className="h-3.5 w-3.5" /></button>
           )}
@@ -203,7 +204,7 @@ export default function InventoryList() {
             { header: t('inventory.modal.imei'), key: 'imei', width: 18 },
             { header: t('inventory.columns.stock'), key: 'quantity', type: 'number' },
             // Buy price is the shop's margin: owner only, like the table
-            ...(isOwner ? [{ header: `${t('inventory.columns.buy_price')} (${cur})`, key: 'buyPrice', type: 'money', width: 16 }] : []),
+            ...(canEdit ? [{ header: `${t('inventory.columns.buy_price')} (${cur})`, key: 'buyPrice', type: 'money', width: 16 }] : []),
             { header: `${t('inventory.columns.sell_price')} (${cur})`, key: 'sellPrice', type: 'money', width: 16 }
           ]} />
           <Button variant="outline" onClick={() => navigate('/inventory/accessories')}>
@@ -212,8 +213,8 @@ export default function InventoryList() {
           <Button variant="outline" onClick={() => setLabelItems((data || []).map(i => ({ ...i, copies: 0 })))} disabled={!data?.length}>
             <Barcode className="h-4 w-4" /> {t('labels.button', 'Labels')}
           </Button>
-          {isOwner && <ImportButton kind="inventory" />}
-          {isOwner && (
+          {canEdit && <ImportButton kind="inventory" />}
+          {canEdit && (
             <Button onClick={() => { setEditItem(null); setForm({...emptyForm}); setShowForm(true) }}>
               <Plus className="h-4 w-4" /> {t('inventory.add_item')}
             </Button>

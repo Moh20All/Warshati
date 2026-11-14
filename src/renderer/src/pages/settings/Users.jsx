@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, UserX, UserCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,7 @@ import Table from '../../components/ui/Table'
 import Badge from '../../components/ui/Badge'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Modal, { ConfirmModal } from '../../components/ui/Modal'
+import PermissionPicker from '../../components/PermissionPicker'
 
 export default function Users() {
     const { t } = useTranslation()
@@ -21,8 +22,10 @@ export default function Users() {
 
     const { data, isLoading } = useQuery({
         queryKey: ['users'],
-        queryFn: () => api.get('/users').then((r) => r.data.users)
+        queryFn: () => api.get('/users').then((r) => r.data)
     })
+    // The permissions that exist come from the API, with what a new user starts with
+    const access = { groups: data?.permissionGroups, staffDefault: data?.staffDefault || [] }
 
     const createMutation = useMutation({
         mutationFn: (userData) => api.post('/users', userData),
@@ -143,7 +146,7 @@ export default function Users() {
             ) : (
                 <Table
                     columns={columns}
-                    data={data || []}
+                    data={data?.users || []}
                     emptyTitle={t('users.empty_title')}
                     emptyDescription={t('users.empty_desc')}
                 />
@@ -156,6 +159,7 @@ export default function Users() {
                 onSubmit={(data) => createMutation.mutate(data)}
                 loading={createMutation.isPending}
                 title={t('users.add_title')}
+                access={access}
                 t={t}
             />
 
@@ -168,6 +172,7 @@ export default function Users() {
                 title={t('users.edit_title')}
                 defaultValues={editUser}
                 isEdit
+                access={access}
                 t={t}
             />
 
@@ -185,29 +190,22 @@ export default function Users() {
     )
 }
 
-function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues, isEdit, t }) {
-    const [form, setForm] = useState({
+function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues, isEdit, access, t }) {
+    const blank = () => ({
         name: defaultValues?.name || '',
         email: defaultValues?.email || '',
         password: '',
-        role: defaultValues?.role || 'STAFF'
+        role: defaultValues?.role || 'STAFF',
+        permissions: defaultValues?.permissions || access.staffDefault
     })
+    const [form, setForm] = useState(blank)
 
-    // Reset form when modal opens with new values
-    useState(() => {
-        if (open && defaultValues) {
-            setForm({
-                name: defaultValues.name || '',
-                email: defaultValues.email || '',
-                password: '',
-                role: defaultValues.role || 'STAFF'
-            })
-        }
-    }, [open, defaultValues])
+    // Each time the modal opens: the user being edited, or an empty form
+    useEffect(() => { if (open) setForm(blank()) }, [open, defaultValues]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        const data = { name: form.name, email: form.email, role: form.role }
+        const data = { name: form.name, email: form.email, role: form.role, ...(form.role === 'OWNER' ? {} : { permissions: form.permissions }) }
         if (form.password) data.password = form.password
         onSubmit(data)
     }
@@ -217,6 +215,7 @@ function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues,
             open={open}
             onClose={onClose}
             title={title}
+            size="lg"
             footer={
                 <>
                     <Button variant="outline" onClick={onClose} disabled={loading}>{t('users.btn_cancel')}</Button>
@@ -257,6 +256,13 @@ function UserFormModal({ open, onClose, onSubmit, loading, title, defaultValues,
                         <option value="STAFF">{t('users.role_staff')}</option>
                         <option value="OWNER">{t('users.role_owner')}</option>
                     </select>
+                </div>
+                {/* What this user may do: an owner everything, anyone else what is ticked */}
+                <div className="space-y-1.5">
+                    <label className="text-sm font-medium text-foreground">{t('perms.title')}</label>
+                    {form.role === 'OWNER'
+                        ? <p className="text-sm text-muted-foreground">{t('perms.owner_all')}</p>
+                        : <PermissionPicker groups={access.groups} value={form.permissions} onChange={(permissions) => setForm({ ...form, permissions })} />}
                 </div>
             </form>
         </Modal>

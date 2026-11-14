@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('expenses'))
 
 // GET /api/expenses
 router.get('/', async (req, res) => {
@@ -61,7 +62,7 @@ router.post('/', async (req, res) => {
 })
 
 // PUT /api/expenses/:id — correct an expense (owner only)
-router.put('/:id', requireRole('OWNER'), async (req, res) => {
+router.put('/:id', requirePerm('corrections'), async (req, res) => {
   try {
     const { category, description, amount, paidTo, expenseDate } = req.body
     const data = {}
@@ -87,7 +88,7 @@ router.put('/:id', requireRole('OWNER'), async (req, res) => {
 })
 
 // DELETE /api/expenses/:id
-router.delete('/:id', requireRole('OWNER'), async (req, res) => {
+router.delete('/:id', requirePerm('corrections'), async (req, res) => {
   try {
     const expense = await prisma.expense.delete({ where: { id: req.params.id } })
     audit(req, 'expense_delete', expense.description, { amount: Number(expense.amount) })

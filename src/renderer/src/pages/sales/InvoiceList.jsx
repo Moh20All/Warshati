@@ -22,7 +22,7 @@ const paidBy = (s) => parseFloat(s.amountPaid || 0) + parseFloat(s.debtEntry?.pa
 export default function InvoiceList() {
   const cur = useCurrency()
   const { t, i18n } = useTranslation()
-  const { isOwner } = useAuth()
+  const { can } = useAuth()
   const queryClient = useQueryClient()
   const toast = useToast()
   const [search, setSearch] = useState('')
@@ -141,7 +141,7 @@ export default function InvoiceList() {
     { key: 'createdAt', label: t('sales.invoices.col_date'), render: (v) => new Date(v).toLocaleDateString() },
     { key: 'actions', label: '', className: 'text-right', render: (_, r) => (
       <div className="flex items-center justify-end gap-1">
-        {isOwner && r.status !== 'REFUNDED' && !r.repairTicketId && (
+        {can('refunds') && r.status !== 'REFUNDED' && !r.repairTicketId && (
           <button onClick={(e) => { e.stopPropagation(); setRefundSale(r); setRefundReason('') }} title={t('sales.invoices.btn_refund')} className="p-1.5 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"><Undo2 className="h-3.5 w-3.5" /></button>
         )}
         <button onClick={(e) => { e.stopPropagation(); printReceipt(r) }} className="p-1.5 rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"><Printer className="h-3.5 w-3.5" /></button>

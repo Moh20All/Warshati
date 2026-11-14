@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { nextSaleNumber } from '../lib/numbering.js'
 import { audit } from '../lib/activity.js'
@@ -18,7 +18,7 @@ export async function generateSaleNumber(db = prisma) {
 }
 
 // GET /api/sales
-router.get('/', async (req, res) => {
+router.get('/', requirePerm('sales'), async (req, res) => {
   try {
     const { search } = req.query
     const where = {}
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/sales/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', requirePerm('sales', 'debts'), async (req, res) => {
   try {
     const sale = await prisma.sale.findUnique({
       where: { id: req.params.id },
@@ -62,7 +62,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // POST /api/sales — create sale from POS
-router.post('/', async (req, res) => {
+router.post('/', requirePerm('sales'), async (req, res) => {
   try {
     const { customerId, repairTicketId, items, discount, tradeInCredit, paymentMethod, amountPaid, notes } = req.body
 
@@ -167,7 +167,7 @@ router.post('/', async (req, res) => {
 })
 
 // POST /api/sales/:id/refund — full refund (owner only): items back in stock, money handed back
-router.post('/:id/refund', requireRole('OWNER'), async (req, res) => {
+router.post('/:id/refund', requirePerm('refunds'), async (req, res) => {
   try {
     const sale = await prisma.sale.findUnique({
       where: { id: req.params.id },

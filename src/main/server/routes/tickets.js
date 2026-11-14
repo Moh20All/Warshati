@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth, requireRole } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
+import { can, ownRepairsOnly, MY_REPAIRS } from '../lib/permissions.js'
 import logger from '../lib/logger.js'
 import { generateSaleNumber } from './sales.js'
 import { nextTicketNumber } from '../lib/numbering.js'
@@ -10,6 +11,30 @@ import { audit } from '../lib/activity.js'
 
 const router = Router()
 router.use(requireAuth)
+// The Repairs permission opens every ticket. A repairman's login without it works on the repairs given to him.
+router.use(requirePerm('repairs', MY_REPAIRS))
+
+/** Extra filter for the lists: a repairman sees his own repairs */
+const mine = (req) => (ownRepairsOnly(req.user) ? { repairmanId: req.user.repairmanId } : {})
+
+// Routes on one ticket: somebody else's repair does not exist for a repairman
+router.param('id', async (req, res, next, id) => {
+  try {
+    if (ownRepairsOnly(req.user)) {
+      const t = await prisma.repairTicket.findUnique({ where: { id }, select: { repairmanId: true } })
+      if (!t || t.repairmanId !== req.user.repairmanId) return res.status(404).json({ error: 'Ticket not found' })
+    }
+    next()
+  } catch (err) { next(err) }
+})
+
+// What a repairman may not change on his repair: who it belongs to, and the money taken at the counter
+const COUNTER_FIELDS = ['customerName', 'customerPhone', 'deposit', 'repairmanId', 'repairmanPay', 'priority', 'warrantyDays']
+// He moves his repair forward; cancelling and handing it back (the invoice) stay at the counter
+const REPAIRMAN_STEPS = ['WAITING_PARTS', 'IN_REPAIR', 'DONE']
+
+/** '' or null from an emptied price box → null (0 for the parts cost) */
+const price = (v, empty = null) => (v === '' || v === null ? empty : v)
 
 // Generate TKT number: TKT-YYYY-NNNN (pass the transaction client when inside one)
 export async function generateTicketNumber(db = prisma) {
@@ -29,11 +54,11 @@ export async function warrantyFor(db, typed) {
   return store?.warrantyDays ?? DEFAULT_WARRANTY_DAYS
 }
 
-/** repairmanId (anyone) and repairmanPay (owner only; empty = from his rule at delivery) sent with a ticket */
+/** repairmanId (anyone) and repairmanPay (who manages the repairmen; empty = from his rule at delivery) sent with a ticket */
 function repairmanFields(req, body) {
   const data = {}
   if (body.repairmanId !== undefined) data.repairmanId = body.repairmanId || null
-  if (body.repairmanPay !== undefined && req.user.role === 'OWNER') {
+  if (body.repairmanPay !== undefined && can(req.user, 'repairmen')) {
     data.repairmanPay = body.repairmanPay === '' || body.repairmanPay === null ? null : Math.max(0, parseFloat(body.repairmanPay) || 0)
   }
   return data
@@ -52,7 +77,7 @@ const validTransitions = {
 router.get('/', async (req, res) => {
   try {
     const { search, status } = req.query
-    const where = {}
+    const where = { ...mine(req) }
     if (status) where.status = status
     if (search) {
       where.OR = [
@@ -93,8 +118,8 @@ router.get('/:id', async (req, res) => {
       }
     })
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' })
-    // The repairman's pay is the owner's business
-    if (req.user.role !== 'OWNER') {
+    // The repairman's pay is the business of whoever manages the repairmen
+    if (!can(req.user, 'repairmen')) {
       delete ticket.repairmanPay
       if (ticket.repairman) ticket.repairman = { id: ticket.repairman.id, name: ticket.repairman.name }
     }
@@ -105,7 +130,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // POST /api/tickets — create directly (no check-in needed)
-router.post('/', async (req, res) => {
+router.post('/', requirePerm('repairs'), async (req, res) => {
   try {
     const { checkInId, customerId, customerName, customerPhone, deviceBrand, deviceModel, imei, devicePassword, color, condition, issueDesc, diagnosis, partsUsedNotes, finalCost, partsCost, deposit, priority, estimatedDoneAt, warrantyDays } = req.body
 
@@ -178,6 +203,7 @@ router.post('/', async (req, res) => {
 // PUT /api/tickets/:id — update ticket details
 router.put('/:id', async (req, res) => {
   try {
+    if (ownRepairsOnly(req.user)) for (const k of COUNTER_FIELDS) delete req.body[k]
     const { diagnosis, partsUsedNotes, estimatedCost, finalCost, partsCost, deposit, priority, estimatedDoneAt } = req.body
     const data = {}
     // Device and problem can be corrected any time (they only describe the repair)
@@ -193,9 +219,9 @@ router.put('/:id', async (req, res) => {
     if (req.body.warrantyDays !== undefined && Number.isFinite(parseInt(req.body.warrantyDays))) data.warrantyDays = Math.max(0, parseInt(req.body.warrantyDays))
     if (diagnosis !== undefined) data.diagnosis = diagnosis
     if (partsUsedNotes !== undefined) data.partsUsedNotes = partsUsedNotes
-    if (estimatedCost !== undefined) data.estimatedCost = estimatedCost
-    if (finalCost !== undefined) data.finalCost = finalCost
-    if (partsCost !== undefined) data.partsCost = partsCost
+    if (estimatedCost !== undefined) data.estimatedCost = price(estimatedCost)
+    if (finalCost !== undefined) data.finalCost = price(finalCost)
+    if (partsCost !== undefined) data.partsCost = price(partsCost, 0)
     if (priority !== undefined) data.priority = priority
     if (estimatedDoneAt !== undefined) data.estimatedDoneAt = estimatedDoneAt ? new Date(estimatedDoneAt) : null
 
@@ -240,9 +266,9 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-// DELETE /api/tickets/:id — owner only, for a ticket made by mistake: its parts go back to stock.
+// DELETE /api/tickets/:id — (Corrections permission) for a ticket made by mistake: its parts go back to stock.
 // Not once money moved (invoice or deposit): those stay in the books, cancel the ticket instead.
-router.delete('/:id', requireRole('OWNER'), async (req, res) => {
+router.delete('/:id', requirePerm('corrections'), async (req, res) => {
   try {
     const ticket = await prisma.repairTicket.findUnique({
       where: { id: req.params.id },
@@ -276,6 +302,7 @@ router.post('/:id/transition', async (req, res) => {
     const ticket = await prisma.repairTicket.findUnique({ where: { id: req.params.id }, include: { sale: true, repairman: true } })
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' })
 
+    if (ownRepairsOnly(req.user) && !REPAIRMAN_STEPS.includes(status)) return res.status(403).json({ error: 'Insufficient permissions' })
     const allowed = validTransitions[ticket.status] || []
     if (!allowed.includes(status)) {
       return res.status(400).json({ error: `Cannot transition from ${ticket.status} to ${status}` })
@@ -383,9 +410,9 @@ class PartError extends Error {}
 async function partsResponse(db, ticketId) {
   const [parts, ticket] = await Promise.all([
     db.repairPart.findMany({ where: { repairTicketId: ticketId }, include: { inventoryItem: true }, orderBy: { createdAt: 'asc' } }),
-    db.repairTicket.findUnique({ where: { id: ticketId }, select: { partsCost: true } })
+    db.repairTicket.findUnique({ where: { id: ticketId }, select: { partsCost: true, ticketNumber: true } })
   ])
-  return { parts, partsCost: ticket?.partsCost ?? 0 }
+  return { parts, partsCost: ticket?.partsCost ?? 0, ticketNumber: ticket?.ticketNumber }
 }
 
 // GET /api/tickets/:id/parts

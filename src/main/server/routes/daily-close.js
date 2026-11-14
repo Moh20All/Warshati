@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import prisma from '../lib/prisma.js'
-import { requireAuth } from '../middleware/auth.js'
+import { requireAuth, requirePerm } from '../middleware/auth.js'
 import logger from '../lib/logger.js'
 import { dayRange, loadMovements, summarize } from '../lib/finance.js'
+import { can } from '../lib/permissions.js'
 
 const router = Router()
 router.use(requireAuth)
+router.use(requirePerm('daily_close'))
 
 async function todayFigures() {
   const { start, end } = dayRange()
@@ -77,8 +79,8 @@ router.get('/preview', async (req, res) => {
   try {
     const { start: today, end: tomorrow, totals } = await todayFigures()
     const existing = await prisma.dailyClose.findFirst({ where: { date: { gte: today, lt: tomorrow } } })
-    // Staff see the drawer figures they need to close the day, not the shop's margins
-    if (req.user.role !== 'OWNER') {
+    // Without the Profit permission: the drawer figures needed to close the day, not the shop's margins
+    if (!can(req.user, 'profit')) {
       for (const k of ['cogs', 'grossProfit', 'runningCosts', 'netProfit', 'ticketCogs', 'netTicketProfit']) delete totals[k]
     }
     res.json({ ...totals, alreadyClosed: !!existing })
