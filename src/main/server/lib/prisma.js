@@ -186,7 +186,7 @@ async function applyMigrations(prismaDb) {
       await prismaDb.$executeRawUnsafe(`CREATE INDEX "RepairPart_repairTicketId_idx" ON "RepairPart"("repairTicketId")`);
     }
 
-    // v1.7: license plan (1 lifetime, 2 cloud + mobile, 3 VIP)
+    // v1.7: license plan (1 lifetime, 2 Pro: lifetime + shop network, 3 VIP: everything)
     const licenseInfo = await prismaDb.$queryRaw`PRAGMA table_info(LocalLicense)`;
     if (!licenseInfo.some(col => col.name === 'plan')) {
       logToDisk('Migrating LocalLicense table: adding plan');

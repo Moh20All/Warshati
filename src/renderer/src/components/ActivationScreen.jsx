@@ -111,7 +111,7 @@ export default function ActivationScreen({ onActivated, deactivationMessage }) {
                 {loading ? t('activation.btn_validating') : t('activation.btn_activate')}
               </button>
 
-              {/* VIP shop network: the other PCs use the main PC's license and data */}
+              {/* Shop network (Pro and VIP): the other PCs use the main PC's license and data */}
               <button type="button" onClick={() => setJoining(true)} className="w-full text-sm text-primary hover:underline cursor-pointer">
                 {t('network.join_link', 'Shop with several PCs? Connect this PC to the main PC')}
               </button>

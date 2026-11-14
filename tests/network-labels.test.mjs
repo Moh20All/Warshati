@@ -1,4 +1,4 @@
-// Shop network (VIP): who may call the main PC's API. Barcode labels: Code 128 symbols, automatic barcodes.
+// Shop network (Pro and VIP): who may call the main PC's API. Barcode labels: Code 128 symbols, automatic barcodes.
 import { prepareEnv, startServer, setupOwner, createChecker, importProject } from './helpers/setup.mjs'
 
 prepareEnv()

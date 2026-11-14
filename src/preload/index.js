@@ -11,7 +11,7 @@ const api = {
     // Where the data is: { base, headers, mode, hostName } (this PC, or the shop's main PC)
     apiTarget: ipcRenderer.sendSync('get-api-target'),
 
-    // Shop network (VIP)
+    // Shop network (Pro and VIP)
     networkStatus: (token) => ipcRenderer.invoke('network-status', token),
     networkShare: (token, on) => ipcRenderer.invoke('network-share', { token, on }),
     networkRenewCode: (token) => ipcRenderer.invoke('network-renew-code', token),

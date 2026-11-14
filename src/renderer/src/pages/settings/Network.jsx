@@ -9,7 +9,7 @@ import { useToast } from '../../components/ui/Toast'
 import { useAuth } from '../../lib/auth'
 import { hasNetworkPlan } from '../../lib/plan'
 
-/** Settings → Shop network (VIP): share this PC's data, or see the main PC this PC uses */
+/** Settings → Shop network (Pro and VIP): share this PC's data, or see the main PC this PC uses */
 export default function NetworkPage() {
   const { t } = useTranslation()
   const { token } = useAuth()
@@ -78,7 +78,7 @@ export default function NetworkPage() {
     )
   }
 
-  // Any PC that is not the main PC can join one (the main PC's VIP license is what counts)
+  // Any PC that is not the main PC can join one (the main PC's Pro or VIP license is what counts)
   const joinCard = (
     <div className="bg-card border border-border rounded-lg p-6 flex items-start gap-4">
       <Monitor className="w-6 h-6 text-muted-foreground flex-shrink-0" />

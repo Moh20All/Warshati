@@ -131,7 +131,7 @@ app.whenReady().then(async () => {
 
     // Validation (with offline grace period) and activation both happen here, not in the renderer
     ipcMain.handle('get-local-license', async () => {
-        // A connected PC runs on the main PC's VIP license: it only needs to reach it
+        // A connected PC runs on the main PC's Pro or VIP license: it only needs to reach it
         const net = network.getConfig()
         if (net.mode === 'client') {
             const r = await network.hello(net.host, net.code)
@@ -158,7 +158,7 @@ app.whenReady().then(async () => {
         return result
     });
 
-    // SHOP NETWORK (VIP): the main PC shares, the other PCs join it
+    // SHOP NETWORK (Pro and VIP): the main PC shares, the other PCs join it
     ipcMain.handle('network-status', async (_e, token) => {
         const c = network.getConfig()
         const base = { mode: c.mode, plan: network.getPlan(), hostName: c.hostName, host: c.host }

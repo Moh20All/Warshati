@@ -28,7 +28,7 @@ import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, NETWORK_PLAN } from '../network.js'
 
 const app = express()
-// Local only, unless this is the main PC of a VIP shop network (see ../network.js)
+// Local only, unless this is the main PC of a shop network (Pro and VIP) (see ../network.js)
 const hostAddress = () => (isSharing() ? '0.0.0.0' : '127.0.0.1')
 
 app.use(cors())
@@ -127,7 +127,7 @@ export async function startServer() {
         logger.error('Accessory catalog sync failed', err)
     }
 
-    // The saved plan lets a VIP main PC share right away; the online license check confirms it later
+    // The saved plan lets a Pro or VIP main PC share right away; the online license check confirms it later
     try {
         const local = await prisma.localLicense.findFirst({ select: { plan: true } })
         if (local) setPlan(local.plan)

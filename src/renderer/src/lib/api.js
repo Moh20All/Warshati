@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-// This PC's own API, or the shop's main PC when this PC is connected to it (VIP network).
+// This PC's own API, or the shop's main PC when this PC is connected to it (shop network, Pro and VIP).
 // The headers carry the per-launch key (own API) or the shop's pairing code (main PC).
 const target = window.api?.apiTarget || { base: 'http://127.0.0.1:3456/api', headers: {} }
 
