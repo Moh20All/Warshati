@@ -1,7 +1,7 @@
-// Shop network (VIP plan): one "main PC" shares its database over the shop's Wi-Fi / cable,
+// Shop network (Pro and VIP plans): one "main PC" shares its database over the shop's Wi-Fi / cable,
 // the other PCs ("connected PCs") use it instead of their own.
 //
-// - The main PC's API listens on the network only while sharing is on and the license is VIP.
+// - The main PC's API listens on the network only while sharing is on and the license is Pro or VIP.
 // - Connected PCs prove they belong to the shop with the pairing code shown on the main PC.
 // - Connected PCs find the main PC with a UDP broadcast (or the user types its address).
 import { app } from 'electron'
@@ -14,6 +14,8 @@ import crypto from 'crypto'
 export const API_PORT = 3456
 export const NET_HEADER = 'x-warshati-net'
 export const VIP_PLAN = 3
+// Pro (2) and VIP (3) can share the shop data between PCs
+export const NETWORK_PLAN = 2
 const DISCOVERY_PORT = 3457
 const HELLO = 'WARSHATI_DISCOVER_1'
 const TIMEOUT_MS = 4000
@@ -58,7 +60,7 @@ export function lanAddresses() {
 }
 
 // ── Main PC side ──
-export const isSharing = () => getConfig().mode === 'host' && plan >= VIP_PLAN
+export const isSharing = () => getConfig().mode === 'host' && plan >= NETWORK_PLAN
 
 /** Does this request come from a PC of the shop network that knows the pairing code? */
 export function isPairedRequest(req) {

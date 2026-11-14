@@ -25,7 +25,7 @@ import dashboardRoutes from './routes/dashboard.js'
 import { syncCatalog, syncAccessories } from './lib/catalog.js'
 import { SESSION_KEY, SESSION_HEADER } from './lib/session-key.js'
 
-import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, VIP_PLAN } from '../network.js'
+import { API_PORT as PORT, isSharing, isPairedRequest, markSeen, updateDiscovery, getConfig, getPlan, setPlan, NETWORK_PLAN } from '../network.js'
 
 const app = express()
 // Local only, unless this is the main PC of a VIP shop network (see ../network.js)
@@ -44,7 +44,7 @@ app.use('/api', (req, res, next) => {
         markSeen(req)
         return next()
     }
-    if (getConfig().mode === 'host' && getPlan() < VIP_PLAN) return res.status(403).json({ error: 'not_vip' })
+    if (getConfig().mode === 'host' && getPlan() < NETWORK_PLAN) return res.status(403).json({ error: 'not_vip' })
     res.status(403).json({ error: 'Forbidden' })
 })
 

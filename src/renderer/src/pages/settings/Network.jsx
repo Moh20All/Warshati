@@ -7,7 +7,7 @@ import Modal, { ConfirmModal } from '../../components/ui/Modal'
 import JoinNetwork from '../../components/JoinNetwork'
 import { useToast } from '../../components/ui/Toast'
 import { useAuth } from '../../lib/auth'
-import { isVip } from '../../lib/plan'
+import { hasNetworkPlan } from '../../lib/plan'
 
 /** Settings → Shop network (VIP): share this PC's data, or see the main PC this PC uses */
 export default function NetworkPage() {
@@ -47,7 +47,7 @@ export default function NetworkPage() {
   const header = (
     <div className="mb-6">
       <h1 className="text-[22px] leading-[30px] font-semibold text-foreground flex items-center gap-2">
-        {t('network.title', 'Shop network')} <Badge variant="primary">VIP</Badge>
+        {t('network.title', 'Shop network')} <Badge variant="primary">Pro</Badge>
       </h1>
       <p className="text-sm text-muted-foreground mt-1">{t('network.subtitle', 'Several PCs in the shop work on the same data: one main PC keeps it, the others connect to it.')}</p>
     </div>
@@ -95,15 +95,15 @@ export default function NetworkPage() {
     </Modal>
   )
 
-  if (!isVip()) {
+  if (!hasNetworkPlan()) {
     return (
       <div className="animate-fade-in max-w-2xl">
         {header}
         <div className="bg-card border border-border rounded-lg p-6 flex gap-4">
           <Lock className="w-6 h-6 text-muted-foreground flex-shrink-0" />
           <div>
-            <p className="font-medium text-foreground">{t('network.vip_only', 'Part of the VIP plan')}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t('network.vip_only_desc', 'Contact Warshati to move to the VIP plan, then restart the app.')}</p>
+            <p className="font-medium text-foreground">{t('network.vip_only', 'Part of the Pro and VIP plans')}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('network.vip_only_desc', 'Contact Warshati to move to the Pro plan, then restart the app.')}</p>
           </div>
         </div>
         <div className="mt-4">{joinCard}</div>

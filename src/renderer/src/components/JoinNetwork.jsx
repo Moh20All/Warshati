@@ -10,7 +10,7 @@ function useErrors() {
   return {
     unreachable: t('network.err_unreachable', 'The main PC did not answer. Check that it is on, Warshati is open on it, and both PCs are on the same Wi-Fi or cable.'),
     wrong_code: t('network.err_wrong_code', 'Wrong pairing code. Read it again on the main PC: Settings → Shop network.'),
-    not_vip: t('network.err_not_vip', 'The main PC has no VIP plan. The shop network is part of the VIP plan.'),
+    not_vip: t('network.err_not_vip', 'The main PC has no Pro or VIP plan. The shop network is part of the Pro and VIP plans.'),
     is_host: t('network.err_is_host', 'This PC is the main PC. Stop sharing first.')
   }
 }

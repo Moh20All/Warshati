@@ -136,7 +136,7 @@ app.whenReady().then(async () => {
         if (net.mode === 'client') {
             const r = await network.hello(net.host, net.code)
             return r.ok
-                ? { valid: true, license: null, plan: network.VIP_PLAN, deactivationMessage: null }
+                ? { valid: true, license: null, plan: network.NETWORK_PLAN, deactivationMessage: null }
                 : { valid: false, license: null, networkError: r.code, hostName: net.hostName || net.host }
         }
         // An activated PC opens at once; the online check runs behind and only speaks up if the key was revoked
@@ -167,7 +167,7 @@ app.whenReady().then(async () => {
     })
     ipcMain.handle('network-share', async (_e, { token, on }) => {
         if (!(await isOwner(token))) return { ok: false, code: 'not_owner' }
-        if (on && network.getPlan() < network.VIP_PLAN) return { ok: false, code: 'not_vip' }
+        if (on && network.getPlan() < network.NETWORK_PLAN) return { ok: false, code: 'not_vip' }
         network.setSharing(!!on)
         await applyNetworkMode()
         return { ok: true }

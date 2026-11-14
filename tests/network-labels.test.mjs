@@ -29,6 +29,9 @@ try {
   check('sharing on but plan 1: refused', notVip.status, 403)
   check('… and says it is not VIP', notVip.data?.error, 'not_vip')
 
+  net.setPlan(2)
+  check('Pro plan (2): main PC answers too', (await asPc(code)).status, 200)
+
   net.setPlan(3)
   const hello = await asPc(code)
   check('VIP + right code: main PC answers', hello.status, 200)
